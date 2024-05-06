@@ -1,0 +1,29 @@
+{% extends 'admin/base.html' %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        // Wait for jQuery to be ready
+        $(document).ready(function() {
+            $('#id_discord_llm_agent').prop('disabled', true);
+            console.log("hi")
+         
+
+            $('#id_discord_llm_config').on('change', function () {
+                $("#id_discord_llm_agent").empty();
+                var url = "{% url 'ajax_get_config' %}";
+                $.getJSON(url, { id: $(this).val() }, function (j) {
+                    var options = '<option value="">---------</option>';
+                    for (var i = 0; i < j.length; i++) {
+                        options +=
+                            '<option value="' + j[i].id + '">' + j[i].agent_name + "</option>";
+                    }
+                    $("#id_discord_llm_agent").html(options);
+                    $('#id_discord_llm_agent').prop('disabled', false);
+                });
+
+                })
+        });
+    </script>
+{% endblock %}
