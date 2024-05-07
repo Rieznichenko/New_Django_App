@@ -8,9 +8,17 @@ class LLMConfigAdmin(admin.ModelAdmin):
     list_display = ('config_name','api_key', 'platform', )
 
 class DiscordConfigAdmin(admin.ModelAdmin):
+    readonly_fields = ('discord_bot_token', 'discord_client_id')
+
     def discord_bot(self, obj):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
-        discord_link = "https://discord.com/api/oauth2/authorize?client_id=1236554945914994800&permissions=328565073920&scope=bot"
+        discord_link = ''
+        first_record = DiscordBotConfig.objects.first()
+        if first_record:
+            client_id = first_record.discord_client_id
+            discord_link = f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=328565073920&scope=bot"
+        
+        
 
         # Your button HTML with Facebook link
         Discord_bot = format_html(
