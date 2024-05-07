@@ -31,6 +31,10 @@ class DiscordConfigAdmin(admin.ModelAdmin):
         actions = f'{Discord_bot}'
 
         return mark_safe(actions)
+    
+    def has_add_permission(self, request):
+        return False
+
 
     list_display = ('discord_bot_token', 'discord_client_id', 'discord_bot')
 
