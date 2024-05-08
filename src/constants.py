@@ -42,6 +42,41 @@ def fetch_llm_credentials():
 
     return api_key, assistant_id
 
+def fetch_telegram_credentials():
+    conn = sqlite3.connect('db connection file')
+    cursor = conn.cursor()
+
+    # Execute the SQL query to retrieve the most recent record from llm_bot_discordbotconfig table
+    cursor.execute("SELECT * FROM llm_bot_telegrambotconfig ORDER BY created_at DESC LIMIT 1")
+    most_recent_record = cursor.fetchone()
+    telegram_bot_token = most_recent_record[1]
+
+    # Check if there's any record returned
+    if most_recent_record:
+        print("Here is most_recent_record", most_recent_record)
+        llm_config_id = most_recent_record[3]
+        llm_agent_id = most_recent_record[4]
+
+        # Execute SQL queries to fetch api_key and assistant_id
+        cursor.execute("SELECT api_key FROM llm_bot_llmconfig WHERE page_ptr_id = ?", (llm_config_id,))
+        api_key = cursor.fetchone()[0]  # Assuming api_key is in the first column
+
+        cursor.execute("SELECT assistant_id FROM llm_bot_llmagent WHERE id = ?", (llm_agent_id,))
+        assistant_id = cursor.fetchone()[0]  # Assuming assistant_id is in the first column
+
+        # Now you have both api_key and assistant_id
+        print("API Key:", api_key)
+        print("Assistant ID:", assistant_id)
+
+    else:
+        print("No records found.")
+
+    # Close cursor and connection
+    cursor.close()
+    conn.close()
+
+    return api_key, assistant_id, telegram_bot_token
+
 
 
 
@@ -57,8 +92,8 @@ EXAMPLE_CONVOS = CONFIG.example_conversations
 
 
 
-DISCORD_BOT_TOKEN = os.envrion.get("DISCORD_BOT_TOKEN")
-DISCORD_CLIENT_ID = os.envrion.get("DISCORD_CLIENT_ID")
+DISCORD_BOT_TOKEN = os.environ.get("DISCORD_BOT_TOKEN")
+DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID")
 
 
 
