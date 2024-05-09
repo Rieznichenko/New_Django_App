@@ -55,3 +55,17 @@ class DiscordBotConfig(models.Model):
         verbose_name = "Discord Bot Configuration"
         verbose_name_plural = "Discord Bot Configuration"
 
+
+class TelegramBotConfig(models.Model):
+    telegram_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
+    telegram_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
+    telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+
+    def __str__(self) -> str:
+        return self.telegram_bot_token
+
+    class Meta:
+        verbose_name = "Telegram Bot Configuration"
+        verbose_name_plural = "Telegram Bot Configuration"

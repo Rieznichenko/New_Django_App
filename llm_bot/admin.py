@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DiscordBotConfig, LLMAgent, LLMCOnfig
+from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -41,6 +41,36 @@ class DiscordConfigAdmin(admin.ModelAdmin):
 class LLMAgentAdmin(admin.ModelAdmin):
     list_display = ('agent_name', 'assistant_id', 'agent_name')
 
+
+class TelegramConfigAdmin(admin.ModelAdmin):
+    # readonly_fields = ('telegram_bot_token', )
+
+    def telegram_bot(self, obj):
+        button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
+        discord_link = ''
+        first_record = TelegramBotConfig.objects.first()
+        if first_record:
+            client_id = first_record.telegram_bot_token[:10]
+            discord_link = f"https://web.telegram.org/a/#{client_id}"
+        
+        
+
+        # Your button HTML with Facebook link
+        Telegram_bot = format_html(
+            '<button id="approve-button-{0}" class="button" style="{1} cursor: pointer;" onclick="window.open(\'{2}\', \'_blank\')">View Telegram Bot</button>',
+            0,
+            "",
+            discord_link
+        )
+
+        actions = f'{Telegram_bot}'
+
+        return mark_safe(actions)
+    
+
+    list_display = ('telegram_bot_token', 'telegram_bot')
+
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
 admin.site.register(DiscordBotConfig, DiscordConfigAdmin)
+admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
 admin.site.register(LLMAgent, LLMAgentAdmin)
