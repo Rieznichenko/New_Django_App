@@ -69,3 +69,17 @@ class TelegramBotConfig(models.Model):
     class Meta:
         verbose_name = "Telegram Bot Configuration"
         verbose_name_plural = "Telegram Bot Configuration"
+
+class WhatsAppBotConfig(models.Model):
+    whatsapp_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
+    whatsapp_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
+    whatsapp_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self) -> str:
+        return self.whatsapp_bot_token
+
+
+    class Meta:
+        verbose_name = "Whatsapp Bot Configuration"
+        verbose_name_plural = "Whatsapp Bot Configuration"

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig
+from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -70,7 +70,11 @@ class TelegramConfigAdmin(admin.ModelAdmin):
 
     list_display = ('telegram_bot_token', 'telegram_bot')
 
+class WhatsappBotAdmin(admin.ModelAdmin):
+    list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', )
+
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
 admin.site.register(DiscordBotConfig, DiscordConfigAdmin)
 admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
 admin.site.register(LLMAgent, LLMAgentAdmin)
+admin.site.register(WhatsAppBotConfig, WhatsappBotAdmin)
