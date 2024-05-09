@@ -12,10 +12,12 @@ from utils import (
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
 )
+from dotenv import load_dotenv
+load_dotenv()
 
-api_key, assitant_id, bot_token = fetch_telegram_credentials()
 
-BOT_TOKEN = bot_token
+
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -25,6 +27,7 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda msg: True)
 def echo_all(message):
+    api_key, assitant_id, bot_token = fetch_telegram_credentials()
     user_input = message.text
 
 
