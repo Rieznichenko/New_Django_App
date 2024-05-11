@@ -56,8 +56,8 @@ def ajax_get_config(request):
     result = list(llm_agents.values('id', 'agent_name'))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
-def get_llm_config():
-    most_recent_config = WhatsAppBotConfig.objects.latest('created_at')
+def get_llm_config(channel_id):
+    most_recent_config = WhatsAppBotConfig.objects.get(whatsapp_channel_id = channel_id)
     llm_config_id = most_recent_config.whatsapp_llm_config.id
     llm_config = LLMCOnfig.objects.get(id = llm_config_id)
 
@@ -75,12 +75,13 @@ def webhook_whatsapp(request):
     # Retrieving the text of the message
     message_text = incoming_message['messages'][0]['text'].get("body")
     message_from = incoming_message['messages'][0].get("from")
+    channel_id = incoming_message.get("channel_id")
 
     if incoming_message['messages'][0]['from_me']:
         return JsonResponse({"status": True}, status=200)
 
 
-    api_key, assitant_id, bot_token = get_llm_config()
+    api_key, assitant_id, bot_token = get_llm_config(channel_id)
 
     if "asst_" in assitant_id:
         logging.info("Openai client created")

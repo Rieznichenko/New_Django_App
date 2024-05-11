@@ -67,7 +67,7 @@ class TelegramConfigAdmin(admin.ModelAdmin):
 
         return mark_safe(actions)
     
-
+    exclude = ('bot_thread_id',)
     list_display = ('telegram_bot_token', 'telegram_bot')
 
 class WhatsappBotAdmin(admin.ModelAdmin):
