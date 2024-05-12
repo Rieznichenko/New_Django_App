@@ -29,10 +29,10 @@ class ConfigStore:
             api_key = instance.telegram_llm_agent.llm_config.llmconfig.api_key
             logging.info(f"Giving back {api_key} and {assistant_id}")
 
-            return api_key, assistant_id, self.discord_bot_token, self.bot_thread_id
+            return api_key, assistant_id, self.telegram_bot_token, self.bot_thread_id
         except Exception as e:
             logging.error(f"Failed while pulling param {e}")
-            return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
+            return self.api_key, self.assistant_id, self.telegram_bot_token, self.bot_thread_id
     
 config_store = ConfigStore()
 
