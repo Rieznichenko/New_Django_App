@@ -1,5 +1,5 @@
 from django.db import models
-
+import uuid
 
 class Page(models.Model):
     config_name = models.CharField(max_length=100, default='', blank=True, null=True)
@@ -57,10 +57,11 @@ class DiscordBotConfig(models.Model):
 
 
 class TelegramBotConfig(models.Model):
-    telegram_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
+    telegram_bot_token = models.CharField(max_length=100, primary_key=True)
     telegram_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    bot_thread_id = models.CharField(max_length=100, default='', blank=True, null=True)
 
 
     def __str__(self) -> str:
@@ -71,7 +72,8 @@ class TelegramBotConfig(models.Model):
         verbose_name_plural = "Telegram Bot Configuration"
 
 class WhatsAppBotConfig(models.Model):
-    whatsapp_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
+    whatsapp_bot_token = models.CharField(max_length=100, default='')
+    whatsapp_channel_id = models.CharField(max_length=100, primary_key=True)
     whatsapp_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     whatsapp_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
