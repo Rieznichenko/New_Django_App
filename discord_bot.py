@@ -31,7 +31,16 @@ class ConfigStore:
         self.bot_thread_id = bot_thread_id
 
     def get_param(self):
-        return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
+        try:
+            obj = DiscordBotConfig.objects.get(bot_thread_id = self.bot_thread_id)
+            api_key = obj.discord_llm_agent.llm_config.llmconfig.api_key
+            assistant_id = obj.discord_llm_agent.assistant_id
+            logging.info(f"Giving back {api_key} and {assistant_id}")
+
+            return api_key, assistant_id, self.discord_bot_token, self.bot_thread_id
+        except Exception as e:
+            logging.error(f"Failed while pulling param {e}")
+            return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
     
 config_store = ConfigStore()
 
@@ -127,6 +136,7 @@ async def on_message(message):
     try:
         bot_config = await sync_to_async(DiscordBotConfig.objects.get)(bot_thread_id=bot_thread_id)
     except Exception as e:
+        print("Closing down the bot as signal issued")
         await client.close()
 
     if message.author == client.user:

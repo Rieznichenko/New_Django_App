@@ -2,6 +2,7 @@ import telebot
 import logging
 import openai
 import time
+from llm_bot.models import TelegramBotConfig
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -12,14 +13,25 @@ class ConfigStore:
         self.api_key = None
         self.assistant_id = None
         self.telegram_bot_token = None
+        self.bot_thread_id = None
 
-    def set_param(self, api_key, assistant_id, telegram_bot_token):
+    def set_param(self, api_key, assistant_id, telegram_bot_token, bot_thread_id):
         self.api_key = api_key
         self.assistant_id = assistant_id
         self.telegram_bot_token = telegram_bot_token
+        self.bot_thread_id = bot_thread_id
 
     def get_param(self):
-        return self.api_key, self.assistant_id, self.telegram_bot_token
+        try:
+            instance = TelegramBotConfig.objects.get(bot_thread_id = self.bot_thread_id)
+            assistant_id = instance.telegram_llm_agent.assistant_id
+            api_key = instance.telegram_llm_agent.llm_config.llmconfig.api_key
+            logging.info(f"Giving back {api_key} and {assistant_id}")
+
+            return api_key, assistant_id, self.discord_bot_token, self.bot_thread_id
+        except Exception as e:
+            logging.error(f"Failed while pulling param {e}")
+            return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
     
 config_store = ConfigStore()
 
@@ -125,7 +137,7 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
     global stop_threads
     stop_threads = False
 
-    config_store.set_param(api_key, assistant_id, telegram_bot_token)
+    config_store.set_param(api_key, assistant_id, telegram_bot_token, bot_thread_id)
     bot = telebot.TeleBot(telegram_bot_token, bot_thread_id=bot_thread_id)
 
     @bot.message_handler(func=lambda msg: True)
