@@ -169,5 +169,8 @@ def start_discord_bot(discord_bot_token):
 
 def run_discord_bot(api_key, assistant_id, discord_bot_token, bot_thread_id):
     config_store.set_param(api_key, assistant_id, discord_bot_token, bot_thread_id)
+    try:
 
-    start_discord_bot(discord_bot_token)
+        start_discord_bot(discord_bot_token)
+    except Exception as e:
+        logging.error(f"Exception {e}")
