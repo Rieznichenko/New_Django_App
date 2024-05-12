@@ -8,7 +8,11 @@ class LLMConfigAdmin(admin.ModelAdmin):
     list_display = ('config_name','api_key', 'platform', )
 
 class DiscordConfigAdmin(admin.ModelAdmin):
-    readonly_fields = ('discord_bot_token', 'discord_client_id')
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return self.readonly_fields
+        return ('discord_bot_token', 'discord_client_id')
 
     def discord_bot(self, obj):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
@@ -31,11 +35,8 @@ class DiscordConfigAdmin(admin.ModelAdmin):
         actions = f'{Discord_bot}'
 
         return mark_safe(actions)
-    
-    def has_add_permission(self, request):
-        return False
 
-
+    exclude = ('bot_thread_id',)
     list_display = ('discord_bot_token', 'discord_client_id', 'discord_bot')
 
 class LLMAgentAdmin(admin.ModelAdmin):
@@ -44,6 +45,11 @@ class LLMAgentAdmin(admin.ModelAdmin):
 
 class TelegramConfigAdmin(admin.ModelAdmin):
     # readonly_fields = ('telegram_bot_token', )
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return self.readonly_fields
+        return ('telegram_bot_token',)
 
     def telegram_bot(self, obj):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
@@ -71,6 +77,11 @@ class TelegramConfigAdmin(admin.ModelAdmin):
     list_display = ('telegram_bot_token', 'telegram_bot')
 
 class WhatsappBotAdmin(admin.ModelAdmin):
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return self.readonly_fields
+        return ('whatsapp_bot_token', 'whatsapp_channel_id')
+    
     list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', )
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)

@@ -1,7 +1,8 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from .models import TelegramBotConfig
+from .models import TelegramBotConfig, DiscordBotConfig
 from telegram_bot import run_telegram_bot
+from discord_bot import run_discord_bot
 import threading
 import json
 import random
@@ -43,6 +44,17 @@ def run_bot_in_thread(instance):
     return True
 
 
+def run_discord_bot_in_thread(instance):    
+    discord_bot_token = instance.discord_bot_token
+    assistant_id = instance.discord_llm_agent.assistant_id
+    api_key = instance.discord_llm_agent.llm_config.llmconfig.api_key
+    args = (api_key, assistant_id, discord_bot_token, instance.bot_thread_id)
+    thread = threading.Thread(target=run_discord_bot, args=args)
+    thread.start()
+    thread_id = thread.ident
+    setup_thread_store(instance.id, thread_id)
+    return True
+
 @receiver(post_save, sender=TelegramBotConfig)
 def telegram_bot_config_post_save(sender, instance, created, **kwargs):
     """
@@ -64,3 +76,19 @@ def telegram_bot_config_post_delete(sender, instance, **kwargs):
     """
     # Handle post-delete logic
     print("Post delete")
+
+
+
+@receiver(post_save, sender=DiscordBotConfig)
+def discord_bot_config_post_save(sender, instance, created, **kwargs):
+    """
+    Signal handler for post-save on TelegramBotConfig.
+    """
+    if created:
+        random_code = generate_random_code()
+        instance.bot_thread_id = random_code
+        instance.save()
+        run_discord_bot_in_thread(instance)
+        print("Post save")
+    else:
+        print("In update")
