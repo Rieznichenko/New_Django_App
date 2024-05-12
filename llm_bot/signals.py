@@ -40,7 +40,7 @@ def run_bot_in_thread(instance):
     thread = threading.Thread(target=run_telegram_bot, args=args)
     thread.start()
     thread_id = thread.ident
-    setup_thread_store(instance.id, thread_id)
+    # setup_thread_store(instance.id, thread_id)
     return True
 
 
@@ -52,7 +52,7 @@ def run_discord_bot_in_thread(instance):
     thread = threading.Thread(target=run_discord_bot, args=args)
     thread.start()
     thread_id = thread.ident
-    setup_thread_store(instance.id, thread_id)
+    # setup_thread_store(instance.id, thread_id)
     return True
 
 @receiver(post_save, sender=TelegramBotConfig)
