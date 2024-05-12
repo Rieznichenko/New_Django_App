@@ -17,9 +17,8 @@ class DiscordConfigAdmin(admin.ModelAdmin):
     def discord_bot(self, obj):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
         discord_link = ''
-        first_record = DiscordBotConfig.objects.first()
-        if first_record:
-            client_id = first_record.discord_client_id
+        if obj:
+            client_id = obj.discord_client_id
             discord_link = f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=328565073920&scope=bot"
         
         
@@ -54,9 +53,8 @@ class TelegramConfigAdmin(admin.ModelAdmin):
     def telegram_bot(self, obj):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
         discord_link = ''
-        first_record = TelegramBotConfig.objects.first()
-        if first_record:
-            client_id = first_record.telegram_bot_token[:10]
+        if obj:
+            client_id = obj.telegram_bot_token[:10]
             discord_link = f"https://web.telegram.org/a/#{client_id}"
         
         
