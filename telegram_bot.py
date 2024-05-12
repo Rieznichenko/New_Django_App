@@ -3,6 +3,7 @@ import logging
 import openai
 import time
 from llm_bot.models import TelegramBotConfig
+from asgiref.sync import sync_to_async
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -23,7 +24,7 @@ class ConfigStore:
 
     def get_param(self):
         try:
-            instance = TelegramBotConfig.objects.get(bot_thread_id = self.bot_thread_id)
+            instance = sync_to_async(TelegramBotConfig.objects.get(bot_thread_id = self.bot_thread_id))
             assistant_id = instance.telegram_llm_agent.assistant_id
             api_key = instance.telegram_llm_agent.llm_config.llmconfig.api_key
             logging.info(f"Giving back {api_key} and {assistant_id}")

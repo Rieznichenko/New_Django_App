@@ -32,7 +32,7 @@ class ConfigStore:
 
     def get_param(self):
         try:
-            obj = DiscordBotConfig.objects.get(bot_thread_id = self.bot_thread_id)
+            obj = sync_to_async(DiscordBotConfig.objects.get(bot_thread_id = self.bot_thread_id))
             api_key = obj.discord_llm_agent.llm_config.llmconfig.api_key
             assistant_id = obj.discord_llm_agent.assistant_id
             logging.info(f"Giving back {api_key} and {assistant_id}")
