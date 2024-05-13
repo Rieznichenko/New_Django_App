@@ -6,8 +6,7 @@ import asyncio
 import os
 from dotenv import load_dotenv
 import openai
-from telegram_bot import check_thread_status
-from llm_bot.models import DiscordBotConfig
+import time
 from asgiref.sync import sync_to_async
 
 # Load environment variables from .env file
@@ -31,16 +30,7 @@ class ConfigStore:
         self.bot_thread_id = bot_thread_id
 
     def get_param(self):
-        try:
-            obj = sync_to_async(DiscordBotConfig.objects.get(bot_thread_id = self.bot_thread_id))
-            api_key = obj.discord_llm_agent.llm_config.llmconfig.api_key
-            assistant_id = obj.discord_llm_agent.assistant_id
-            logging.info(f"Giving back {api_key} and {assistant_id}")
-
-            return api_key, assistant_id, self.discord_bot_token, self.bot_thread_id
-        except Exception as e:
-            logging.error(f"Failed while pulling param {e}")
-            return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
+        return self.api_key, self.assistant_id, self.discord_bot_token, self.bot_thread_id
     
 config_store = ConfigStore()
 
@@ -81,6 +71,34 @@ async def chat_functionality_gemini(user_input, channel, api_key, assistant_id):
     # Send the assistant's response to the channel
     await channel.send(response.text)
 
+def check_thread_status(client, thread_id, run_id):
+    """
+    Check the status of the conversation thread.
+
+    Parameters:
+        client (openai.Client): The OpenAI client instance.
+        thread_id (str): The ID of the conversation thread.
+        run_id (str): The ID of the conversation run.
+
+    Returns:
+        None
+    """
+
+    while True:
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread_id,
+            run_id=run_id
+        )
+
+        if run.status == "completed":
+            logging.info(f"Run is completed")
+            break
+        elif run.status == "expired":
+            logging.info(f"Run is expired")
+            break
+        else:
+            logging.info(f"OpenAI: Run is not yet completed. Waiting...")
+            time.sleep(3)
 
 async def chat_functionality(OPENAI_CLIENT, channel, user_input, thread_id, assistant_id):
     """
@@ -134,7 +152,16 @@ async def on_message(message):
     api_key, assistant_id, discord_bot_token, bot_thread_id = config_store.get_param()
 
     try:
-        bot_config = await sync_to_async(DiscordBotConfig.objects.get)(bot_thread_id=bot_thread_id)
+        import sqlite3
+        conn = sqlite3.connect('/Users/apple/Documents/projects/gpt_discord/db.sqlite3')
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM llm_bot_discordbotconfig WHERE bot_thread_id = ?", (bot_thread_id,))
+        row = cursor.fetchone()
+        if row:
+            print("Got row", row)
+        else:
+            raise Exception("something went wrong")
+
     except Exception as e:
         print("Closing down the bot as signal issued")
         await client.close()
@@ -174,3 +201,4 @@ def run_discord_bot(api_key, assistant_id, discord_bot_token, bot_thread_id):
         start_discord_bot(discord_bot_token)
     except Exception as e:
         logging.error(f"Exception {e}")
+        return

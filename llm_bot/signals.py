@@ -6,6 +6,7 @@ from discord_bot import run_discord_bot
 import threading
 import json
 import random
+from multiprocessing import Process
 
 
 def setup_thread_store(telegram_bot_id, thread_id):
@@ -49,10 +50,8 @@ def run_discord_bot_in_thread(instance):
     assistant_id = instance.discord_llm_agent.assistant_id
     api_key = instance.discord_llm_agent.llm_config.llmconfig.api_key
     args = (api_key, assistant_id, discord_bot_token, instance.bot_thread_id)
-    thread = threading.Thread(target=run_discord_bot, args=args)
+    thread = Process(target=run_discord_bot, args=args)
     thread.start()
-    thread_id = thread.ident
-    # setup_thread_store(instance.id, thread_id)
     return True
 
 @receiver(post_save, sender=TelegramBotConfig)
