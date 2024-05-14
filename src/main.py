@@ -44,15 +44,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    """
-    An event handler triggered upon receiving a message.
-
-    Parameters:
-        message (discord.Message): The message received by the bot.
-
-    Returns:
-        None
-    """
+    """An event handler triggered upon receiving a message."""
     if message.author == client.user:
         return
 
@@ -86,16 +78,7 @@ async def on_message(message):
 
 
 async def chat_functionality_gemini(user_input, channel, api_key, assistant_id):
-    """
-    Perform chat functionality using OpenAI API.
-
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
+    """Perform chat functionality using OpenAI API."""
   
     import os
     import google.generativeai as genai
@@ -114,21 +97,8 @@ async def chat_functionality_gemini(user_input, channel, api_key, assistant_id):
 
 
 async def chat_functionality(OPENAI_CLIENT, channel, user_input, thread_id, assitant_id):
-    """
-    Perform chat functionality using OpenAI API.
-
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
+    """ Perform chat functionality using OpenAI API."""
     # Configure OpenAI API
-
-
-    # Create a new thread for the conversation
-    # Send user's message to the thread
     OPENAI_CLIENT.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
