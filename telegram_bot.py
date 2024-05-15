@@ -66,17 +66,7 @@ def check_thread_status(client, thread_id, run_id):
             time.sleep(3)
 
 def chat_functionality_gemini(user_input, message, api_key, assistant_id):
-    """
-    Perform chat functionality using OpenAI API.
-
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
-  
+    """Perform chat functionality using OpenAI API."""
     import os
     import google.generativeai as genai
 
@@ -93,21 +83,8 @@ def chat_functionality_gemini(user_input, message, api_key, assistant_id):
     
 
 def chat_functionality(OPENAI_CLIENT, message, user_input, thread_id, assitant_id):
-    """
-    Perform chat functionality using OpenAI API.
+    """Perform chat functionality using OpenAI API"""
 
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
-    # Configure OpenAI API
-
-
-    # Create a new thread for the conversation
-    # Send user's message to the thread
     OPENAI_CLIENT.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
@@ -171,10 +148,6 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
     while not stop_threads:
         i = i+1
         if i == 2:
-            break
-        print("Here", i)
-        
+            break        
         bot.polling()
-        
-        # bot.infinity_polling()
     return

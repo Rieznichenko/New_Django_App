@@ -47,16 +47,7 @@ async def on_ready():
 
 
 async def chat_functionality_gemini(user_input, channel, api_key, assistant_id):
-    """
-    Perform chat functionality using OpenAI API.
-
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
+    """Perform gemini chat functionality using OpenAI API."""
     import google.generativeai as genai
 
     genai.configure(api_key=api_key)
@@ -72,18 +63,7 @@ async def chat_functionality_gemini(user_input, channel, api_key, assistant_id):
     await channel.send(response.text)
 
 def check_thread_status(client, thread_id, run_id):
-    """
-    Check the status of the conversation thread.
-
-    Parameters:
-        client (openai.Client): The OpenAI client instance.
-        thread_id (str): The ID of the conversation thread.
-        run_id (str): The ID of the conversation run.
-
-    Returns:
-        None
-    """
-
+    """Check the status of the conversation thread"""
     while True:
         run = client.beta.threads.runs.retrieve(
             thread_id=thread_id,
@@ -101,18 +81,7 @@ def check_thread_status(client, thread_id, run_id):
             time.sleep(3)
 
 async def chat_functionality(OPENAI_CLIENT, channel, user_input, thread_id, assistant_id):
-    """
-    Perform chat functionality using OpenAI API.
-
-    Parameters:
-        channel (discord.TextChannel): The channel where the response will be sent.
-        user_input (str): The user input for the chat.
-
-    Returns:
-        None
-    """
-    # Create a new thread for the conversation
-    # Send user's message to the thread
+    """Perform chat functionality using OpenAI API"""
     OPENAI_CLIENT.beta.threads.messages.create(
         thread_id=thread_id,
         role="user",
@@ -140,15 +109,7 @@ async def chat_functionality(OPENAI_CLIENT, channel, user_input, thread_id, assi
 
 @client.event
 async def on_message(message):
-    """
-    An event handler triggered upon receiving a message.
-
-    Parameters:
-        message (discord.Message): The message received by the bot.
-
-    Returns:
-        None
-    """
+    """An event handler triggered upon receiving a message"""
     api_key, assistant_id, discord_bot_token, bot_thread_id = config_store.get_param()
 
     try:
