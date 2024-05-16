@@ -63,6 +63,7 @@ class TelegramBotConfig(models.Model):
     telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     bot_thread_id = models.CharField(max_length=100, default='', blank=True, null=True)
+    bot_link = models.CharField(max_length=100, default='', blank=True, null=True)
 
 
     def __str__(self) -> str:

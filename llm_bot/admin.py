@@ -21,9 +21,6 @@ class DiscordConfigAdmin(admin.ModelAdmin):
             client_id = obj.discord_client_id
             discord_link = f"https://discord.com/api/oauth2/authorize?client_id={client_id}&permissions=328565073920&scope=bot"
         
-        
-
-        # Your button HTML with Facebook link
         Discord_bot = format_html(
             '<button id="approve-button-{0}" class="button" style="{1} cursor: pointer;" onclick="window.open(\'{2}\', \'_blank\')">View Discord Bot</button>',
             0,
@@ -43,8 +40,6 @@ class LLMAgentAdmin(admin.ModelAdmin):
 
 
 class TelegramConfigAdmin(admin.ModelAdmin):
-    # readonly_fields = ('telegram_bot_token', )
-
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return self.readonly_fields
@@ -54,12 +49,8 @@ class TelegramConfigAdmin(admin.ModelAdmin):
         button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
         discord_link = ''
         if obj:
-            client_id = obj.telegram_bot_token[:10]
-            discord_link = f"https://web.telegram.org/a/#{client_id}"
+            discord_link = obj.bot_link
         
-        
-
-        # Your button HTML with Facebook link
         Telegram_bot = format_html(
             '<button id="approve-button-{0}" class="button" style="{1} cursor: pointer;" onclick="window.open(\'{2}\', \'_blank\')">View Telegram Bot</button>',
             0,
