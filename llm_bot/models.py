@@ -55,6 +55,7 @@ class DiscordBotConfig(models.Model):
     class Meta:
         verbose_name = "Discord Bot Configuration"
         verbose_name_plural = "Discord Bot Configuration"
+        ordering = ['created_at']
 
 
 class TelegramBotConfig(models.Model):
@@ -72,6 +73,7 @@ class TelegramBotConfig(models.Model):
     class Meta:
         verbose_name = "Telegram Bot Configuration"
         verbose_name_plural = "Telegram Bot Configuration"
+        ordering = ['created_at']
 
 class WhatsAppBotConfig(models.Model):
     whatsapp_bot_token = models.CharField(max_length=100, default='')
@@ -87,3 +89,4 @@ class WhatsAppBotConfig(models.Model):
     class Meta:
         verbose_name = "Whatsapp Bot Configuration"
         verbose_name_plural = "Whatsapp Bot Configuration"
+        ordering = ['created_at']
