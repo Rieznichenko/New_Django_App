@@ -8,6 +8,7 @@ import logging
 from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig
 import requests
 import logging
+from llm import chat_functionality_gemini,chat_functionality
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -15,35 +16,6 @@ logging.basicConfig(
 
 VALID_PROVIDERS = ["gemini", "openai"]
 
-
-def check_thread_status(client, thread_id, run_id):
-    """
-    Check the status of the conversation thread.
-
-    Parameters:
-        client (openai.Client): The OpenAI client instance.
-        thread_id (str): The ID of the conversation thread.
-        run_id (str): The ID of the conversation run.
-
-    Returns:
-        None
-    """
-
-    while True:
-        run = client.beta.threads.runs.retrieve(
-            thread_id=thread_id,
-            run_id=run_id
-        )
-
-        if run.status == "completed":
-            logging.info(f"Run is completed")
-            break
-        elif run.status == "expired":
-            logging.info(f"Run is expired")
-            break
-        else:
-            logging.info(f"OpenAI: Run is not yet completed. Waiting...")
-            time.sleep(1)
 
 
 def ajax_get_config(request):
@@ -93,59 +65,17 @@ def webhook_whatsapp(request):
             try:
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
-                chat_functionality(OPENAI_CLIENT, message_text, thread_id, assitant_id, message_from, bot_token)
+                assistant_message = chat_functionality(OPENAI_CLIENT, message_text, thread_id, assitant_id, message_from, bot_token)
+                send_message(assistant_message, message_from, bot_token)
             except Exception as e:
                 logging.exception(e)
 
     else:
-        chat_functionality_gemini(message_text, api_key, assitant_id, message_from, bot_token)
+        gemini_message = chat_functionality_gemini(message_text, api_key, assitant_id, message_from, bot_token)
+        send_message(gemini_message, message_from, bot_token)
 
     return JsonResponse({"status": True}, status=200)
 
-
-def chat_functionality(OPENAI_CLIENT, message_text, thread_id, assitant_id, message_from, bot_token):
-
-    OPENAI_CLIENT.beta.threads.messages.create(
-        thread_id=thread_id,
-        role="user",
-        content=message_text
-    )
-
-    # Run the conversation thread with the assistant
-    run = OPENAI_CLIENT.beta.threads.runs.create(
-        thread_id=thread_id,
-        assistant_id=assitant_id,
-    )
-
-    # Check the status of the conversation thread
-    check_thread_status(OPENAI_CLIENT, thread_id, run.id)
-
-    # Retrieve messages from the conversation thread
-    messages = OPENAI_CLIENT.beta.threads.messages.list(thread_id=thread_id)
-
-    # Extract user and assistant messages
-    user_message = messages.data[1].content[0].text.value
-    assistant_message = messages.data[0].content[0].text.value
-
-    # Send the assistant's response to the channel
-    send_message(assistant_message, message_from, bot_token)
-    return True
-
-
-
-def chat_functionality_gemini(user_input, api_key, assistant_id, message_from, bot_token):  
-    import os
-    import google.generativeai as genai
-
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel('gemini-pro')
-
-    prompt = user_input
-    response = model.generate_content(prompt)
-
-    send_message(response.text, message_from, bot_token)
-    return True
 
 
 def send_message(response_text, to, bot_token):
