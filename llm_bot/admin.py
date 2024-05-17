@@ -5,7 +5,33 @@ from django.utils.safestring import mark_safe
 
 
 class LLMConfigAdmin(admin.ModelAdmin):
-    list_display = ('config_name','api_key', 'platform', )
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    list_display = ('config_name','api_key', 'platform', 'delete')
 
 class DiscordConfigAdmin(admin.ModelAdmin):
 
@@ -15,7 +41,17 @@ class DiscordConfigAdmin(admin.ModelAdmin):
         return ('discord_bot_token', 'discord_client_id')
 
     def discord_bot(self, obj):
-        button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: var(--button-bg); '
+            'color: white; '
+            'cursor: pointer;'
+        )
         discord_link = ''
         if obj:
             client_id = obj.discord_client_id
@@ -32,11 +68,65 @@ class DiscordConfigAdmin(admin.ModelAdmin):
 
         return mark_safe(actions)
 
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    
     exclude = ('bot_thread_id',)
-    list_display = ('discord_bot_token', 'discord_client_id', 'discord_bot')
+    list_display = ('discord_bot_token', 'discord_client_id', 'discord_bot', 'delete')
 
 class LLMAgentAdmin(admin.ModelAdmin):
-    list_display = ('agent_name', 'assistant_id', 'agent_name')
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    
+    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete')
 
 
 class TelegramConfigAdmin(admin.ModelAdmin):
@@ -46,24 +136,60 @@ class TelegramConfigAdmin(admin.ModelAdmin):
         return ('telegram_bot_token',)
 
     def telegram_bot(self, obj):
-        button_style = 'background-color: #47bac1; color: #fff; font-size: 12px; font-size: 0.85714rem; font-weight: lighter; '
-        discord_link = ''
-        if obj:
-            discord_link = obj.bot_link
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: var(--button-bg); '
+            'color: white; '
+            'cursor: pointer;'
+        )
+        telegram_link = obj.bot_link if obj else ''
         
-        Telegram_bot = format_html(
-            '<button id="approve-button-{0}" class="button" style="{1} cursor: pointer;" onclick="window.open(\'{2}\', \'_blank\')">View Telegram Bot</button>',
-            0,
-            "",
-            discord_link
+        telegram_bot_button = format_html(
+            '<button class="button" style="{0}" onclick="window.open(\'{1}\', \'_blank\')">View Telegram Bot</button>',
+            button_style,
+            telegram_link
         )
 
-        actions = f'{Telegram_bot}'
+        return mark_safe(telegram_bot_button)
 
-        return mark_safe(actions)
-    
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.telegram_bot_token}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+
     exclude = ('bot_thread_id',)
-    list_display = ('telegram_bot_token', 'telegram_bot')
+    list_display = ('telegram_bot_token', 'telegram_bot', 'delete')
+
+    class Media:
+        js = ('path/to/your/js/file.js',)  # Include your JavaScript file here
+
 
 class WhatsappBotAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
@@ -71,7 +197,34 @@ class WhatsappBotAdmin(admin.ModelAdmin):
             return self.readonly_fields
         return ('whatsapp_bot_token', 'whatsapp_channel_id')
     
-    list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', )
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.whatsapp_channel_id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    
+    list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', 'delete')
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
 admin.site.register(DiscordBotConfig, DiscordConfigAdmin)
