@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig
+from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -226,8 +226,14 @@ class WhatsappBotAdmin(admin.ModelAdmin):
     
     list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', 'delete')
 
+
+class ChatBotAdmin(admin.ModelAdmin):
+    list_display = ('chatbot_name', 'widget_id')
+
+
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
 admin.site.register(DiscordBotConfig, DiscordConfigAdmin)
 admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
 admin.site.register(LLMAgent, LLMAgentAdmin)
 admin.site.register(WhatsAppBotConfig, WhatsappBotAdmin)
+admin.site.register(ChatBot, ChatBotAdmin)

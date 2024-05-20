@@ -1,8 +1,25 @@
 from .views import *
 from django.urls import path
+from .models import TelegramBotConfig, DiscordBotConfig
+from .signals import run_bot_in_thread, run_discord_bot_in_thread, generate_random_code
 
 urlpatterns = [
     path('/ajax/get-config', ajax_get_config, name="ajax_get_config"),
-    path('webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp")
-
+    path('webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp"),
+    path('chatbot/details', chatbot_details, name='chatbot_details'),
+    path('chatbot/call', call_llm_model, name="call_llm_model"),
 ]
+
+def start_bot_thread(instance, caller_function):
+    try:
+        caller_function(instance)
+    except Exception as e:
+        print(f'bot thread starting failed because {e}')
+
+
+def start_required_threads():
+    [start_bot_thread(bot, run_discord_bot_in_thread) for bot in DiscordBotConfig.objects.all()]
+    [start_bot_thread(bot, run_bot_in_thread) for bot in TelegramBotConfig.objects.all()]
+
+
+start_required_threads()
