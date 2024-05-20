@@ -5,7 +5,8 @@ import os
 import openai
 import time
 import logging
-from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig
+from functools import wraps
+from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -16,6 +17,21 @@ logging.basicConfig(
 
 VALID_PROVIDERS = ["gemini", "openai"]
 
+
+def authorize(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        token = os.getenv('AUTH_TOKEN')  # Get the token from environment variables
+        if not token:
+            return JsonResponse({'error': 'Token is not set in environment'}, status=500)
+        
+        header_token = request.headers.get('Authorization')  # Get the token from request headers
+        if header_token == token:
+            return view_func(request, *args, **kwargs)
+        else:
+            return JsonResponse({'error': 'Unauthorized, Please provide a valid token'}, status=401)
+    
+    return _wrapped_view
 
 
 def ajax_get_config(request):
@@ -96,3 +112,60 @@ def send_message(response_text, to, bot_token):
     response = requests.post(url, json=payload, headers=headers)
     logging.info(response.text)
     return True
+
+
+@authorize
+def chatbot_details(request):
+    try:
+        chatbot = ChatBot().load()  # Load the singleton instance
+        lm_config_instance = LLMCOnfig.objects.get(pk = chatbot.chatbot_llm_config)
+        llm_agents = LLMAgent.objects.get(pk = lm_config_instance.id)
+
+        response_data = {
+            'widget_id': chatbot.widget_id,
+            'llm_config': {
+                "llm_config_id": lm_config_instance.id,
+                'agent_name': llm_agents.agent_name
+            },
+            'logo': chatbot.logo.url if chatbot.logo else None 
+        }
+        return JsonResponse(response_data, status=200)
+    except Exception as e:
+        return JsonResponse({"error": f"faiure occurred because {e}"}, status=500)
+
+    
+@authorize
+def call_llm_model(request):
+    llm_config_id = request.GET.get('id')
+    user_input = request.GET.get('user_input')
+
+    lm_config_instance = LLMCOnfig.objects.get(id=llm_config_id)
+    llm_agent = LLMAgent.objects.get(llm_config = lm_config_instance)
+    assistant_id = llm_agent.assistant_id
+    api_key = lm_config_instance.api_key
+
+    print(user_input)
+
+    try:
+        # Ensure the message is not empty
+        if user_input:
+            if "asst_" in assistant_id:
+                logging.info("Openai client created")
+                openai.api_key = api_key
+                OPENAI_CLIENT = openai.Client(api_key=api_key)
+                logging.info(f"Message received: {user_input}")
+                
+                thread = OPENAI_CLIENT.beta.threads.create()
+                thread_id = thread.id
+                assistant_message = chat_functionality(OPENAI_CLIENT, "", user_input, thread_id, assistant_id)
+                return JsonResponse({"message": assistant_message}, status=200)
+            else:
+                gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
+                return JsonResponse({"message": gemini_response}, status=200)
+        else:
+            return JsonResponse({"error": "please provide user input"}, status=400)
+
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse({"error": "failure occurred because {e}"}, status=500)
+

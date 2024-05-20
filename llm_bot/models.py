@@ -1,5 +1,7 @@
 from django.db import models
 import uuid
+from singleton_model import SingletonModel
+
 
 class Page(models.Model):
     config_name = models.CharField(max_length=100, default='', blank=True, null=True)
@@ -87,3 +89,22 @@ class WhatsAppBotConfig(models.Model):
     class Meta:
         verbose_name = "Whatsapp Bot Configuration"
         verbose_name_plural = "Whatsapp Bot Configuration"
+
+
+class ChatBot(SingletonModel):
+    chatbot_name = models.CharField(max_length=100, default='')
+    widget_id = models.CharField(max_length=100, unique=True)
+    chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
+    chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
+    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+
+    def __str__(self) -> str:
+        return self.chatbot_name
+    
+    def load(self):
+        return ChatBot.objects.get(pk=1)
+
+    class Meta:
+        verbose_name = "ChatBot Configuration"
+        verbose_name_plural = "ChatBot Configuration"
