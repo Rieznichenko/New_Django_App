@@ -117,18 +117,16 @@ def send_message(response_text, to, bot_token):
 @authorize
 def chatbot_details(request):
     try:
-        chatbot = ChatBot().load()  # Load the singleton instance
-        lm_config_instance = LLMCOnfig.objects.get(pk = chatbot.chatbot_llm_config)
-        llm_agents = LLMAgent.objects.get(pk = lm_config_instance.id)
+        chatbot = ChatBot().load()
 
-        response_data = {
-            'widget_id': chatbot.widget_id,
-            'llm_config': {
-                "llm_config_id": lm_config_instance.id,
-                'agent_name': llm_agents.agent_name
-            },
-            'logo': chatbot.logo.url if chatbot.logo else None 
-        }
+        if chatbot:
+            response_data = {
+                'chatbot_name': chatbot.chatbot_name,
+                'logo': f"https://ia.humanytek.com/{chatbot.logo.url}" if chatbot.logo else None 
+            }
+        else:
+            response_data = { "message": "Please add a chatbot first." }
+
         return JsonResponse(response_data, status=200)
     except Exception as e:
         return JsonResponse({"error": f"faiure occurred because {e}"}, status=500)
@@ -136,11 +134,13 @@ def chatbot_details(request):
     
 @authorize
 def call_llm_model(request):
-    llm_config_id = request.GET.get('id')
+    widget_id = request.GET.get('widget_id')
     user_input = request.GET.get('user_input')
 
-    lm_config_instance = LLMCOnfig.objects.get(id=llm_config_id)
-    llm_agent = LLMAgent.objects.get(llm_config = lm_config_instance)
+    chatbot = ChatBot.objects.get(widget_id=widget_id)    
+    lm_config_instance = LLMCOnfig.objects.get(id=chatbot.chatbot_llm_config.id)
+    llm_agent = LLMAgent.objects.get(llm_config = chatbot.chatbot_llm_agent.id)
+
     assistant_id = llm_agent.assistant_id
     api_key = lm_config_instance.api_key
 
