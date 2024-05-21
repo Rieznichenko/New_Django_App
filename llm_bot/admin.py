@@ -269,7 +269,7 @@ class ChatBotAdmin(admin.ModelAdmin):
         )
 
         if obj:
-            delete_url = f'/api/chatbot/{obj.widget_id}'
+            delete_url = f'/chatbot/{obj.widget_id}'
             delete_button = format_html(
                 '<a href="{0}" class="button" style="{1}">Visit</a>',
                 delete_url,
