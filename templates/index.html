@@ -1,0 +1,19 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+
+    <div id="chat-container"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'js/chatbot-ui.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/chatbot-ui.css' %}">
+    <script>
+        createChatBot(id="{{ widget_id }}")
+    </script>
+
+
+</body>
+
+</html>

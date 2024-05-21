@@ -8,6 +8,7 @@ urlpatterns = [
     path('webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp"),
     path('chatbot/details', chatbot_details, name='chatbot_details'),
     path('chatbot/call', call_llm_model, name="call_llm_model"),
+    path('chatbot/<str:id>', chatbot_create, name="chatbot_create")
 ]
 
 def start_bot_thread(instance, caller_function):

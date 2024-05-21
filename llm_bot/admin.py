@@ -255,7 +255,34 @@ class ChatBotAdmin(admin.ModelAdmin):
             )
         return mark_safe(delete_button)
 
-    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent', 'logo', 'delete')
+    def visit(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: blue; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/api/chatbot/{obj.widget_id}'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Visit</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Visit</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+
+    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent', 'logo', 'visit', 'delete')
 
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)

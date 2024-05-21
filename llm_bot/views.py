@@ -1,5 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 import os
 import openai
@@ -169,3 +170,6 @@ def call_llm_model(request):
         logging.exception(e)
         return JsonResponse({"error": "failure occurred because {e}"}, status=500)
 
+
+def chatbot_create(request, id):
+    return render(request, 'index.html', context={"widget_id": id})
