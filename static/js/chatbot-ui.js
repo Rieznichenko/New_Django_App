@@ -10,9 +10,6 @@ welcomeMessage = "Hi, how can I assit you today?"
 theme = "blue"
 function init() {
 
-    //----------------------------- Init Variables ------------------------------
-    import_chatbot_setting();
-
     //--------------------------- Chatbot Frontend -------------------------------
     const chatContainer = document.getElementById("chat-container");
 
@@ -173,13 +170,12 @@ function send(message) {
     chatInput.focus();
     console.log("User Message:", message)
     $.ajax({
-        url: `${host}/call`,
-        type: 'POST',
+        url: `${host}/call?message=${message}&widget_id=${widget_id}`,
+        headers: {
+            'Authorization': `Bearer A8qKxaj3vHrF2jATS5q7ooxMvkId91FuZaf1l6UPQqII4IECv2KRkjSE4b8DZBwO`
+        },
+        type: 'GET',
         contentType: 'application/json',
-        data: JSON.stringify({
-            "message": message,
-            "widget_id": widget_id
-        }),
         success: function(data, textStatus) {
             if (data.message != null) {
                 setBotResponse(data.message);
@@ -321,6 +317,8 @@ function import_chatbot_setting(){
             if (data.theme != null) {
                 theme = data.theme
             }
+            init()
+            chatbotTheme(theme)
         },
         error: function(errorMessage) {
             setBotResponse("");
@@ -333,6 +331,5 @@ function import_chatbot_setting(){
 function createChatBot(id) {
 //--------------------------- Important Variables----------------------------
     widget_id = id;
-    init()
-    chatbotTheme(theme)
+    import_chatbot_setting();
 }
