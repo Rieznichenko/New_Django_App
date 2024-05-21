@@ -170,7 +170,7 @@ function send(message) {
     chatInput.focus();
     console.log("User Message:", message)
     $.ajax({
-        url: `${host}/call?message=${message}&widget_id=${widget_id}`,
+        url: `${host}/call?user_input=${message}&widget_id=${widget_id}`,
         headers: {
             'Authorization': `Bearer A8qKxaj3vHrF2jATS5q7ooxMvkId91FuZaf1l6UPQqII4IECv2KRkjSE4b8DZBwO`
         },
@@ -308,8 +308,8 @@ function import_chatbot_setting(){
             if (data.logo != null) {
                 botLogoPath = data.logo
             }
-            if (data.name != null) {
-                botName = data.name
+            if (data.chatbot_name != null) {
+                botName = data.chatbot_name
             }
             if (data.welcomeMessage != null) {
                 welcomeMessage = data.welcomeMessage
