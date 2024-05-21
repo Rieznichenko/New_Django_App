@@ -118,10 +118,12 @@ def send_message(response_text, to, bot_token):
 @authorize
 def chatbot_details(request):
     try:
-        chatbot = ChatBot().load()
+        widget_id = request.GET.get('widget_id')
+        chatbot = ChatBot.objects.get(widget_id=widget_id)   
 
         if chatbot:
             response_data = {
+                'widget_id': widget_id,
                 'chatbot_name': chatbot.chatbot_name,
                 'logo': f"https://ia.humanytek.com/{chatbot.logo.url}" if chatbot.logo else None 
             }

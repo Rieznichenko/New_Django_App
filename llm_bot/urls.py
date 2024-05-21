@@ -4,11 +4,11 @@ from .models import TelegramBotConfig, DiscordBotConfig
 from .signals import run_bot_in_thread, run_discord_bot_in_thread, generate_random_code
 
 urlpatterns = [
-    path('/ajax/get-config', ajax_get_config, name="ajax_get_config"),
-    path('webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp"),
+    path('api/ajax/get-config', ajax_get_config, name="ajax_get_config"),
+    path('api/webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp"),
     path('chatbot/details', chatbot_details, name='chatbot_details'),
-    path('chatbot/call', call_llm_model, name="call_llm_model"),
-    path('chatbot/<str:id>', chatbot_create, name="chatbot_create")
+    path('api/chatbot/call', call_llm_model, name="call_llm_model"),
+    path('api/chatbot/<str:id>', chatbot_create, name="chatbot_create")
 ]
 
 def start_bot_thread(instance, caller_function):
