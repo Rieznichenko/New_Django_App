@@ -125,7 +125,7 @@ def chatbot_details(request):
             response_data = {
                 'widget_id': widget_id,
                 'chatbot_name': chatbot.chatbot_name,
-                'logo': f"https://ia.humanytek.com/{chatbot.logo.url}" if chatbot.logo else None 
+                'logo': f"https://ia.humanytek.com{chatbot.logo.url}" if chatbot.logo else None 
             }
         else:
             response_data = { "message": "Please add a chatbot first." }

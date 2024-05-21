@@ -302,12 +302,12 @@ function chatbotTheme(theme) {
 
 function import_chatbot_setting(){
     $.ajax({
-        url: `${host}/details`,
-        type: 'POST',
+        url: `${host}/details?widget_id=${widget_id}`,
+        type: 'GET',
+        headers: {
+            'Authorization': `Bearer A8qKxaj3vHrF2jATS5q7ooxMvkId91FuZaf1l6UPQqII4IECv2KRkjSE4b8DZBwO`
+          },
         contentType: 'application/json',
-        data: JSON.stringify({
-            "widget_id": widget_id
-        }),
         success: function(data, textStatus) {
             if (data.logo != null) {
                 botLogoPath = data.logo
