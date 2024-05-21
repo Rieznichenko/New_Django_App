@@ -124,7 +124,7 @@ def chatbot_details(request):
         if chatbot:
             response_data = {
                 'widget_id': widget_id,
-                'chatbot_name': chatbot.chatbot_name,
+                'name': chatbot.chatbot_name,
                 'logo': f"https://ia.humanytek.com{chatbot.logo.url}" if chatbot.logo else None 
             }
         else:
