@@ -281,8 +281,40 @@ class ChatBotAdmin(admin.ModelAdmin):
                 button_style
             )
         return mark_safe(delete_button)
+    
+    def viewscript(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: green; '
+            'color: white; '
+            'cursor: pointer;'
+        )
 
-    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent', 'logo', 'visit', 'delete')
+        if obj:
+            viewscript_button = format_html(
+                '<button type="button" class="button" style="{0}" onclick="openModal(\'{1}\')">View Script</button>',
+                button_style,
+                obj.widget_id
+            )
+        else:
+            viewscript_button = format_html(
+                '<button type="button" class="button" style="{0}" disabled>View Script</button>',
+                button_style
+            )
+        return mark_safe(viewscript_button)
+    class Media:
+        js = ('js/custom_admin.js',)
+        css = {
+            'all': ('css/custom_admin.css',)
+        }
+
+
+    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent','welcome_message', 'logo', 'visit', 'delete', 'viewscript')
 
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)

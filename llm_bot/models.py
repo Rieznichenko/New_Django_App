@@ -98,6 +98,7 @@ class ChatBot(SingletonModel):
     chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
     logo = models.ImageField(upload_to='logos/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    welcome_message = models.TextField(default='', blank=True, null=True)
 
     def __str__(self) -> str:
         return self.chatbot_name
