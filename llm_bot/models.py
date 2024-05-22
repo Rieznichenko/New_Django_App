@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from singleton_model import SingletonModel
+import uuid
 
 
 class Page(models.Model):
@@ -93,7 +94,7 @@ class WhatsAppBotConfig(models.Model):
 
 class ChatBot(SingletonModel):
     chatbot_name = models.CharField(max_length=100, default='')
-    widget_id = models.CharField(max_length=100, unique=True)
+    widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
     chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
     logo = models.ImageField(upload_to='logos/', null=True, blank=True)
