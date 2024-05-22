@@ -15,36 +15,73 @@ document.addEventListener('DOMContentLoaded', function() {
         modal.id = 'customModal';
         modal.style.display = 'none';
         modal.style.position = 'fixed';
-        modal.style.zIndex = '1';
+        modal.style.zIndex = '1000';
         modal.style.left = '0';
         modal.style.top = '0';
         modal.style.width = '100%';
         modal.style.height = '100%';
         modal.style.overflow = 'auto';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.4)';
-
+        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    
         const modalContent = document.createElement('div');
         modalContent.id = 'modalContent';
-        modalContent.style.backgroundColor = '#fefefe';
-        modalContent.style.margin = '15% auto';
+        modalContent.style.backgroundColor = '#fff';
+        modalContent.style.margin = '10% auto';
         modalContent.style.padding = '20px';
-        modalContent.style.border = '1px solid #888';
-        modalContent.style.width = '80%';
+        modalContent.style.borderRadius = '10px';
+        modalContent.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        modalContent.style.width = '70%';
+        modalContent.style.position = 'relative';
+    
+        const textSpan = document.createElement('span');
+        textSpan.id = 'htmlContent';
+        textSpan.innerText = 'Your text to copy'; // Add some sample text
+        textSpan.style.display = 'block';
+        textSpan.style.marginBottom = '20px';
+        textSpan.style.color = '#333';
+        textSpan.style.fontFamily = 'Arial, sans-serif';
+        textSpan.style.fontSize = '16px';
+    
+        const modalButtons = document.createElement('div');
+        modalButtons.id = 'modalButtons';
+        modalButtons.style.position = 'absolute';
+        modalButtons.style.top = '10px';
+        modalButtons.style.right = '10px';
+    
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '📋'; // You can use an image like this: '<img src="path_to_icon.png" alt="Copy">'
+        copyBtn.style.cursor = 'pointer';
+        copyBtn.style.background = 'none';
+        copyBtn.style.border = 'none';
+        copyBtn.style.color = '#555';
+        copyBtn.style.fontSize = '20px';
+        copyBtn.style.marginRight = '10px';
+        copyBtn.onclick = function() {
+            copyTextToClipboard(textSpan.innerText);
+            copyBtn.innerHTML = '✔'; // Change to a check mark or any other indicator
+            setTimeout(() => {
+                copyBtn.innerHTML = '📋'; // Revert back to original icon after 2 seconds
+            }, 2000);
+        };
 
         const closeBtn = document.createElement('span');
         closeBtn.innerHTML = '&times;';
-        closeBtn.style.float = 'right';
         closeBtn.style.cursor = 'pointer';
+        closeBtn.style.fontSize = '24px';
+        closeBtn.style.color = '#555';
         closeBtn.onclick = closeModal;
 
-        modalContent.appendChild(closeBtn);
+        modalButtons.appendChild(copyBtn);
+        modalButtons.appendChild(closeBtn);
+        modalContent.appendChild(modalButtons);
+        modalContent.appendChild(textSpan);
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
     }
 
     function openModal(widgetId) {
         const modal = document.getElementById('customModal');
-        const modalContent = document.getElementById('modalContent');
+        const modalContent = document.getElementById('htmlContent');
 
         if (!modal || !modalContent) {
             console.error('Modal or modal content not found');
@@ -106,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // Attach click events to buttons after DOM is loaded
-    document.querySelectorAll('.button').forEach(button => {
+    document.querySelectorAll('#viewScript').forEach(button => {
         button.addEventListener('click', function(e) {
             e.preventDefault();
         });

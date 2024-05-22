@@ -231,7 +231,7 @@ class ChatBotAdmin(admin.ModelAdmin):
     def delete(self, obj):
         button_style = (
             'margin: 2px 0; '
-            'padding: 2px 3px; '
+            'padding: 4px 6px; '
             'vertical-align: middle; '
             'font-family: var(--font-family-primary); '
             'font-weight: normal; '
@@ -258,7 +258,7 @@ class ChatBotAdmin(admin.ModelAdmin):
     def visit(self, obj):
         button_style = (
             'margin: 2px 0; '
-            'padding: 2px 3px; '
+            'padding: 4px 6px; '
             'vertical-align: middle; '
             'font-family: var(--font-family-primary); '
             'font-weight: normal; '
@@ -285,7 +285,7 @@ class ChatBotAdmin(admin.ModelAdmin):
     def viewscript(self, obj):
         button_style = (
             'margin: 2px 0; '
-            'padding: 2px 3px; '
+            'padding: 4px 6px; '
             'vertical-align: middle; '
             'font-family: var(--font-family-primary); '
             'font-weight: normal; '
@@ -293,11 +293,12 @@ class ChatBotAdmin(admin.ModelAdmin):
             'background-color: green; '
             'color: white; '
             'cursor: pointer;'
+            'width: 80px;'
         )
 
         if obj:
             viewscript_button = format_html(
-                '<button type="button" class="button" style="{0}" onclick="openModal(\'{1}\')">View Script</button>',
+                '<button id="viewScript" type="button" class="button" style="{0}" onclick="openModal(\'{1}\')">View Script</button>',
                 button_style,
                 obj.widget_id
             )

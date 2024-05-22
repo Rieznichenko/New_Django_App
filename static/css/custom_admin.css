@@ -18,3 +18,9 @@
     border: 1px solid #888;
     width: 80%;
 }
+
+td.field-delete,
+td.field-viewscript,
+td.field-visit {
+    align-content: center;
+}
