@@ -136,12 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sidebar) {
             sidebar.style.display = 'none';
         }
-
-        // Change main div class
-        const mainDiv = document.getElementById('main');
-        if (mainDiv) {
-            mainDiv.className = 'main';
-        }
     }
 
     function closeModal() {
@@ -154,12 +148,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('nav-sidebar');
         if (sidebar) {
             sidebar.style.display = 'block';
-        }
-
-        // Revert main div class
-        const mainDiv = document.getElementById('main');
-        if (mainDiv) {
-            mainDiv.className = 'main shifted';
         }
     }
 
