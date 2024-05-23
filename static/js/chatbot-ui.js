@@ -6,7 +6,7 @@ host = 'https://ia.humanytek.com/api/chatbot'
 widget_id = ""
 botLogoPath = ""
 botName = ""
-welcomeMessage = "Hi, how can I assit you today?"
+welcomeMessage = "Hi, how can I assist you today?"
 inactiveMessage = "Sorry, There's no connection with the server."
 theme = "blue"
 function init() {
