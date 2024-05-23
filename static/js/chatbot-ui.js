@@ -7,6 +7,7 @@ widget_id = ""
 botLogoPath = ""
 botName = ""
 welcomeMessage = "Hi, how can I assit you today?"
+inactiveMessage = "Sorry, There's no connection with the server."
 theme = "blue"
 function init() {
 
@@ -194,63 +195,12 @@ function send(message) {
 //------------------------------------ Set bot response -------------------------------------
 function setBotResponse(val) {
     setTimeout(function() {
-        if (val.length < 1) {
-            //if there is no response from HumanyTek
-            // msg = 'I couldn\'t get that. Let\' try something else!';
-            msg = inactiveMessage;
-
-            var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${msg} </span></div>`;
-            $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-            scrollToBottomOfResults();
-            chatInput.focus();
-
-        } else {
-            //if we get response from HumanyTek
-            for (i = 0; i < val.length; i++) {
-                //check if there is text message
-                if (val[i].hasOwnProperty("text")) {
-                    const botMsg = val[i].text;
-                    if (botMsg.includes("password")) {
-                        chatInput.type = "password";
-                        passwordInput = true;
-                    }
-                    var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'>${val[i].text}</span></div>`;
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                }
-
-                //check if there is image
-                if (val[i].hasOwnProperty("image")) {
-                    var BotResponse = "<div class='bot-msg'>" + "<img class='bot-img' src ='${botLogoPath}' />"
-                    '<img class="msg-image" src="' + val[i].image + '">' +
-                        '</div>'
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                }
-
-                //check if there are buttons
-                if (val[i].hasOwnProperty("buttons")) {
-                    var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><div class='response-btns'>`
-
-                    buttonsArray = val[i].buttons;
-                    buttonsArray.forEach(btn => {
-                        BotResponse += `<button class='btn-primary' onclick= 'userResponseBtn(this)' value='${btn.payload}'>${btn.title}</button>`
-                    })
-
-                    BotResponse += "</div></div>"
-
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                    chatInput.disabled = true;
-                }
-
-            }
-            scrollToBottomOfResults();
-            chatInput.disabled = false;
-            chatInput.focus();
-        }
-
+        var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${val} </span></div>`;
+        $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
+        scrollToBottomOfResults();
+        chatInput.focus();
     }, 500);
 }
-
-
 
 
 function mobileView() {
