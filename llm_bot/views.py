@@ -82,13 +82,13 @@ def webhook_whatsapp(request):
             try:
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
-                assistant_message = chat_functionality(OPENAI_CLIENT, message_text, thread_id, assitant_id, message_from, bot_token)
+                assistant_message = chat_functionality(OPENAI_CLIENT, '', message_text, thread_id, assitant_id)
                 send_message(assistant_message, message_from, bot_token)
             except Exception as e:
                 logging.exception(e)
 
     else:
-        gemini_message = chat_functionality_gemini(message_text, api_key, assitant_id, message_from, bot_token)
+        gemini_message = chat_functionality_gemini(message_text, '', api_key, assitant_id)
         send_message(gemini_message, message_from, bot_token)
 
     return JsonResponse({"status": True}, status=200)
