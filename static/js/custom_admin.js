@@ -98,12 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const pre = document.createElement('pre');
         pre.id = 'preContent';
         pre.style.whiteSpace = 'pre-wrap';
-        
-        // const pre = document.createElement('pre');
-        // pre.style.whiteSpace = 'pre-wrap';
-        // // pre.style.wordWrap = 'break-word';
-        // pre.innerText = ``;
-        
+
         htmlContent.appendChild(pre)
         modalContent.appendChild(modalButtons);
         modalContent.appendChild(htmlContent);
