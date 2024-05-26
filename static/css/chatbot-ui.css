@@ -209,3 +209,11 @@
         height: 100%;
     }
 }
+
+.thinking {
+    display: none;
+}
+
+.hidden {
+    visibility: hidden;
+}

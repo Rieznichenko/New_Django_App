@@ -47,7 +47,10 @@ function init() {
 			<!-- <div class='user-msg'>
 				<span class='msg'>Hi, How can i help you?</span>
 			</div> -->
-			
+			<div id="thinking-indicator" class='bot-msg thinking hidden'>
+                <img class='bot-img' src ='${botLogoPath}' />
+                <span class='msg'>...</span>
+            </div>
 
 		</div>
 
@@ -150,13 +153,37 @@ function setUserResponse() {
         let temp = `<div class="user-msg"><span class = "msg">${userInput}</span></div>`
         chatArea.innerHTML += temp;
         chatInput.value = ""
+
+        // Display the thinking indicator
+        displayThinkingIndicator();
     } else {
         chatInput.disabled = false;
     }
     scrollToBottomOfResults();
 }
 
+// Try to show chatbot thinking effect wait for server response
+function displayThinkingIndicator() {
+    let thinkingIndicator = document.getElementById("thinking-indicator");
+    if (!thinkingIndicator) {
+        let temp = `<div id="thinking-indicator" class='bot-msg thinking'>
+                        <img class='bot-img' src ='${botLogoPath}' />
+                        <span class='msg'>...</span>
+                    </div>`;
+        chatArea.innerHTML += temp;
+    } else {
+        thinkingIndicator.classList.remove('hidden');
+    }
+    scrollToBottomOfResults();
+}
 
+// Stop thinking effect
+function hideThinkingIndicator() {
+    let thinkingIndicator = document.getElementById("thinking-indicator");
+    if (thinkingIndicator) {
+        thinkingIndicator.classList.add('hidden');
+    }
+}
 
 function scrollToBottomOfResults() {
     chatArea.scrollTop = chatArea.scrollHeight;
@@ -196,6 +223,7 @@ function send(message) {
 //------------------------------------ Set bot response -------------------------------------
 function setBotResponse(val) {
     setTimeout(function() {
+        hideThinkingIndicator();
         var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${val} </span></div>`;
         $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
         scrollToBottomOfResults();
@@ -263,7 +291,7 @@ function import_chatbot_setting(){
                 botName = data.chatbot_name
             }
             if (data.welcomeMessage != null) {
-                welcomeMessage = data.welcomeMessage
+                welcomeMessage = data.welcome_message
             }
             if (data.theme != null) {
                 theme = data.theme
