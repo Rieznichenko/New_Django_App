@@ -47,11 +47,6 @@ function init() {
 			<!-- <div class='user-msg'>
 				<span class='msg'>Hi, How can i help you?</span>
 			</div> -->
-            
-            <div id="thinking-indicator" class='bot-msg thinking hidden'>
-                <img class='bot-img' src ='${botLogoPath}' />
-                <span class='msg'>...</span>
-            </div>
 		</div>
 
 
@@ -172,6 +167,7 @@ function displayThinkingIndicator() {
                     </div>`;
         chatArea.innerHTML += temp;
     } else {
+        thinkingIndicator.classList.remove('thinking');
         thinkingIndicator.classList.remove('hidden');
     }
     scrollToBottomOfResults();
@@ -181,7 +177,7 @@ function displayThinkingIndicator() {
 function hideThinkingIndicator() {
     let thinkingIndicator = document.getElementById("thinking-indicator");
     if (thinkingIndicator) {
-        thinkingIndicator.classList.add('hidden');
+        thinkingIndicator.remove()
     }
 }
 
