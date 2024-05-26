@@ -160,7 +160,7 @@ function setUserResponse() {
 // Try to show chatbot thinking effect wait for server response
 function displayThinkingIndicator() {
     let thinkingIndicator = document.getElementById("thinking-indicator");
-    if (thinkingIndicator != null) {
+    if (thinkingIndicator == null) {
         let temp = `<div id="thinking-indicator" class='bot-msg'>
                         <img class='bot-img' src ='${botLogoPath}' />
                         <span class='msg'>...</span>
