@@ -161,7 +161,7 @@ function setUserResponse() {
 function displayThinkingIndicator() {
     let thinkingIndicator = document.getElementById("thinking-indicator");
     if (thinkingIndicator != null) {
-        let temp = `<div id="thinking-indicator" class='bot-msg thinking'>
+        let temp = `<div id="thinking-indicator" class='bot-msg'>
                         <img class='bot-img' src ='${botLogoPath}' />
                         <span class='msg'>...</span>
                     </div>`;
