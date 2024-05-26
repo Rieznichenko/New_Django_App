@@ -23,7 +23,7 @@ function init() {
 			<div class='chatbot-img'>
 				<img src='${botLogoPath}' alt='Chat Bot image' class='bot-img'> 
 			</div>
-			<h3 class='bot-title'>'${botName}'</h3>
+			<h3 class='bot-title'>${botName}</h3>
 			<button class = "expand-chat-window" ><img src="${static_host}/static/icons/open_fullscreen.png" class="icon" ></button>
 		</div>
 
