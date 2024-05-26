@@ -47,7 +47,11 @@ function init() {
 			<!-- <div class='user-msg'>
 				<span class='msg'>Hi, How can i help you?</span>
 			</div> -->
-
+            
+            <div id="thinking-indicator" class='bot-msg thinking hidden'>
+                <img class='bot-img' src ='${botLogoPath}' />
+                <span class='msg'>...</span>
+            </div>
 		</div>
 
 
@@ -161,7 +165,7 @@ function setUserResponse() {
 // Try to show chatbot thinking effect wait for server response
 function displayThinkingIndicator() {
     let thinkingIndicator = document.getElementById("thinking-indicator");
-    if (!thinkingIndicator) {
+    if (thinkingIndicator != null) {
         let temp = `<div id="thinking-indicator" class='bot-msg thinking'>
                         <img class='bot-img' src ='${botLogoPath}' />
                         <span class='msg'>...</span>
