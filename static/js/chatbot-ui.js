@@ -47,10 +47,6 @@ function init() {
 			<!-- <div class='user-msg'>
 				<span class='msg'>Hi, How can i help you?</span>
 			</div> -->
-			<div id="thinking-indicator" class='bot-msg thinking hidden'>
-                <img class='bot-img' src ='${botLogoPath}' />
-                <span class='msg'>...</span>
-            </div>
 
 		</div>
 
@@ -290,7 +286,7 @@ function import_chatbot_setting(){
             if (data.chatbot_name != null) {
                 botName = data.chatbot_name
             }
-            if (data.welcomeMessage != null) {
+            if (data.welcome_message != null) {
                 welcomeMessage = data.welcome_message
             }
             if (data.theme != null) {
