@@ -124,9 +124,9 @@ document.addEventListener('DOMContentLoaded', function() {
             <script src="https://ia.humanytek.com/static/js/chatbot-ui.js"></script>
             <link rel="stylesheet" href="https://ia.humanytek.com/static/css/chatbot-ui.css">
             <script>
-                createChatBot(id="9c291c7d-0424-41de-8737-f04e2c5dc0f6");
+            createChatBot(id="${widgetId}");
             </script>
-        `;
+            `;
 
         // Show the modal
         modal.style.display = 'block';
