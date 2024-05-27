@@ -254,6 +254,33 @@ class ChatBotAdmin(admin.ModelAdmin):
                 button_style
             )
         return mark_safe(delete_button)
+    
+    def edit(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 4px 6px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #417690; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            edit_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/'
+            edit_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Edit</a>',
+                edit_url,
+                button_style
+            )
+        else:
+            edit_button = format_html(
+                '<button class="button" style="{0}" disabled>Edit</button>',
+                button_style
+            )
+        return mark_safe(edit_button)
 
     def visit(self, obj):
         button_style = (
@@ -294,6 +321,7 @@ class ChatBotAdmin(admin.ModelAdmin):
             'color: white; '
             'cursor: pointer;'
             'width: 80px;'
+            'vertical-align: None; !important'
         )
 
         if obj:
@@ -315,7 +343,7 @@ class ChatBotAdmin(admin.ModelAdmin):
         }
 
 
-    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent','welcome_message', 'logo', 'visit', 'delete', 'viewscript')
+    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent','welcome_message', 'logo', 'visit','edit', 'delete', 'viewscript')
 
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
