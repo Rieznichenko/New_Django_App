@@ -92,7 +92,7 @@ class WhatsAppBotConfig(models.Model):
         verbose_name_plural = "Whatsapp Bot Configuration"
 
 
-class ChatBot(SingletonModel):
+class ChatBot(models.Model):
     chatbot_name = models.CharField(max_length=100, default='')
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
     chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -104,8 +104,6 @@ class ChatBot(SingletonModel):
     def __str__(self) -> str:
         return self.chatbot_name
     
-    def load(self):
-        return ChatBot.objects.get(pk=1)
 
     class Meta:
         verbose_name = "ChatBot Configuration"
