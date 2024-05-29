@@ -44,6 +44,13 @@ class LLMAgent(models.Model):
 
 
 class DiscordBotConfig(models.Model):
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]
+    
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
+    chatbot_name = models.CharField(max_length=100, default='')
     discord_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_client_id = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -61,6 +68,13 @@ class DiscordBotConfig(models.Model):
 
 
 class TelegramBotConfig(models.Model):
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]
+    
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
+    chatbot_name = models.CharField(max_length=100, default='')
     telegram_bot_token = models.CharField(max_length=100, primary_key=True)
     telegram_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
@@ -77,6 +91,13 @@ class TelegramBotConfig(models.Model):
         verbose_name_plural = "Telegram Bot Configuration"
 
 class WhatsAppBotConfig(models.Model):
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]
+    
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
+    chatbot_name = models.CharField(max_length=100, default='')
     whatsapp_bot_token = models.CharField(max_length=100, default='')
     whatsapp_channel_id = models.CharField(max_length=100, primary_key=True)
     whatsapp_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)

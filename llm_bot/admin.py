@@ -34,6 +34,8 @@ class LLMConfigAdmin(admin.ModelAdmin):
     list_display = ('config_name','api_key', 'platform', 'delete')
 
 class DiscordConfigAdmin(admin.ModelAdmin):
+    list_editable = ['state',]
+
 
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
@@ -96,7 +98,7 @@ class DiscordConfigAdmin(admin.ModelAdmin):
         return mark_safe(delete_button)
     
     exclude = ('bot_thread_id',)
-    list_display = ('discord_bot_token', 'discord_client_id', 'discord_bot', 'delete')
+    list_display = ( "chatbot_name", 'discord_bot_token', "state", 'discord_client_id', 'discord_bot', 'delete')
 
 class LLMAgentAdmin(admin.ModelAdmin):
     def delete(self, obj):
@@ -130,6 +132,8 @@ class LLMAgentAdmin(admin.ModelAdmin):
 
 
 class TelegramConfigAdmin(admin.ModelAdmin):
+    list_editable = ['state']
+    
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return self.readonly_fields
@@ -185,13 +189,14 @@ class TelegramConfigAdmin(admin.ModelAdmin):
         return mark_safe(delete_button)
 
     exclude = ('bot_thread_id',)
-    list_display = ('telegram_bot_token', 'telegram_bot', 'delete')
+    list_display = ("chatbot_name", 'telegram_bot_token', "state", 'telegram_bot', 'delete')
 
     class Media:
         js = ('path/to/your/js/file.js',)  # Include your JavaScript file here
 
 
 class WhatsappBotAdmin(admin.ModelAdmin):
+    list_editable = ['state']
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return self.readonly_fields
@@ -224,7 +229,7 @@ class WhatsappBotAdmin(admin.ModelAdmin):
             )
         return mark_safe(delete_button)
     
-    list_display = ('whatsapp_bot_token', 'whatsapp_llm_config', 'whatsapp_llm_agent', 'delete')
+    list_display = ("chatbot_name",'whatsapp_bot_token', "state", 'whatsapp_llm_config', 'whatsapp_llm_agent', 'delete')
 
 
 class ChatBotAdmin(admin.ModelAdmin):
