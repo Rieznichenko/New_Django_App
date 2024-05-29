@@ -18,9 +18,9 @@ def start_bot_thread(instance, caller_function):
         print(f'bot thread starting failed because {e}')
 
 
-def start_required_threads():
-    [start_bot_thread(bot, run_discord_bot_in_thread) for bot in DiscordBotConfig.objects.all()]
-    [start_bot_thread(bot, run_bot_in_thread) for bot in TelegramBotConfig.objects.all()]
+# def start_required_threads():
+#     [start_bot_thread(bot, run_discord_bot_in_thread) for bot in DiscordBotConfig.objects.all()]
+#     [start_bot_thread(bot, run_bot_in_thread) for bot in TelegramBotConfig.objects.all()]
 
 
-start_required_threads()
+# start_required_threads()
