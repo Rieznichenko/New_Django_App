@@ -2,7 +2,7 @@ import telebot
 import logging
 import openai
 import time
-from llm_bot.models import TelegramBotConfig
+from llm_bot.models import TelegramBotConfig, TelegramMessage
 from asgiref.sync import sync_to_async
 from llm import chat_functionality_gemini, chat_functionality, check_thread_status
 
@@ -48,8 +48,15 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
     @bot.message_handler(func=lambda msg: True)
     def echo_all(message):
         user_input = message.text
-        api_key, assitant_id, bot_token, bot_thread_id = config_store.get_param()
+        user_name = message.from_user.username or message.from_user.first_name
 
+        api_key, assitant_id, bot_token, bot_thread_id = config_store.get_param()
+        try:
+            obj = TelegramBotConfig.objects.get(telegram_bot_token=bot_token)
+            if obj.state == "paused":
+                return
+        except TelegramBotConfig.DoesNotExist:
+            return
         if "asst_" in assitant_id:
             logging.info("Openai client created")
             openai.api_key = api_key
@@ -60,12 +67,16 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
                     thread = OPENAI_CLIENT.beta.threads.create()
                     thread_id = thread.id
                     assistant_message = chat_functionality(OPENAI_CLIENT, message, user_input, thread_id, assitant_id)
+                    TelegramMessage.objects.create(content=assistant_message, author=bot.get_my_name().name)
+                    TelegramMessage.objects.create(content=user_input, author=user_name)
                     return bot.reply_to(message, assistant_message)
                 except Exception as e:
                     logging.exception(e)
                     bot.reply_to(message, f"Failed to start chat: {str(e)}")
         else:
             assistant_message = chat_functionality_gemini(user_input, message, api_key, assitant_id)
+            TelegramMessage.objects.create(content=assistant_message, author=bot.get_my_name().name)
+            TelegramMessage.objects.create(content=user_input, author=user_name)
             bot.reply_to(message, assistant_message)
 
     thread_iteartion = 0

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import DiscordBotConfig, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
+from .models import DiscordBotConfig, DiscordMessage, LLMAgent, LLMCOnfig, TelegramBotConfig, TelegramMessage, WhatsAppBotConfig, ChatBot, WhatsAppMessage
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -357,3 +357,6 @@ admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
 admin.site.register(LLMAgent, LLMAgentAdmin)
 admin.site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin.site.register(ChatBot, ChatBotAdmin)
+admin.site.register(DiscordMessage)
+admin.site.register(WhatsAppMessage)
+admin.site.register(TelegramMessage)

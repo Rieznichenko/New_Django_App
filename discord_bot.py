@@ -5,6 +5,8 @@ import openai
 import time
 from llm import  chat_functionality_gemini, chat_functionality, check_thread_status
 import logging
+from discord.message import Message
+from llm_bot.models import DiscordMessage, DiscordBotConfig
 
 load_dotenv()
 
@@ -41,32 +43,20 @@ async def on_ready():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message:Message):
     """An event handler triggered upon receiving a message"""
     api_key, assistant_id, discord_bot_token, bot_thread_id = config_store.get_param()
-
-    try:
-        import sqlite3
-        conn = sqlite3.connect('/Users/apple/Documents/projects/gpt_discord/db.sqlite3')
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM llm_bot_discordbotconfig WHERE bot_thread_id = ?", (bot_thread_id,))
-        row = cursor.fetchone()
-        if row:
-            print("Got row", row)
-        else:
-            raise Exception("something went wrong")
-
-    except Exception as e:
-        print("Closing down the bot as signal issued")
-        await client.close()
 
     if message.author == client.user:
         print("qual")
         return
-
-    
+    try:
+        obj = await DiscordBotConfig.objects.aget(discord_client_id=client.application_id)
+        if obj.state == 'paused':
+            return
+    except DiscordBotConfig.DoesNotExist:
+        return 
     user_input = message.content
-    print(user_input)
 
     if "asst_" in assistant_id:
         logging.info("Openai client created")
@@ -79,17 +69,22 @@ async def on_message(message):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, message.channel, user_input, thread_id, assistant_id)
+                await DiscordMessage.objects.acreate(content=message.content, author=str(message.author))
+                await DiscordMessage.objects.acreate(content=assistant_message, author=str(client.user))
+
                 await message.channel.send(assistant_message)
             except Exception as e:
                 logging.exception(e)
                 await message.channel.send(f"Failed to start chat: {str(e)}")
     else:
         gemini_response = chat_functionality_gemini(user_input, message.channel, api_key, assistant_id)
+        await DiscordMessage.objects.acreate(content=message.content, author=str(message.author))
+        await DiscordMessage.objects.acreate(content=gemini_response, author=str(client.user))
         await message.channel.send(gemini_response)
 
 
 def start_discord_bot(discord_bot_token):
-    client.run(discord_bot_token)
+    client.run(discord_bot_token, root_logger=True)
 
 
 def run_discord_bot(api_key, assistant_id, discord_bot_token, bot_thread_id):
@@ -98,5 +93,6 @@ def run_discord_bot(api_key, assistant_id, discord_bot_token, bot_thread_id):
 
         start_discord_bot(discord_bot_token)
     except Exception as e:
+        print(discord_bot_token)
         logging.error(f"Exception {e}")
         return

@@ -7,7 +7,7 @@ import openai
 import time
 import logging
 from functools import wraps
-from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot
+from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot, WhatsAppMessage
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -65,12 +65,18 @@ def webhook_whatsapp(request):
     message_text = incoming_message['messages'][0]['text'].get("body")
     message_from = incoming_message['messages'][0].get("from")
     channel_id = incoming_message.get("channel_id")
+    api_key, assitant_id, bot_token = get_llm_config(channel_id)
 
+    try:
+        obj = WhatsAppBotConfig.objects.get(whatsapp_bot_token=bot_token)
+        if obj.state == "paused":
+            return JsonResponse({"status": False}, status=400)
+    except WhatsAppBotConfig.DoesNotExist:
+            return JsonResponse({"status": False}, status=400)
     if incoming_message['messages'][0]['from_me']:
         return JsonResponse({"status": True}, status=200)
 
 
-    api_key, assitant_id, bot_token = get_llm_config(channel_id)
 
     if "asst_" in assitant_id:
         logging.info("Openai client created")
@@ -83,12 +89,17 @@ def webhook_whatsapp(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, '', message_text, thread_id, assitant_id)
+                WhatsAppMessage.objects.create(content=message_text, author=message_from)
+                WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
+
                 send_message(assistant_message, message_from, bot_token)
             except Exception as e:
                 logging.exception(e)
 
     else:
         gemini_message = chat_functionality_gemini(message_text, '', api_key, assitant_id)
+        WhatsAppMessage.objects.create(content=message_text, author=message_from)
+        WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
         send_message(gemini_message, message_from, bot_token)
 
     return JsonResponse({"status": True}, status=200)

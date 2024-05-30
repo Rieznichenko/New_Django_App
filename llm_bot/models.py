@@ -129,3 +129,40 @@ class ChatBot(models.Model):
     class Meta:
         verbose_name = "ChatBot Configuration"
         verbose_name_plural = "ChatBot Configuration"
+        
+
+class DiscordMessage(models.Model):
+    content = models.TextField()
+    author = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "Discord Chat History"
+        verbose_name_plural = "Discord Chat Histories"
+
+    def __str__(self):
+        return f'{self.author}: {self.content[:50]}...'
+
+class WhatsAppMessage(models.Model):
+    content = models.TextField()
+    author = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "WhatsApp Chat History"
+        verbose_name_plural = "WhatsApp Chat Histories"
+
+    def __str__(self):
+        return f'{self.author}: {self.content[:50]}...'
+
+class TelegramMessage(models.Model):
+    content = models.TextField()
+    author = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.author}: {self.content[:50]}...'
+
+    class Meta:
+        verbose_name = "Telegram Chat History"
+        verbose_name_plural = "Telegram Chat Histories"
