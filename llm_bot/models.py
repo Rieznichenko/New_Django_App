@@ -28,8 +28,8 @@ class LLMCOnfig(Page):
         return self.platform
 
     class Meta:
-        verbose_name = "LLM Configuration"
-        verbose_name_plural = "LLM Configuration"
+        verbose_name = "LLM IA Configuration"
+        verbose_name_plural = "LLM IA Configuration"
 
 class LLMAgent(models.Model):
     agent_name = models.CharField(max_length=100, default='', blank=True, null=True)
@@ -114,6 +114,12 @@ class WhatsAppBotConfig(models.Model):
 
 
 class ChatBot(models.Model):
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]
+    
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
     chatbot_name = models.CharField(max_length=100, default='')
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
     chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -127,8 +133,20 @@ class ChatBot(models.Model):
     
 
     class Meta:
-        verbose_name = "ChatBot Configuration"
-        verbose_name_plural = "ChatBot Configuration"
+        verbose_name = "WebBot Configuration"
+        verbose_name_plural = "WebBot Configuration"
+
+class ChatBotMessage(models.Model):
+    content = models.TextField()
+    author = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = "WebBot Chat Thread"
+        verbose_name_plural = "WebBot Chat Threads"
+
+    def __str__(self):
+        return f'{self.author}: {self.content[:50]}...'
         
 
 class DiscordMessage(models.Model):
@@ -137,8 +155,8 @@ class DiscordMessage(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "Discord Chat History"
-        verbose_name_plural = "Discord Chat Histories"
+        verbose_name = "Discord Chat Thread"
+        verbose_name_plural = "Discord Chat Threads"
 
     def __str__(self):
         return f'{self.author}: {self.content[:50]}...'
@@ -149,8 +167,8 @@ class WhatsAppMessage(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "WhatsApp Chat History"
-        verbose_name_plural = "WhatsApp Chat Histories"
+        verbose_name = "Whatsapp Chat Thread"
+        verbose_name_plural = "Whatsapp Chat Threads"
 
     def __str__(self):
         return f'{self.author}: {self.content[:50]}...'
@@ -164,5 +182,11 @@ class TelegramMessage(models.Model):
         return f'{self.author}: {self.content[:50]}...'
 
     class Meta:
-        verbose_name = "Telegram Chat History"
-        verbose_name_plural = "Telegram Chat Histories"
+        verbose_name = "Telegram Chat Thread"
+        verbose_name_plural = "Telegram Chat Threads"
+        
+
+class EmailSchedule(models.Model):
+    recipient = models.EmailField()
+    frequency_hours = models.PositiveIntegerField(default=24)  # Change this line
+

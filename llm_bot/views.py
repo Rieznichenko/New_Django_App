@@ -152,7 +152,11 @@ def call_llm_model(request):
     widget_id = request.GET.get('widget_id')
     user_input = request.GET.get('user_input')
 
-    chatbot = ChatBot.objects.get(widget_id=widget_id)    
+    chatbot = ChatBot.objects.get(widget_id=widget_id)
+    
+    if chatbot.state == "paused":
+        return JsonResponse({"error": "Bot has been stopped."}, status=400)
+    
     lm_config_instance = LLMCOnfig.objects.get(id=chatbot.chatbot_llm_config.id)
     llm_agent = LLMAgent.objects.get(llm_config = chatbot.chatbot_llm_agent.id)
 

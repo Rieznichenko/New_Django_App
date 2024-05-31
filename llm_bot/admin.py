@@ -1,10 +1,38 @@
 from django.contrib import admin
-from .models import DiscordBotConfig, DiscordMessage, LLMAgent, LLMCOnfig, TelegramBotConfig, TelegramMessage, WhatsAppBotConfig, ChatBot, WhatsAppMessage
+from django.urls import reverse
+from .models import ChatBotMessage, DiscordBotConfig, DiscordMessage, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, TelegramMessage, WhatsAppBotConfig, ChatBot, WhatsAppMessage
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 
-class LLMConfigAdmin(admin.ModelAdmin):
+
+class CustomBaseAdmin(admin.ModelAdmin):
+    list_display = ('edit_link', )
+    edit_button_style = (
+        'border-radius: 4px;'
+        'margin: 2px 0; '
+        'padding: 2px 3px; '
+        'vertical-align: middle; '
+        'font-family: var(--font-family-primary); '
+        'font-weight: normal; '
+        'font-size: 0.8125rem; '
+        'background-color: #417690; '
+        'color: white; '
+        'cursor: pointer;'
+    )
+
+    def edit_link(self, obj):
+        url = reverse('admin:%s_%s_change' % (obj._meta.app_label, obj._meta.model_name), args=[obj.pk])
+        return format_html(
+            '<a href="{}" style="{}">Edit</a>',
+            url,
+            self.edit_button_style
+        )
+    edit_link.short_description = 'Edit'
+    
+    
+
+class LLMConfigAdmin(CustomBaseAdmin):
     def delete(self, obj):
         button_style = (
             'margin: 2px 0; '
@@ -31,17 +59,16 @@ class LLMConfigAdmin(admin.ModelAdmin):
                 button_style
             )
         return mark_safe(delete_button)
-    list_display = ('config_name','api_key', 'platform', 'delete')
+    list_display = ('config_name','api_key', 'platform', 'delete') + CustomBaseAdmin.list_display
 
-class DiscordConfigAdmin(admin.ModelAdmin):
+class DiscordConfigAdmin(CustomBaseAdmin):
     list_editable = ['state',]
-
 
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
             return self.readonly_fields
         return ('discord_bot_token', 'discord_client_id')
-
+    
     def discord_bot(self, obj):
         button_style = (
             'margin: 2px 0; '
@@ -98,9 +125,9 @@ class DiscordConfigAdmin(admin.ModelAdmin):
         return mark_safe(delete_button)
     
     exclude = ('bot_thread_id',)
-    list_display = ( "chatbot_name", 'discord_bot_token', "state", 'discord_client_id', 'discord_bot', 'delete')
+    list_display = ("chatbot_name", "state", 'discord_client_id', 'discord_bot', 'delete') + CustomBaseAdmin.list_display
 
-class LLMAgentAdmin(admin.ModelAdmin):
+class LLMAgentAdmin(CustomBaseAdmin):
     def delete(self, obj):
         button_style = (
             'margin: 2px 0; '
@@ -128,10 +155,10 @@ class LLMAgentAdmin(admin.ModelAdmin):
             )
         return mark_safe(delete_button)
     
-    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete')
+    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete') + CustomBaseAdmin.list_display
 
 
-class TelegramConfigAdmin(admin.ModelAdmin):
+class TelegramConfigAdmin(CustomBaseAdmin):
     list_editable = ['state']
     
     def get_readonly_fields(self, request, obj=None):
@@ -189,13 +216,13 @@ class TelegramConfigAdmin(admin.ModelAdmin):
         return mark_safe(delete_button)
 
     exclude = ('bot_thread_id',)
-    list_display = ("chatbot_name", 'telegram_bot_token', "state", 'telegram_bot', 'delete')
+    list_display = ("chatbot_name", "state", 'telegram_bot', 'delete') + CustomBaseAdmin.list_display
 
     class Media:
         js = ('path/to/your/js/file.js',)  # Include your JavaScript file here
 
 
-class WhatsappBotAdmin(admin.ModelAdmin):
+class WhatsappBotAdmin(CustomBaseAdmin):
     list_editable = ['state']
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
@@ -229,10 +256,13 @@ class WhatsappBotAdmin(admin.ModelAdmin):
             )
         return mark_safe(delete_button)
     
-    list_display = ("chatbot_name",'whatsapp_bot_token', "state", 'whatsapp_llm_config', 'whatsapp_llm_agent', 'delete')
+    
+    list_display = ("chatbot_name", "state", 'whatsapp_llm_config',
+                    'whatsapp_llm_agent', 'delete') + CustomBaseAdmin.list_display
 
 
-class ChatBotAdmin(admin.ModelAdmin):
+class ChatBotAdmin(CustomBaseAdmin):
+    list_editable = ['state']
     def delete(self, obj):
         button_style = (
             'margin: 2px 0; '
@@ -259,33 +289,6 @@ class ChatBotAdmin(admin.ModelAdmin):
                 button_style
             )
         return mark_safe(delete_button)
-    
-    def edit(self, obj):
-        button_style = (
-            'margin: 2px 0; '
-            'padding: 4px 6px; '
-            'vertical-align: middle; '
-            'font-family: var(--font-family-primary); '
-            'font-weight: normal; '
-            'font-size: 0.8125rem; '
-            'background-color: #417690; '
-            'color: white; '
-            'cursor: pointer;'
-        )
-
-        if obj:
-            edit_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/'
-            edit_button = format_html(
-                '<a href="{0}" class="button" style="{1}">Edit</a>',
-                edit_url,
-                button_style
-            )
-        else:
-            edit_button = format_html(
-                '<button class="button" style="{0}" disabled>Edit</button>',
-                button_style
-            )
-        return mark_safe(edit_button)
 
     def visit(self, obj):
         button_style = (
@@ -348,7 +351,25 @@ class ChatBotAdmin(admin.ModelAdmin):
         }
 
 
-    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'chatbot_llm_agent','welcome_message', 'logo', 'visit','edit', 'delete', 'viewscript')
+    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'state',
+                    'chatbot_llm_agent','welcome_message', 'logo', 'visit', 'delete', 'viewscript'
+                    ) + CustomBaseAdmin.list_display
+
+
+
+class ChatBotMessageAdmin(CustomBaseAdmin):
+    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
+
+class DiscordMessageAdmin(CustomBaseAdmin):
+    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
+    
+
+class TelegramMessageAdmin(CustomBaseAdmin):
+    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
+
+
+class WhatsAppMessageAdmin(CustomBaseAdmin):
+    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
 
 
 admin.site.register(LLMCOnfig, LLMConfigAdmin)
@@ -357,6 +378,8 @@ admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
 admin.site.register(LLMAgent, LLMAgentAdmin)
 admin.site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin.site.register(ChatBot, ChatBotAdmin)
-admin.site.register(DiscordMessage)
-admin.site.register(WhatsAppMessage)
-admin.site.register(TelegramMessage)
+admin.site.register(ChatBotMessage, ChatBotMessageAdmin)
+admin.site.register(DiscordMessage, DiscordMessageAdmin)
+admin.site.register(WhatsAppMessage, WhatsAppMessageAdmin)
+admin.site.register(TelegramMessage, TelegramMessageAdmin)
+admin.site.register(EmailSchedule)
