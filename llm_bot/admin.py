@@ -1,4 +1,7 @@
 from django.contrib import admin
+
+from django.contrib.auth.models import Group, User
+from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.urls import reverse
 from .models import ChatBotMessage, DiscordBotConfig, DiscordMessage, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, TelegramMessage, WhatsAppBotConfig, ChatBot, WhatsAppMessage
 from django.utils.html import format_html
@@ -372,14 +375,45 @@ class WhatsAppMessageAdmin(CustomBaseAdmin):
     list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
 
 
-admin.site.register(LLMCOnfig, LLMConfigAdmin)
-admin.site.register(DiscordBotConfig, DiscordConfigAdmin)
-admin.site.register(TelegramBotConfig, TelegramConfigAdmin)
-admin.site.register(LLMAgent, LLMAgentAdmin)
-admin.site.register(WhatsAppBotConfig, WhatsappBotAdmin)
-admin.site.register(ChatBot, ChatBotAdmin)
-admin.site.register(ChatBotMessage, ChatBotMessageAdmin)
-admin.site.register(DiscordMessage, DiscordMessageAdmin)
-admin.site.register(WhatsAppMessage, WhatsAppMessageAdmin)
-admin.site.register(TelegramMessage, TelegramMessageAdmin)
-admin.site.register(EmailSchedule)
+from django.contrib.admin import AdminSite
+class CustomAdminSite(AdminSite):
+    def get_app_list(self, request):
+        """
+        Return a sorted list of all the installed apps that have been
+        registered in this site.
+        """
+        ordering = {
+            "LLM IA Configurations": 1,
+            "LLM Agent Configurations": 2,
+            "Discord Bot Configurations": 3,
+            "Discord Chat Threads": 4,
+            "Telegram Bot Configurations":5,
+            "Telegram Chat Threads":6,
+            "Whatsapp Bot Configurations":7,
+            "Whatsapp Chat Threads":8,
+            "WebBot Configurations":9,
+            "WebBot Chat Threads":10,
+            "Email schedules":11
+        }
+        app_dict = self._build_app_dict(request)
+        app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
+
+        # Sort the models alphabetically within each app.
+        for app in app_list:
+            app['models'].sort(key=lambda x: ordering.get(x['name'], float('inf')))
+
+        return app_list
+admin_site = CustomAdminSite(name="ihorSite")
+admin_site.register(Group, GroupAdmin)
+admin_site.register(User, UserAdmin)
+admin_site.register(LLMCOnfig, LLMConfigAdmin)
+admin_site.register(DiscordBotConfig, DiscordConfigAdmin)
+admin_site.register(TelegramBotConfig, TelegramConfigAdmin)
+admin_site.register(LLMAgent, LLMAgentAdmin)
+admin_site.register(WhatsAppBotConfig, WhatsappBotAdmin)
+admin_site.register(ChatBot, ChatBotAdmin)
+admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
+admin_site.register(DiscordMessage, DiscordMessageAdmin)
+admin_site.register(WhatsAppMessage, WhatsAppMessageAdmin)
+admin_site.register(TelegramMessage, TelegramMessageAdmin)
+admin_site.register(EmailSchedule)

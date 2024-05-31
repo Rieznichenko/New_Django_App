@@ -29,7 +29,7 @@ class LLMCOnfig(Page):
 
     class Meta:
         verbose_name = "LLM IA Configuration"
-        verbose_name_plural = "LLM IA Configuration"
+        verbose_name_plural = "LLM IA Configurations"
 
 class LLMAgent(models.Model):
     agent_name = models.CharField(max_length=100, default='', blank=True, null=True)
@@ -40,7 +40,7 @@ class LLMAgent(models.Model):
     
     class Meta:
         verbose_name = "LLM Agent Configuration"
-        verbose_name_plural =  "LLM Agent Configuration"
+        verbose_name_plural =  "LLM Agent Configurations"
 
 
 class DiscordBotConfig(models.Model):
@@ -64,7 +64,7 @@ class DiscordBotConfig(models.Model):
 
     class Meta:
         verbose_name = "Discord Bot Configuration"
-        verbose_name_plural = "Discord Bot Configuration"
+        verbose_name_plural = "Discord Bot Configurations"
 
 
 class TelegramBotConfig(models.Model):
@@ -88,7 +88,7 @@ class TelegramBotConfig(models.Model):
 
     class Meta:
         verbose_name = "Telegram Bot Configuration"
-        verbose_name_plural = "Telegram Bot Configuration"
+        verbose_name_plural = "Telegram Bot Configurations"
 
 class WhatsAppBotConfig(models.Model):
     STATE_CHOICES = [
@@ -110,7 +110,7 @@ class WhatsAppBotConfig(models.Model):
 
     class Meta:
         verbose_name = "Whatsapp Bot Configuration"
-        verbose_name_plural = "Whatsapp Bot Configuration"
+        verbose_name_plural = "Whatsapp Bot Configurations"
 
 
 class ChatBot(models.Model):
@@ -134,7 +134,7 @@ class ChatBot(models.Model):
 
     class Meta:
         verbose_name = "WebBot Configuration"
-        verbose_name_plural = "WebBot Configuration"
+        verbose_name_plural = "WebBot Configurations"
 
 class ChatBotMessage(models.Model):
     content = models.TextField()
