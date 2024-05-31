@@ -377,7 +377,7 @@ class WhatsAppMessageAdmin(CustomBaseAdmin):
 
 from django.contrib.admin import AdminSite
 class CustomAdminSite(AdminSite):
-    def get_app_list(self, request):
+    def get_app_list(self, request, app_label=None):
         """
         Return a sorted list of all the installed apps that have been
         registered in this site.
@@ -395,7 +395,7 @@ class CustomAdminSite(AdminSite):
             "WebBot Chat Threads":10,
             "Email schedules":11
         }
-        app_dict = self._build_app_dict(request)
+        app_dict = self._build_app_dict(request, app_label)
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
 
         # Sort the models alphabetically within each app.
