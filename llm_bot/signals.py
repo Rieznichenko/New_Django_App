@@ -1,9 +1,6 @@
 from datetime import timedelta
-import sched
-import time
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.utils import timezone
 
 from llm_bot.mails import send_mail
 from .models import EmailSchedule, TelegramBotConfig, DiscordBotConfig
@@ -97,29 +94,17 @@ def discord_bot_config_post_save(sender, instance, created, **kwargs):
         print("Post save")
     else:
         print("In update")
-        
-
-scheduler = sched.scheduler(time.time, time.sleep)
-
-def send_email_task(instance):
-    send_mail()  # Call your send_mail function here
-    # Reschedule the next email based on the instance's frequency
-    next_run = timezone.now() + timedelta(seconds=instance)
-    scheduler.enterabs(next_run.timestamp(), 1, send_email_task, (instance,))
-
-def schedule_email(instance: EmailSchedule):
-    next_run = timezone.now() + timedelta(seconds=1)
-    scheduler.enterabs(next_run.timestamp(), 1, send_email_task, (instance,))
     
+from urd.models import (
+    Task,
+)
 @receiver(post_save, sender=EmailSchedule)
-def send_mail_post_save(sender, instance, created, **kwargs):
+def send_mail_post_save(sender, instance: EmailSchedule, created, **kwargs):
+    next_run = timedelta(seconds=instance.frequency_hours)
+    
     if created:
-        schedule_email(instance)
+        Task.objects.create(name=f"send_mail-{instance.pk}", function="llm_bot.tasks.send_mail",environment="unknown ENV",interval=next_run)
     else:
-        # If the instance is updated, cancel the previous schedule and reschedule it
-        scheduler.cancel(send_email_task)
-        schedule_email(instance)
-
-# Start the scheduler
-print(scheduler.run())
-print("wtf")
+        Task.objects.update_or_create(name=f"send_mail-{instance.pk}", defaults={
+             "function":"llm_bot.tasks.send_mail","environment": "unknown ENV","interval":next_run
+        })

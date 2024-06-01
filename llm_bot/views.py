@@ -7,7 +7,7 @@ import openai
 import time
 import logging
 from functools import wraps
-from llm_bot.models import LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot, WhatsAppMessage
+from llm_bot.models import ChatBotMessage, LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot, WhatsAppMessage
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -177,9 +177,15 @@ def call_llm_model(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, "", user_input, thread_id, assistant_id)
+                ChatBotMessage.objects.create(content=user_input, author="User")
+                ChatBotMessage.objects.create(content=assistant_message, author='Bot')
+
                 return JsonResponse({"message": assistant_message}, status=200)
             else:
                 gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
+                ChatBotMessage.objects.create(content=user_input, author="User")
+                ChatBotMessage.objects.create(content=gemini_response, author='Bot')
+
                 return JsonResponse({"message": gemini_response}, status=200)
         else:
             return JsonResponse({"error": "please provide user input"}, status=400)
