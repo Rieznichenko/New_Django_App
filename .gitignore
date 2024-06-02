@@ -7,3 +7,5 @@ gpt_discord/__pycache__
 venv/
 __pycache__/
 media/
+client_secret.json
+token.json
