@@ -2,7 +2,6 @@ from datetime import timedelta
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-from llm_bot.mails import send_mail
 from .models import EmailSchedule, TelegramBotConfig, DiscordBotConfig
 from telegram_bot import run_telegram_bot
 from discord_bot import run_discord_bot
@@ -102,11 +101,11 @@ from django_celery_beat.models import PeriodicTask, IntervalSchedule
 def send_mail_post_save(sender, instance: EmailSchedule, created, **kwargs):
     schedule, _ = IntervalSchedule.objects.get_or_create(
         every=instance.frequency_hours,
-        period=IntervalSchedule.HOURS,
+        period=IntervalSchedule.SECONDS,
     )
 
     task_name = f'send_mail_to_{instance.recipient}'
-    task_args = json.dumps([instance.recipient])
+    task_args = json.dumps([instance.recipient, instance.frequency_hours])
 
     if instance.periodic_task:
         instance.periodic_task.interval = schedule

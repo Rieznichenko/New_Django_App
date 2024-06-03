@@ -24,5 +24,6 @@ def start_required_threads():
     [start_bot_thread(bot, run_bot_in_thread) for bot in TelegramBotConfig.objects.all()]
 
 
-start_required_threads()
-
+if 'runserver' in os.getenv('DJANGO_COMMAND', ''):
+    print("oh yeahh")
+    start_required_threads()
