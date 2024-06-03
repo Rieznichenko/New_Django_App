@@ -46,7 +46,6 @@ async def on_ready():
 async def on_message(message:Message):
     """An event handler triggered upon receiving a message"""
     api_key, assistant_id, discord_bot_token, bot_thread_id = config_store.get_param()
-    api_key, assistant_id =  "sk-proj-RrLGS3AfWX5p8mf7VO7oT3BlbkFJPTX92wY4jhkJkvNo8psj", "asst_djArvc1Mh86fHZavcVkbdF1Z"
     if message.author == client.user:
         print("qual")
         return
