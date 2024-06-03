@@ -2,6 +2,7 @@ import logging
 import time
 import os
 import google.generativeai as genai
+from credential_manager import load_creds
 
 
 def check_thread_status(client, thread_id, run_id):
@@ -25,9 +26,10 @@ def check_thread_status(client, thread_id, run_id):
 
 def chat_functionality_gemini(user_input, message, api_key, assistant_id):
     """Perform chat functionality using gemini API."""
-    genai.configure(api_key=api_key)
-
-    model = genai.GenerativeModel('gemini-pro')
+    creds = load_creds()
+    genai.configure(credentials=creds)
+    assistant_id = assistant_id if assistant_id else 'tunedModels/trainingbot-68gdba3ddw1s'
+    model = genai.GenerativeModel(assistant_id)
 
     prompt = user_input
     response = model.generate_content(prompt)
