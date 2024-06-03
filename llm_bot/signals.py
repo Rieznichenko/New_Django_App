@@ -94,17 +94,31 @@ def discord_bot_config_post_save(sender, instance, created, **kwargs):
         print("Post save")
     else:
         print("In update")
-    
-from urd.models import (
-    Task,
-)
+
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
+
+
 @receiver(post_save, sender=EmailSchedule)
 def send_mail_post_save(sender, instance: EmailSchedule, created, **kwargs):
-    next_run = timedelta(seconds=instance.frequency_hours)
-    
-    if created:
-        Task.objects.create(name=f"send_mail-{instance.pk}", function="llm_bot.tasks.send_mail",environment="unknown ENV",interval=next_run)
+    schedule, _ = IntervalSchedule.objects.get_or_create(
+        every=instance.frequency_hours,
+        period=IntervalSchedule.HOURS,
+    )
+
+    task_name = f'send_mail_to_{instance.recipient}'
+    task_args = json.dumps([instance.recipient])
+
+    if instance.periodic_task:
+        instance.periodic_task.interval = schedule
+        instance.periodic_task.name = task_name
+        instance.periodic_task.args = task_args
+        instance.periodic_task.save()
     else:
-        Task.objects.update_or_create(name=f"send_mail-{instance.pk}", defaults={
-             "function":"llm_bot.tasks.send_mail","environment": "unknown ENV","interval":next_run
-        })
+        task = PeriodicTask.objects.create(
+            interval=schedule,
+            name=task_name,
+            task='llm_bot.tasks.send_mail',
+            args=task_args,
+        )
+        instance.periodic_task = task
+        instance.save()

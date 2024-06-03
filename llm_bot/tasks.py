@@ -1,114 +1,77 @@
-import base64
-import csv
-from io import StringIO
-from datetime import timedelta
-import uuid
+import time
 from mailersend import emails
-from django.utils import timezone
-from urd import schedulable_task
-from .models import WhatsAppMessage, DiscordMessage, TelegramMessage
+from .models import ChatBotMessage, WhatsAppMessage, DiscordMessage, TelegramMessage
+from celery import shared_task
 
-api_key = "mlsn.5e095ba5f2b2fdc2458c01ead42212b15d07216ba7e882b32dffeb7c41022833"
-mailer = emails.NewEmail(api_key)
+api_key = "mlsn.37d5c4775e35ca220500b1930c394e443653b07dc5f8ee39421c83dfa7e473b0"
 
-@schedulable_task
-def send_mail(heartbeat):
-    # Fetch all messages from each platform
-    whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
-    discord_messages = DiscordMessage.objects.all().order_by('timestamp')
-    telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
 
-    # Use StringIO to handle CSV in memory
-    csv_buffer = StringIO()
-    fieldnames = ['Platform', 'Content', 'Author', 'Timestamp']
-    writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
-    
-    writer.writeheader()
-
-    # Write messages from each platform
-    for message in whatsapp_messages:
-        writer.writerow({
-            'Platform': 'WhatsApp',
-            'Content': message.content,
-            'Author': message.author,
-            'Timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+def generate_html_content(messages):
+    message_row = []
+    for message in messages:
+        message_row.append({
+            "Content": message.content,
+            "Author": message.author,
+            "Timestamp":message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
         })
-        heartbeat()  # Call heartbeat for each message
-    
-    for message in discord_messages:
-        writer.writerow({
-            'Platform': 'Discord',
-            'Content': message.content,
-            'Author': message.author,
-            'Timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        })
-        heartbeat()  # Call heartbeat for each message
+        
+    return message_row
 
-    for message in telegram_messages:
-        writer.writerow({
-            'Platform': 'Telegram',
-            'Content': message.content,
-            'Author': message.author,
-            'Timestamp': message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        })
-        heartbeat()  # Call heartbeat for each message
+def send_mail_for_bot(email, messages, platform_name):
+    table_rows = generate_html_content(messages)
+    total_messages = len(messages)
     
+    api_key = "mlsn.37d5c4775e35ca220500b1930c394e443653b07dc5f8ee39421c83dfa7e473b0"
 
-    # Email setup and sending
+    mailer = emails.NewEmail(api_key)
     mail_body = {}
-    mail_from = {"name": "Humany", "email": "MS_xRqMgk@trial-neqvygme1dd40p7w.mlsender.net"}
-    recipients = [{"name": "testemail", "email": "rtksoni00@gmail.com"}]
+
+    mail_from = {
+        "name": "Humany",
+        "email": "MS_sylUdl@trial-v69oxl5oo5xg785k.mlsender.net",
+    }
+
+    recipients = [
+        {
+            "name": "testemail",
+            "email": email,
+        }
+    ]
+
+    personalization = [
+        {
+            "email": email,
+            "data": {
+                "bot_name": platform_name,
+                "messages_row": table_rows,
+                "total_messages": total_messages
+            }
+        }
+    ]
 
     mailer.set_mail_from(mail_from, mail_body)
     mailer.set_mail_to(recipients, mail_body)
-    mailer.set_subject("All Platform Messages CSV", mail_body)
+    mailer.set_subject(f"Notification for {platform_name}", mail_body)
+    mailer.set_template("351ndgwwp2ngzqx8", mail_body)
+    mailer.set_advanced_personalization(personalization, mail_body)
 
-    # Calculate some basic stats for the email body
-    total_messages = len(whatsapp_messages) + len(discord_messages) + len(telegram_messages)
-    html_content = f"""
-    <p>Please find attached the CSV file with messages from WhatsApp, Discord, and Telegram.</p>
-    <p>Summary:</p>
-    <ul>
-        <li>Total Messages: {total_messages}</li>
-        <li>WhatsApp: {len(whatsapp_messages)}</li>
-        <li>Discord: {len(discord_messages)}</li>
-        <li>Telegram: {len(telegram_messages)}</li>
-    </ul>
-    """
-
-    plain_content = f"""
-    Please find attached the CSV file with messages from WhatsApp, Discord, and Telegram.
-
-    Summary:
-    - Total Messages: {total_messages}
-    - WhatsApp: {len(whatsapp_messages)}
-    - Discord: {len(discord_messages)}
-    - Telegram: {len(telegram_messages)}
-    """
-
-    mailer.set_html_content(html_content, mail_body)
-    mailer.set_plaintext_content(plain_content, mail_body)
-
-    
-    
-    csv_content = csv_buffer.getvalue()
-
-    csv_bytes = csv_content.encode('utf-8')
-    csv_base64 = base64.b64encode(csv_bytes)
-    csv_base64_str = csv_base64.decode('ascii')
-    print(csv_base64_str)
-
-    attachment = [{
-        "content": csv_base64_str,
-        "filename": "all_platform_messages.csv",
-        "disposition": "attachment",
-        "id": "csv-01",
-    }]
-    mailer.set_attachments(attachment, mail_body)
-
-    heartbeat()  # Call heartbeat before sending the email
-
-    # Send the email and handle response
     response = mailer.send(mail_body)
-
+    print("email response", response)
     return response
+
+@shared_task
+def send_mail(email):
+    whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
+    discord_messages = DiscordMessage.objects.all().order_by('timestamp')
+    telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
+    chat_bot_messages = ChatBotMessage.objects.all().order_by('timestamp')
+    all_messages = [
+        (whatsapp_messages, 'WhatsApp'),
+        (discord_messages, 'Discord'),
+        (telegram_messages, 'Telegram'),
+        (chat_bot_messages, 'ChatBot')
+    ]
+
+    for messages, platform_name in all_messages:        
+        response=send_mail_for_bot(email, messages, platform_name)
+        print("NICE",response)

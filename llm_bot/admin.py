@@ -376,9 +376,7 @@ class WhatsAppMessageAdmin(CustomBaseAdmin):
 
 
 from django.contrib.admin import AdminSite
-from urd.models import (
-    Task,
-)
+
 class CustomAdminSite(AdminSite):
     def get_app_list(self, request, app_label=None):
         """
@@ -397,7 +395,6 @@ class CustomAdminSite(AdminSite):
             "WebBot Configurations":9,
             "WebBot Chat Threads":10,
             "Email schedules":11,
-            "Tasks":12
         }
         app_dict = self._build_app_dict(request, app_label)
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
@@ -409,7 +406,6 @@ class CustomAdminSite(AdminSite):
         return app_list
 admin_site = CustomAdminSite(name="ihorSite")
 admin_site.register(Group, GroupAdmin)
-admin_site.register(Task)
 admin_site.register(User, UserAdmin)
 admin_site.register(LLMCOnfig, LLMConfigAdmin)
 admin_site.register(DiscordBotConfig, DiscordConfigAdmin)

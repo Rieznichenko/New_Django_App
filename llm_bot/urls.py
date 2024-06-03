@@ -1,3 +1,4 @@
+import schedule
 from .views import *
 from django.urls import path
 from .models import TelegramBotConfig, DiscordBotConfig
@@ -24,3 +25,4 @@ def start_required_threads():
 
 
 start_required_threads()
+

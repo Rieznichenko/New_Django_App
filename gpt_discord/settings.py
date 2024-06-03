@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'urd',
     'llm_bot'
 ]
 
@@ -158,3 +157,19 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://ia.humanytek.com']
+
+
+from decouple import config
+
+DEBUG = config("DEBUG", cast=bool, default=False)
+...
+
+INSTALLED_APPS = INSTALLED_APPS + [
+    'django_celery_beat',
+    'django_celery_results',
+]
+
+CELERY_RESULT_BACKEND = "django-db"
+
+CELERY_BROKER_URL = config('CELERY_BROKER_REDIS_URL', default='redis://localhost:6379')
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'

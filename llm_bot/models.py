@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from singleton_model import SingletonModel
+from django_celery_beat.models import PeriodicTask
 import uuid
 
 
@@ -184,9 +184,10 @@ class TelegramMessage(models.Model):
     class Meta:
         verbose_name = "Telegram Chat Thread"
         verbose_name_plural = "Telegram Chat Threads"
-        
+       
 
 class EmailSchedule(models.Model):
     recipient = models.EmailField()
     frequency_hours = models.PositiveIntegerField(default=24)  # Change this line
+    periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
 
