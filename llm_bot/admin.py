@@ -3,14 +3,14 @@ from django.contrib import admin
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.urls import reverse
-from .models import ChatBotMessage, DiscordBotConfig, DiscordMessage, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, TelegramMessage, WhatsAppBotConfig, ChatBot, WhatsAppMessage
+from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 
 
 class CustomBaseAdmin(admin.ModelAdmin):
-    list_display = ('edit_link', )
+    list_display = ('edit_link',  "view_related_model_button")
     edit_button_style = (
         'border-radius: 4px;'
         'margin: 2px 0; '
@@ -33,6 +33,23 @@ class CustomBaseAdmin(admin.ModelAdmin):
         )
     edit_link.short_description = 'Edit'
     
+    def view_related_model_button(self, obj):
+        cl_url = f"/admin/{obj._meta.app_label}/chatbotmessage/"
+        # url = reverse('admin:appname_relatedmodel_changelist')
+        url_with_filter = f"{cl_url}?chatbot_name={obj.chatbot_name}&bot_type={obj.bot_type}"
+        return format_html('<a class="button" style="{}" href="{}">History</a>', self.edit_button_style, 
+                           url_with_filter)
+
+    view_related_model_button.short_description = 'History'
+
+    
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        chatbot_name = request.GET.get('chatbot_name')
+        bot_type = request.GET.get('bot_type')
+        if bot_type:
+            qs = qs.filter(bot_type=bot_type, chatbot_name=chatbot_name)
+        return qs
     
 
 class LLMConfigAdmin(CustomBaseAdmin):
@@ -363,17 +380,6 @@ class ChatBotAdmin(CustomBaseAdmin):
 class ChatBotMessageAdmin(CustomBaseAdmin):
     list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
 
-class DiscordMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
-    
-
-class TelegramMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
-
-
-class WhatsAppMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
-
 
 from django.contrib.admin import AdminSite
 
@@ -414,7 +420,4 @@ admin_site.register(LLMAgent, LLMAgentAdmin)
 admin_site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin_site.register(ChatBot, ChatBotAdmin)
 admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
-admin_site.register(DiscordMessage, DiscordMessageAdmin)
-admin_site.register(WhatsAppMessage, WhatsAppMessageAdmin)
-admin_site.register(TelegramMessage, TelegramMessageAdmin)
 admin_site.register(EmailSchedule)

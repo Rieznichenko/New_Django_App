@@ -48,9 +48,9 @@ class DiscordBotConfig(models.Model):
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
-    
+    bot_type = models.CharField(default="discord", max_length=256, editable=False, auto_created=True)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='')
+    chatbot_name = models.CharField(max_length=100, default='', unique=True)
     discord_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_client_id = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -72,9 +72,10 @@ class TelegramBotConfig(models.Model):
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
+    bot_type = models.CharField(default="telegram", max_length=256, editable=False, auto_created=True)
     
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='')
+    chatbot_name = models.CharField(max_length=100, default='', unique=True)
     telegram_bot_token = models.CharField(max_length=100, primary_key=True)
     telegram_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
@@ -95,9 +96,10 @@ class WhatsAppBotConfig(models.Model):
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
-    
+    bot_type = models.CharField(default="whatsapp", max_length=256, editable=False, auto_created=True)
+
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='')
+    chatbot_name = models.CharField(max_length=100, default='', unique=True)
     whatsapp_bot_token = models.CharField(max_length=100, default='')
     whatsapp_channel_id = models.CharField(max_length=100, primary_key=True)
     whatsapp_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -118,9 +120,9 @@ class ChatBot(models.Model):
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
-    
+    bot_type = models.CharField(default="webbot", max_length=256, editable=False, auto_created=True)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='')
+    chatbot_name = models.CharField(max_length=100, default='', unique=True)
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
     chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
@@ -137,56 +139,41 @@ class ChatBot(models.Model):
         verbose_name_plural = "WebBot Configurations"
 
 class ChatBotMessage(models.Model):
+    BOT_TYPES = [
+        ('discord', 'Discord'),
+        ('telegram', 'Telegram'),
+        ('webbot', 'WebBot'),
+        ('whatsapp', 'WhatsApp'),
+    ]
+    
+    
+    bot_type = models.CharField(choices=BOT_TYPES, max_length=256)
+    chatbot_name = models.CharField(max_length=256)
+    
     content = models.TextField()
     author = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        verbose_name = "WebBot Chat Thread"
-        verbose_name_plural = "WebBot Chat Threads"
+        verbose_name = "Bot Chat Thread"
+        verbose_name_plural = "Bots Chat Threads"
 
     def __str__(self):
         return f'{self.author}: {self.content[:50]}...'
         
 
-class DiscordMessage(models.Model):
-    content = models.TextField()
-    author = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name = "Discord Chat Thread"
-        verbose_name_plural = "Discord Chat Threads"
-
-    def __str__(self):
-        return f'{self.author}: {self.content[:50]}...'
-
-class WhatsAppMessage(models.Model):
-    content = models.TextField()
-    author = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        verbose_name = "Whatsapp Chat Thread"
-        verbose_name_plural = "Whatsapp Chat Threads"
-
-    def __str__(self):
-        return f'{self.author}: {self.content[:50]}...'
-
-class TelegramMessage(models.Model):
-    content = models.TextField()
-    author = models.CharField(max_length=255)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f'{self.author}: {self.content[:50]}...'
-
-    class Meta:
-        verbose_name = "Telegram Chat Thread"
-        verbose_name_plural = "Telegram Chat Threads"
-       
-
 class EmailSchedule(models.Model):
+    BOT_TYPES = [
+        ('discord', 'Discord'),
+        ('telegram', 'Telegram'),
+        ('webbot', 'WebBot'),
+        ('whatsapp', 'WhatsApp'),
+    ]
+    
+    
+    bot_type = models.CharField(choices=BOT_TYPES, max_length=256)
+    bot_name = models.CharField(max_length=256)
+    
     recipient = models.EmailField()
     frequency_hours = models.PositiveIntegerField(default=24)  # Change this line
     periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)

@@ -7,7 +7,7 @@ import openai
 import time
 import logging
 from functools import wraps
-from llm_bot.models import ChatBotMessage, LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot, WhatsAppMessage
+from llm_bot.models import ChatBotMessage, LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -69,6 +69,7 @@ def webhook_whatsapp(request):
 
     try:
         obj = WhatsAppBotConfig.objects.get(whatsapp_bot_token=bot_token)
+        bot_name = obj.chatbot_name
         if obj.state == "paused":
             return JsonResponse({"status": False}, status=400)
     except WhatsAppBotConfig.DoesNotExist:
@@ -89,8 +90,8 @@ def webhook_whatsapp(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, '', message_text, thread_id, assitant_id)
-                WhatsAppMessage.objects.create(content=message_text, author="Human")
-                WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
+                ChatBotMessage.objects.create(content=message_text, author="Human", bot_name=bot_name, bot_type="whatsapp")
+                ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="whatsapp")
 
                 send_message(assistant_message, message_from, bot_token)
             except Exception as e:
@@ -98,8 +99,8 @@ def webhook_whatsapp(request):
 
     else:
         gemini_message = chat_functionality_gemini(message_text, '', api_key, assitant_id)
-        WhatsAppMessage.objects.create(content=message_text, author="Human")
-        WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
+        ChatBotMessage.objects.create(content=message_text, author="Human", bot_name=bot_name, bot_type="whatsapp")
+        ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="whatsapp")
         send_message(gemini_message, message_from, bot_token)
 
     return JsonResponse({"status": True}, status=200)
@@ -153,7 +154,7 @@ def call_llm_model(request):
     user_input = request.GET.get('user_input')
 
     chatbot = ChatBot.objects.get(widget_id=widget_id)
-    
+    bot_name=chatbot.chatbot_name
     if chatbot.state == "paused":
         return JsonResponse({"error": "Bot has been stopped."}, status=400)
     
@@ -177,14 +178,14 @@ def call_llm_model(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, "", user_input, thread_id, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="Human")
-                ChatBotMessage.objects.create(content=assistant_message, author='Bot')
+                ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="webbot")
 
                 return JsonResponse({"message": assistant_message}, status=200)
             else:
                 gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="Human")
-                ChatBotMessage.objects.create(content=gemini_response, author='Bot')
+                ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=gemini_response, author='Bot', bot_name=bot_name, bot_type="webbot")
 
                 return JsonResponse({"message": gemini_response}, status=200)
         else:

@@ -2,7 +2,7 @@ import telebot
 import logging
 import openai
 import time
-from llm_bot.models import TelegramBotConfig, TelegramMessage
+from llm_bot.models import ChatBotMessage, TelegramBotConfig
 from asgiref.sync import sync_to_async
 from llm import chat_functionality_gemini, chat_functionality, check_thread_status
 
@@ -53,6 +53,7 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
         api_key, assitant_id, bot_token, bot_thread_id = config_store.get_param()
         try:
             obj = TelegramBotConfig.objects.get(telegram_bot_token=bot_token)
+            bot_name = obj.chatbot_name
             if obj.state == "paused":
                 return
         except TelegramBotConfig.DoesNotExist:
@@ -67,16 +68,16 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
                     thread = OPENAI_CLIENT.beta.threads.create()
                     thread_id = thread.id
                     assistant_message = chat_functionality(OPENAI_CLIENT, message, user_input, thread_id, assitant_id)
-                    TelegramMessage.objects.create(content=assistant_message, author="BOT")
-                    TelegramMessage.objects.create(content=user_input, author="Human")
+                    ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="telegram")
+                    ChatBotMessage.objects.create(content=assistant_message, author="BOT", bot_name=bot_name, bot_type="telegram")
                     return bot.reply_to(message, assistant_message)
                 except Exception as e:
                     logging.exception(e)
                     bot.reply_to(message, f"Failed to start chat: {str(e)}")
         else:
             assistant_message = chat_functionality_gemini(user_input, message, api_key, assitant_id)
-            TelegramMessage.objects.create(content=assistant_message, author="BOT")
-            TelegramMessage.objects.create(content=user_input, author="Human")
+            ChatBotMessage.objects.create(content=assistant_message, author="BOT", bot_name=bot_name, bot_type="telegram")
+            ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="telegram")
             bot.reply_to(message, assistant_message)
 
     thread_iteartion = 0
