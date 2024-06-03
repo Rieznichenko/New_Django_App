@@ -89,7 +89,7 @@ def webhook_whatsapp(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, '', message_text, thread_id, assitant_id)
-                WhatsAppMessage.objects.create(content=message_text, author=message_from)
+                WhatsAppMessage.objects.create(content=message_text, author="Human")
                 WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
 
                 send_message(assistant_message, message_from, bot_token)
@@ -98,7 +98,7 @@ def webhook_whatsapp(request):
 
     else:
         gemini_message = chat_functionality_gemini(message_text, '', api_key, assitant_id)
-        WhatsAppMessage.objects.create(content=message_text, author=message_from)
+        WhatsAppMessage.objects.create(content=message_text, author="Human")
         WhatsAppMessage.objects.create(content=assistant_message, author='Bot')
         send_message(gemini_message, message_from, bot_token)
 
@@ -177,13 +177,13 @@ def call_llm_model(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, "", user_input, thread_id, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="User")
+                ChatBotMessage.objects.create(content=user_input, author="Human")
                 ChatBotMessage.objects.create(content=assistant_message, author='Bot')
 
                 return JsonResponse({"message": assistant_message}, status=200)
             else:
                 gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="User")
+                ChatBotMessage.objects.create(content=user_input, author="Human")
                 ChatBotMessage.objects.create(content=gemini_response, author='Bot')
 
                 return JsonResponse({"message": gemini_response}, status=200)

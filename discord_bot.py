@@ -69,8 +69,8 @@ async def on_message(message:Message):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, message.channel, user_input, thread_id, assistant_id)
-                await DiscordMessage.objects.acreate(content=message.content, author=str(message.author))
-                await DiscordMessage.objects.acreate(content=assistant_message, author=str(client.user))
+                await DiscordMessage.objects.acreate(content=message.content, author="Human")
+                await DiscordMessage.objects.acreate(content=assistant_message, author="BOT")
 
                 await message.channel.send(assistant_message)
             except Exception as e:
@@ -78,8 +78,8 @@ async def on_message(message:Message):
                 await message.channel.send(f"Failed to start chat: {str(e)}")
     else:
         gemini_response = chat_functionality_gemini(user_input, message.channel, api_key, assistant_id)
-        await DiscordMessage.objects.acreate(content=message.content, author=str(message.author))
-        await DiscordMessage.objects.acreate(content=gemini_response, author=str(client.user))
+        await DiscordMessage.objects.acreate(content=message.content, author="Human")
+        await DiscordMessage.objects.acreate(content=gemini_response, author="BOT")
         await message.channel.send(gemini_response)
 
 
