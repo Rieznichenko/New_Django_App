@@ -331,7 +331,7 @@ class ChatBotAdmin(CustomBaseAdmin):
         if obj:
             delete_url = f'/chatbot/{obj.widget_id}'
             delete_button = format_html(
-                '<a href="{0}" class="button" style="{1}">Visit</a>',
+                '<a href="{0}" class="button" style="{1}" target="_blank">Visit</a>',
                 delete_url,
                 button_style
             )
@@ -383,7 +383,7 @@ class ChatBotAdmin(CustomBaseAdmin):
 
 
 class ChatBotMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content', 'timestamp') + tuple(
+    list_display =  ('author', 'content','bot_type', 'timestamp') + tuple(
         field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
     ) 
     
