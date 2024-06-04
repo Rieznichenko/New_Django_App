@@ -11,6 +11,11 @@ class Page(models.Model):
         return self.config_name
     
 
+class BotConfig(models.Model):
+    chatbot_name = models.CharField(max_length=100, default='', blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.chatbot_name
 
 class LLMCOnfig(Page):
     PLATFORM_CHOICES = [
@@ -43,14 +48,14 @@ class LLMAgent(models.Model):
         verbose_name_plural =  "LLM Agent Configurations"
 
 
-class DiscordBotConfig(models.Model):
+class DiscordBotConfig(BotConfig):
     STATE_CHOICES = [
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
     bot_type = models.CharField(default="discord", max_length=256, editable=False, auto_created=True)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='', unique=True)
+    # chatbot_name = models.CharField(max_length=100, default='', unique=True)
     discord_bot_token = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_client_id = models.CharField(max_length=100, default='', blank=True, null=True)
     discord_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -67,7 +72,7 @@ class DiscordBotConfig(models.Model):
         verbose_name_plural = "Discord Bot Configurations"
 
 
-class TelegramBotConfig(models.Model):
+class TelegramBotConfig(BotConfig):
     STATE_CHOICES = [
         ('running', 'Running'),
         ('paused', 'Puased'),
@@ -75,7 +80,7 @@ class TelegramBotConfig(models.Model):
     bot_type = models.CharField(default="telegram", max_length=256, editable=False, auto_created=True)
     
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='', unique=True)
+    # chatbot_name = models.CharField(max_length=100, default='', unique=True)
     telegram_bot_token = models.CharField(max_length=100, primary_key=True)
     telegram_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     telegram_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
@@ -91,7 +96,7 @@ class TelegramBotConfig(models.Model):
         verbose_name = "Telegram Bot Configuration"
         verbose_name_plural = "Telegram Bot Configurations"
 
-class WhatsAppBotConfig(models.Model):
+class WhatsAppBotConfig(BotConfig):
     STATE_CHOICES = [
         ('running', 'Running'),
         ('paused', 'Puased'),
@@ -99,7 +104,7 @@ class WhatsAppBotConfig(models.Model):
     bot_type = models.CharField(default="whatsapp", max_length=256, editable=False, auto_created=True)
 
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='', unique=True)
+    # chatbot_name = models.CharField(max_length=100, default='', unique=True)
     whatsapp_bot_token = models.CharField(max_length=100, default='')
     whatsapp_channel_id = models.CharField(max_length=100, primary_key=True)
     whatsapp_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
@@ -115,14 +120,14 @@ class WhatsAppBotConfig(models.Model):
         verbose_name_plural = "Whatsapp Bot Configurations"
 
 
-class ChatBot(models.Model):
+class ChatBot(BotConfig):
     STATE_CHOICES = [
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
     bot_type = models.CharField(default="webbot", max_length=256, editable=False, auto_created=True)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    chatbot_name = models.CharField(max_length=100, default='', unique=True)
+    # chatbot_name = models.CharField(max_length=100, default='', unique=True)
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
     chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
     chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
@@ -172,7 +177,7 @@ class EmailSchedule(models.Model):
     
     
     bot_type = models.CharField(choices=BOT_TYPES, max_length=256)
-    bot_name = models.CharField(max_length=256)
+    bot_name = models.ForeignKey(BotConfig, on_delete=models.CASCADE,null=True, blank=True)
     
     recipient = models.EmailField()
     frequency_hours = models.PositiveIntegerField(default=24)  # Change this line

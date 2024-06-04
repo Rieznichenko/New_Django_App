@@ -21,7 +21,10 @@ botNameSelect.style.display = 'none';  // Hide it initially
 
 // Function to fetch and populate bot names
 function populateBotNames(botType) {
+    $("#id_bot_name").empty();
     var url = `${window.location.origin}/get_bot_names?bot_type=${encodeURIComponent(botType)}`;
+    var options = '<option value="">---------</option>';
+    var botNameSelect = document.getElementById('id_bot_name'); // Assuming 'id_discord_llm_agent' is the ID of your select element
 
     fetch(url)
         .then(response => {
@@ -33,11 +36,10 @@ function populateBotNames(botType) {
         .then(data => {
             botNameSelect.innerHTML = '<option value="">Select a bot</option>';
             data.bots.forEach(bot => {
-                let option = document.createElement('option');
-                option.value = bot.id;
-                option.textContent = bot.name;
-                botNameSelect.appendChild(option);
+                options += '<option value="' + bot.id + '">' + bot.name + '</option>';
             });
+            botNameSelect.innerHTML += options;
+            botNameSelect.disabled = false; // Enabling the select element
             botNameSelect.style.display = 'inline-block';  // Show the dropdown
         })
         .catch(error => {
