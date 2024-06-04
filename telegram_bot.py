@@ -68,16 +68,16 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
                     thread = OPENAI_CLIENT.beta.threads.create()
                     thread_id = thread.id
                     assistant_message = chat_functionality(OPENAI_CLIENT, message, user_input, thread_id, assitant_id)
-                    ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="telegram")
-                    ChatBotMessage.objects.create(content=assistant_message, author="BOT", bot_name=bot_name, bot_type="telegram")
+                    ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=bot_name, bot_type="telegram")
+                    ChatBotMessage.objects.create(content=assistant_message, author="BOT", chatbot_name=bot_name, bot_type="telegram")
                     return bot.reply_to(message, assistant_message)
                 except Exception as e:
                     logging.exception(e)
                     bot.reply_to(message, f"Failed to start chat: {str(e)}")
         else:
             assistant_message = chat_functionality_gemini(user_input, message, api_key, assitant_id)
-            ChatBotMessage.objects.create(content=assistant_message, author="BOT", bot_name=bot_name, bot_type="telegram")
-            ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="telegram")
+            ChatBotMessage.objects.create(content=assistant_message, author="BOT", chatbot_name=bot_name, bot_type="telegram")
+            ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=bot_name, bot_type="telegram")
             bot.reply_to(message, assistant_message)
 
     thread_iteartion = 0

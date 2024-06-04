@@ -90,8 +90,8 @@ def webhook_whatsapp(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, '', message_text, thread_id, assitant_id)
-                ChatBotMessage.objects.create(content=message_text, author="Human", bot_name=bot_name, bot_type="whatsapp")
-                ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="whatsapp")
+                ChatBotMessage.objects.create(content=message_text, author="Human", chatbot_name=bot_name, bot_type="whatsapp")
+                ChatBotMessage.objects.create(content=assistant_message, author='Bot', chatbot_name=bot_name, bot_type="whatsapp")
 
                 send_message(assistant_message, message_from, bot_token)
             except Exception as e:
@@ -99,8 +99,8 @@ def webhook_whatsapp(request):
 
     else:
         gemini_message = chat_functionality_gemini(message_text, '', api_key, assitant_id)
-        ChatBotMessage.objects.create(content=message_text, author="Human", bot_name=bot_name, bot_type="whatsapp")
-        ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="whatsapp")
+        ChatBotMessage.objects.create(content=message_text, author="Human", chatbot_name=bot_name, bot_type="whatsapp")
+        ChatBotMessage.objects.create(content=assistant_message, author='Bot', chatbot_name=bot_name, bot_type="whatsapp")
         send_message(gemini_message, message_from, bot_token)
 
     return JsonResponse({"status": True}, status=200)
@@ -178,14 +178,14 @@ def call_llm_model(request):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, "", user_input, thread_id, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="webbot")
-                ChatBotMessage.objects.create(content=assistant_message, author='Bot', bot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=assistant_message, author='Bot', chatbot_name=bot_name, bot_type="webbot")
 
                 return JsonResponse({"message": assistant_message}, status=200)
             else:
                 gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
-                ChatBotMessage.objects.create(content=user_input, author="Human", bot_name=bot_name, bot_type="webbot")
-                ChatBotMessage.objects.create(content=gemini_response, author='Bot', bot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=bot_name, bot_type="webbot")
+                ChatBotMessage.objects.create(content=gemini_response, author='Bot', chatbot_name=bot_name, bot_type="webbot")
 
                 return JsonResponse({"message": gemini_response}, status=200)
         else:

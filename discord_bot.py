@@ -69,16 +69,16 @@ async def on_message(message:Message):
                 thread = OPENAI_CLIENT.beta.threads.create()
                 thread_id = thread.id
                 assistant_message = chat_functionality(OPENAI_CLIENT, message.channel, user_input, thread_id, assistant_id)
-                await ChatBotMessage.objects.acreate(content=message.content, author="Human", bot_name=bot_name, bot_type="discord")
-                await ChatBotMessage.objects.acreate(content=assistant_message, author="BOT", bot_name=bot_name, bot_type="discord")
+                await ChatBotMessage.objects.acreate(content=message.content, author="Human", chatbot_name=bot_name, bot_type="discord")
+                await ChatBotMessage.objects.acreate(content=assistant_message, author="BOT", chatbot_name=bot_name, bot_type="discord")
                 await message.channel.send(assistant_message)
             except Exception as e:
                 logging.exception(e)
                 await message.channel.send(f"Failed to start chat: {str(e)}")
     else:
         gemini_response = chat_functionality_gemini(user_input, message.channel, api_key, assistant_id)
-        await ChatBotMessage.objects.acreate(content=message.content, author="Human", bot_name=bot_name, bot_type="discord")
-        await ChatBotMessage.objects.acreate(content=gemini_response, author="BOT", bot_name=bot_name, bot_type="discord")
+        await ChatBotMessage.objects.acreate(content=message.content, author="Human", chatbot_name=bot_name, bot_type="discord")
+        await ChatBotMessage.objects.acreate(content=gemini_response, author="BOT", chatbot_name=bot_name, bot_type="discord")
         await message.channel.send(gemini_response)
 
 
