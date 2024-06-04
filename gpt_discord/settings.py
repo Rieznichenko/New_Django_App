@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'gpt_discord.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'HumanytekDB',
+        'NAME': 'humanytekdb',
         'USER': 'admin',
         'PASSWORD': 'Greenisgood1!',
         'HOST': 'localhost',
