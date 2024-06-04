@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import time
 from mailersend import emails
-from .models import ChatBotMessage, WhatsAppMessage, DiscordMessage, TelegramMessage
+from .models import ChatBotMessage
 from celery import shared_task
 
 from celery.utils.log import get_task_logger
@@ -73,14 +73,14 @@ def send_mail(email, hour):
     # telegram_messages = TelegramMessage.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
     # chat_bot_messages = ChatBotMessage.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
 
-    whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
-    discord_messages = DiscordMessage.objects.all().order_by('timestamp')
-    telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
+    # whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
+    # discord_messages = DiscordMessage.objects.all().order_by('timestamp')
+    # telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
     chat_bot_messages = ChatBotMessage.objects.all().order_by('timestamp')
     all_messages = [
-        (whatsapp_messages, 'WhatsApp'),
-        (discord_messages, 'Discord'),
-        (telegram_messages, 'Telegram'),
+        # (whatsapp_messages, 'WhatsApp'),
+        # (discord_messages, 'Discord'),
+        # (telegram_messages, 'Telegram'),
         (chat_bot_messages, 'ChatBot')
     ]
 
