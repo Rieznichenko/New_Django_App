@@ -79,7 +79,9 @@ class LLMConfigAdmin(CustomBaseAdmin):
                 button_style
             )
         return mark_safe(delete_button)
-    list_display = ('config_name','api_key', 'platform', 'delete') + CustomBaseAdmin.list_display
+    list_display = ('config_name','api_key', 'platform', 'delete') + tuple(
+        field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
+    )
 
 class DiscordConfigAdmin(CustomBaseAdmin):
     list_editable = ['state',]
@@ -175,8 +177,9 @@ class LLMAgentAdmin(CustomBaseAdmin):
             )
         return mark_safe(delete_button)
     
-    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete') + CustomBaseAdmin.list_display
-
+    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete') + tuple(
+        field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
+    )
 
 class TelegramConfigAdmin(CustomBaseAdmin):
     list_editable = ['state']
@@ -378,7 +381,9 @@ class ChatBotAdmin(CustomBaseAdmin):
 
 
 class ChatBotMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content', 'timestamp') + CustomBaseAdmin.list_display 
+    list_display =  ('author', 'content', 'timestamp') + tuple(
+        field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
+    ) 
 
 
 from django.contrib.admin import AdminSite
