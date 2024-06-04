@@ -203,15 +203,24 @@ class TelegramConfigAdmin(CustomBaseAdmin):
             'color: white; '
             'cursor: pointer;'
         )
-        telegram_link = obj.bot_link if obj else ''
-        
+        if obj and hasattr(obj, 'bot_link') and obj.bot_link:
+            telegram_link = f"https://{obj.bot_link}"
+        else:
+            telegram_link = '#'
+
+        print("Link", telegram_link)
         telegram_bot_button = format_html(
-            '<button class="button" style="{0}" onclick="window.open(\'{1}\', \'_blank\')">View Telegram Bot</button>',
+            '<a class="button" style="{0}" href="{1}" target="_blank">View Telegram Bot</a>',
             button_style,
             telegram_link
         )
 
         return mark_safe(telegram_bot_button)
+    
+    telegram_bot.short_description = 'Telegram Bot'
+
+    list_display = ('state', 'telegram_bot')
+
 
     def delete(self, obj):
         button_style = (
@@ -244,7 +253,7 @@ class TelegramConfigAdmin(CustomBaseAdmin):
     list_display = ("chatbot_name", "state", 'telegram_bot', 'delete') + CustomBaseAdmin.list_display
 
     class Media:
-        js = ('path/to/your/js/file.js',)  # Include your JavaScript file here
+       js = ('js/custom_admin.js',)
 
 
 class WhatsappBotAdmin(CustomBaseAdmin):
@@ -382,10 +391,12 @@ class ChatBotAdmin(CustomBaseAdmin):
 
 
 
+
 class ChatBotMessageAdmin(CustomBaseAdmin):
-    list_display =  ('author', 'content','bot_type', 'timestamp') + tuple(
-        field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
-    ) 
+    list_displayer = ("view_related_model_button",)
+    list_display = ('author', 'content', 'bot_type', 'chatbot_name', 'timestamp') + list_displayer
+
+
     
 
 class EmailScheduleAdmin(admin.ModelAdmin):

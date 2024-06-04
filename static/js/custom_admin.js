@@ -173,3 +173,28 @@ document.addEventListener('DOMContentLoaded', function() {
     window.openModal = openModal;
     window.closeModal = closeModal;
 });
+
+
+$(document).ready(function() {
+
+    try{
+    $('#id_telegram_llm_agent').prop('disabled', true);
+    console.log("hi")
+ 
+
+    $('#id_telegram_llm_config').on('change', function () {
+        $("#id_telegram_llm_agent").empty();
+        var url = "/api/ajax/get-config";
+        $.getJSON(url, { id: $(this).val() }, function (j) {
+            var options = '<option value="">---------</option>';
+            for (var i = 0; i < j.length; i++) {
+                options +=
+                    '<option value="' + j[i].id + '">' + j[i].agent_name + "</option>";
+            }
+            $("#id_telegram_llm_agent").html(options);
+            $('#id_telegram_llm_agent').prop('disabled', false);
+        });
+
+        })}
+        catch{}
+});
