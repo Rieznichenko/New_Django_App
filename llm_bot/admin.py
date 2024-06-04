@@ -5,7 +5,6 @@ from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from llm_bot.forms import EmailScheduleForm
 from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
