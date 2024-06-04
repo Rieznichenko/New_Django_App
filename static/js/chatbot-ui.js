@@ -30,7 +30,7 @@ function init() {
 		<div class='chat-area'>
             <div class='bot-msg'>
                 <img class='bot-img' src ='${botLogoPath}' />
-				<span class='msg'>'${welcomeMessage}'</span>
+				<span class='msg'>${welcomeMessage}</span>
 			</div>
 
             <!-- <div class='bot-msg'>
@@ -150,7 +150,7 @@ function setUserResponse() {
         chatInput.value = ""
 
         // Display the thinking indicator
-        displayThinkingIndicator();
+        // displayThinkingIndicator();
     } else {
         chatInput.disabled = false;
     }
@@ -194,6 +194,10 @@ function send(message) {
     passwordInput = false;
     chatInput.focus();
     console.log("User Message:", message)
+
+    // Show loading animation
+    showLoadingAnimation();
+
     $.ajax({
         url: `${host}/call?user_input=${message}&widget_id=${widget_id}`,
         headers: {
@@ -202,12 +206,14 @@ function send(message) {
         type: 'GET',
         contentType: 'application/json',
         success: function(data, textStatus) {
+
             if (data.message != null) {
                 setBotResponse(data.message);
             }
             console.log("HumanyTek Response: ", data.message, "\n Status:", textStatus)
         },
         error: function(errorMessage) {
+
             setBotResponse("");
             console.log('Error' + errorMessage);
 
@@ -216,11 +222,33 @@ function send(message) {
     chatInput.focus();
 }
 
+function showLoadingAnimation() {
+    let loadingHtml = `<div class="bot-msg loading"><div class="circle"></div><div class="circle"></div><div class="circle"></div></div>`;
+    $(loadingHtml).appendTo('.chat-area').hide().fadeIn(500);
+    scrollToBottomOfResults();
+}
+
+function removeLoadingAnimation() {
+    $('.loading').remove();
+}
+
 //------------------------------------ Set bot response -------------------------------------
+function formatBotMessage(message) {
+    // Replace \n with <br>
+    let formattedMsg = message.replace(/\n/g, '<br>');
+
+    // Automatically hyperlink URLs in the message
+    const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+    formattedMsg = formattedMsg.replace(urlRegex, url => `<a href="${url}" target="_blank">${url}</a>`);
+
+    return formattedMsg;
+}
+
 function setBotResponse(val) {
     setTimeout(function() {
-        hideThinkingIndicator();
-        var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${val} </span></div>`;
+        removeLoadingAnimation();
+        const botMsg = formatBotMessage(val);
+        var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${botMsg} </span></div>`;
         $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
         scrollToBottomOfResults();
         chatInput.focus();
