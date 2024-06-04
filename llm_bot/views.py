@@ -7,7 +7,7 @@ import openai
 import time
 import logging
 from functools import wraps
-from llm_bot.models import ChatBotMessage, LLMCOnfig, LLMAgent, WhatsAppBotConfig, ChatBot
+from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, TelegramBotConfig, WhatsAppBotConfig, ChatBot
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -198,3 +198,25 @@ def call_llm_model(request):
 
 def chatbot_create(request, id):
     return render(request, 'index.html', context={"widget_id": id})
+
+
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+
+@require_GET
+def get_bot_names(request):
+    bot_type = request.GET.get('bot_type')
+    bots = []
+    if bot_type == 'discord':
+        bots = DiscordBotConfig.objects.all().only('id', 'chatbot_name')
+    elif bot_type == 'telegram':
+        bots = TelegramBotConfig.objects.all().only('id', 'chatbot_name')
+    elif bot_type == 'webbot':
+        bots = ChatBot.objects.all().only('id', 'chatbot_name')
+    elif bot_type == 'whatsapp':
+        bots = WhatsAppBotConfig.objects.all().only('id', 'chatbot_name')
+    else:
+        return JsonResponse({'error': 'Invalid bot type'}, status=400)
+
+    bot_list = [{'id': bot.id, 'name': bot.chatbot_name} for bot in bots]
+    return JsonResponse({'bots': bot_list})

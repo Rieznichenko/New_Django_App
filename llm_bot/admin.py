@@ -2,7 +2,10 @@ from django.contrib import admin
 
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin, UserAdmin
+from django.http import HttpResponseRedirect
 from django.urls import reverse
+
+from llm_bot.forms import EmailScheduleForm
 from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -384,7 +387,13 @@ class ChatBotMessageAdmin(CustomBaseAdmin):
     list_display =  ('author', 'content', 'timestamp') + tuple(
         field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
     ) 
+    
 
+class EmailScheduleAdmin(admin.ModelAdmin):
+    list_display = ["bot_type", "bot_name", "recipient", "frequency_hours"]
+
+    class Media:
+        js = ("js/get_chat_bot_name.js",)
 
 from django.contrib.admin import AdminSite
 
@@ -425,4 +434,4 @@ admin_site.register(LLMAgent, LLMAgentAdmin)
 admin_site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin_site.register(ChatBot, ChatBotAdmin)
 admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
-admin_site.register(EmailSchedule)
+admin_site.register(EmailSchedule, EmailScheduleAdmin)
