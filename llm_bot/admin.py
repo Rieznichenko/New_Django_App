@@ -400,7 +400,8 @@ class ChatBotMessageAdmin(CustomBaseAdmin):
     
 
 class EmailScheduleAdmin(admin.ModelAdmin):
-    list_display = ["bot_type", "bot_name", "recipient", "frequency_hours"]
+    exclude = ('periodic_task',)
+    list_display = ["bot_type", "bot_name", "recipient", "frequency_seconds"]
 
     class Media:
         js = ("js/get_chat_bot_name.js",)

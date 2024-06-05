@@ -8,7 +8,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 
-api_key = "mlsn.37d5c4775e35ca220500b1930c394e443653b07dc5f8ee39421c83dfa7e473b0"
+api_key = "mlsn.0521cea73d9c4bccd3445809899bb66d795c7e5d8d609a0ad141e2ecce645de6"
 
 
 def generate_html_content(messages):
@@ -26,7 +26,7 @@ def send_mail_for_bot(email, messages, platform_name):
     table_rows = generate_html_content(messages)
     total_messages = len(messages)
     
-    api_key = "mlsn.37d5c4775e35ca220500b1930c394e443653b07dc5f8ee39421c83dfa7e473b0"
+    api_key = "mlsn.0521cea73d9c4bccd3445809899bb66d795c7e5d8d609a0ad141e2ecce645de6"
 
     mailer = emails.NewEmail(api_key)
     mail_body = {}

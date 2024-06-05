@@ -100,12 +100,12 @@ from django_celery_beat.models import PeriodicTask, IntervalSchedule
 @receiver(post_save, sender=EmailSchedule)
 def send_mail_post_save(sender, instance: EmailSchedule, created, **kwargs):
     schedule, _ = IntervalSchedule.objects.get_or_create(
-        every=instance.frequency_hours,
+        every=instance.frequency_seconds,
         period=IntervalSchedule.SECONDS,
     )
 
     task_name = f'send_mail_to_{instance.recipient}'
-    task_args = json.dumps([instance.recipient, instance.frequency_hours])
+    task_args = json.dumps([instance.recipient, instance.frequency_seconds])
 
     if instance.periodic_task:
         instance.periodic_task.interval = schedule
