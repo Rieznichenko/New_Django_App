@@ -32,8 +32,8 @@ def send_mail_for_bot(email, messages, platform_name):
     mail_body = {}
 
     mail_from = {
-        "name": "Humany",
-        "email": "MS_sylUdl@trial-v69oxl5oo5xg785k.mlsender.net",
+        "name": "test",
+        "email": "MS_vB2uCK@trial-v69oxl5o9pzg785k.mlsender.net",
     }
 
     recipients = [
@@ -57,7 +57,7 @@ def send_mail_for_bot(email, messages, platform_name):
     mailer.set_mail_from(mail_from, mail_body)
     mailer.set_mail_to(recipients, mail_body)
     mailer.set_subject(f"Notification for {platform_name}", mail_body)
-    mailer.set_template("351ndgwwp2ngzqx8", mail_body)
+    mailer.set_template("3z0vklo032xl7qrx", mail_body)
     mailer.set_advanced_personalization(personalization, mail_body)
 
     response = mailer.send(mail_body)
