@@ -8,7 +8,7 @@ from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
 
-api_key = "mlsn.0521cea73d9c4bccd3445809899bb66d795c7e5d8d609a0ad141e2ecce645de6"
+api_key = "mlsn.f5703a9a9d0c71b9aa84a0b21f32e8d5094f48e6bfe5228f42651def754dc952"
 
 
 def generate_html_content(messages):
@@ -26,14 +26,14 @@ def send_mail_for_bot(email, messages, platform_name):
     table_rows = generate_html_content(messages)
     total_messages = len(messages)
     
-    api_key = "mlsn.0521cea73d9c4bccd3445809899bb66d795c7e5d8d609a0ad141e2ecce645de6"
+    api_key = "mlsn.f5703a9a9d0c71b9aa84a0b21f32e8d5094f48e6bfe5228f42651def754dc952"
 
     mailer = emails.NewEmail(api_key)
     mail_body = {}
 
     mail_from = {
         "name": "test",
-        "email": "MS_vB2uCK@trial-v69oxl5o9pzg785k.mlsender.net",
+        "email": "MS_v15Ibd@trial-3zxk54vy02x4jy6v.mlsender.net",
     }
 
     recipients = [
@@ -57,7 +57,7 @@ def send_mail_for_bot(email, messages, platform_name):
     mailer.set_mail_from(mail_from, mail_body)
     mailer.set_mail_to(recipients, mail_body)
     mailer.set_subject(f"Notification for {platform_name}", mail_body)
-    mailer.set_template("3z0vklo032xl7qrx", mail_body)
+    mailer.set_template("neqvygmo385l0p7w", mail_body)
     mailer.set_advanced_personalization(personalization, mail_body)
 
     response = mailer.send(mail_body)
