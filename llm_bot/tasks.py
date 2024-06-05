@@ -78,9 +78,9 @@ def send_mail(email, hour):
     # telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
     chat_bot_messages = ChatBotMessage.objects.all().order_by('timestamp')
     all_messages = [
-        # (whatsapp_messages, 'WhatsApp'),
-        # (discord_messages, 'Discord'),
-        # (telegram_messages, 'Telegram'),
+        (chat_bot_messages, 'WhatsApp'),
+        (chat_bot_messages, 'Discord'),
+        (chat_bot_messages, 'Telegram'),
         (chat_bot_messages, 'ChatBot')
     ]
 
