@@ -66,7 +66,7 @@ def send_mail_for_bot(email, messages, platform_name):
 
 @shared_task
 def send_mail(email, hour):
-    one_hour_ago = datetime.now() - timedelta(hours=hour)
+    required_hours = datetime.now() - timedelta(hours=hour)
     logger.info(email, hour, "wtfffffffffffff")
     # whatsapp_messages = WhatsAppMessage.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
     # discord_messages = DiscordMessage.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
@@ -76,7 +76,7 @@ def send_mail(email, hour):
     # whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
     # discord_messages = DiscordMessage.objects.all().order_by('timestamp')
     # telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
-    chat_bot_messages = ChatBotMessage.objects.all().order_by('timestamp')
+    chat_bot_messages = ChatBotMessage.objects.filter(timestamp__lte=required_hours).order_by('timestamp')
     all_messages = [
         (chat_bot_messages, 'WhatsApp'),
         (chat_bot_messages, 'Discord'),

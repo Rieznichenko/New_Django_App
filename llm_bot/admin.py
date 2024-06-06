@@ -400,11 +400,67 @@ class ChatBotMessageAdmin(CustomBaseAdmin):
     
 
 class EmailScheduleAdmin(admin.ModelAdmin):
+
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    
+    def edit(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: blue; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            edit_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/change/'
+            edit_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Edit</a>',
+                edit_url,
+                button_style
+            )
+        else:
+            edit_button = format_html(
+                '<button class="button" style="{0}" disabled>Edit</button>',
+                button_style
+            )
+        return mark_safe(edit_button)
+
     exclude = ('periodic_task',)
-    list_display = ["bot_type", "bot_name", "recipient", "frequency_seconds"]
 
     class Media:
         js = ("js/get_chat_bot_name.js",)
+
+    list_display = ("bot_type", "bot_name", "recipient", "frequency_hour", "delete", "edit")
 
 from django.contrib.admin import AdminSite
 

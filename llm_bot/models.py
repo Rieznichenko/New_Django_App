@@ -180,6 +180,11 @@ class EmailSchedule(models.Model):
     bot_name = models.ForeignKey(BotConfig, on_delete=models.CASCADE,null=True, blank=True)
     
     recipient = models.EmailField()
-    frequency_seconds = models.PositiveIntegerField(default=24)  # Change this line
+    frequency_hour = models.PositiveIntegerField(default=1)  # Change this line
     periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
 
+
+    def delete(self, *args, **kwargs):
+        if self.periodic_task:
+            self.periodic_task.delete()
+        super().delete(*args, **kwargs)
