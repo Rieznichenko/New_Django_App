@@ -3,6 +3,9 @@ import time
 from mailersend import emails
 from .models import ChatBotMessage
 from celery import shared_task
+from django.utils import timezone
+from datetime import timedelta
+
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
@@ -22,7 +25,7 @@ def generate_html_content(messages):
         
     return message_row
 
-def send_mail_for_bot(email, messages, platform_name):
+def send_mail_for_bot(email, messages, platform_name, bot_name = None):
     table_rows = generate_html_content(messages)
     total_messages = len(messages)
     
@@ -47,7 +50,8 @@ def send_mail_for_bot(email, messages, platform_name):
         {
             "email": email,
             "data": {
-                "bot_name": platform_name,
+                "bot_name": bot_name,
+                "bot_type": platform_name,
                 "messages_row": table_rows,
                 "total_messages": total_messages
             }
@@ -65,7 +69,12 @@ def send_mail_for_bot(email, messages, platform_name):
     return response
 
 @shared_task
-def send_mail(email, hour):
+def send_mail(email, hour, bot_type, bot_name, state):
+    logger.info("Detials ***********", email, hour, bot_type, bot_name, state)
+    if state == "paused":
+        logger.info("Schedule is paused")
+        return
+    
     required_hours = datetime.now() - timedelta(hours=hour)
     logger.info(email, hour, "wtfffffffffffff")
     # whatsapp_messages = WhatsAppMessage.objects.filter(timestamp__gte=one_hour_ago).order_by('timestamp')
@@ -76,15 +85,21 @@ def send_mail(email, hour):
     # whatsapp_messages = WhatsAppMessage.objects.all().order_by('timestamp')
     # discord_messages = DiscordMessage.objects.all().order_by('timestamp')
     # telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
-    chat_bot_messages = ChatBotMessage.objects.filter(timestamp__lte=required_hours).order_by('timestamp')
-    all_messages = [
-        (chat_bot_messages, 'WhatsApp'),
-        (chat_bot_messages, 'Discord'),
-        (chat_bot_messages, 'Telegram'),
-        (chat_bot_messages, 'ChatBot')
-    ]
+    one_hour_ago = timezone.now() - timedelta(hours=int(hour))
+    chat_bot_messages = ChatBotMessage.objects.filter(timestamp__lte=one_hour_ago, bot_type = bot_type, chatbot_name = bot_name).order_by('timestamp')
+
+    all_messages = []
+
+    if bot_type == "discord":
+        all_messages.append((chat_bot_messages, 'Discord'))
+    if bot_type == "telegram":
+        all_messages.append((chat_bot_messages, 'Telegram'))
+    if bot_type == "webbot":
+        all_messages.append((chat_bot_messages, 'ChatBot'))
+    if bot_type == "whatsapp":
+        all_messages.append((chat_bot_messages, 'WhatsApp'))
 
     for messages, platform_name in all_messages:
         if len(messages) > 0:
-            response=send_mail_for_bot(email, messages, platform_name)
+            response=send_mail_for_bot(email, messages, platform_name, bot_name)
             print("NICE",response)

@@ -460,7 +460,8 @@ class EmailScheduleAdmin(admin.ModelAdmin):
     class Media:
         js = ("js/get_chat_bot_name.js",)
 
-    list_display = ("bot_type", "bot_name", "recipient", "frequency_hour", "delete", "edit")
+    list_editable = ['state',]
+    list_display = ("bot_type", "state", "bot_name", "recipient", "frequency_hour", "delete", "edit")
 
 from django.contrib.admin import AdminSite
 

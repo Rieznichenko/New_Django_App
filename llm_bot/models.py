@@ -178,7 +178,11 @@ class EmailSchedule(models.Model):
     
     bot_type = models.CharField(choices=BOT_TYPES, max_length=256)
     bot_name = models.ForeignKey(BotConfig, on_delete=models.CASCADE,null=True, blank=True)
-    
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]    
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
     recipient = models.EmailField()
     frequency_hour = models.PositiveIntegerField(default=1)  # Change this line
     periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)

@@ -105,7 +105,7 @@ def send_mail_post_save(sender, instance: EmailSchedule, created, **kwargs):
     )
 
     task_name = f'send_mail_to_{instance.recipient}_{instance.id}'
-    task_args = json.dumps([instance.recipient, instance.frequency_hour])
+    task_args = json.dumps([instance.recipient, instance.frequency_hour, instance.bot_type, instance.bot_name.chatbot_name, instance.state])
 
     if instance.periodic_task:
         instance.periodic_task.interval = schedule
