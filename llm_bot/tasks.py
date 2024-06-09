@@ -5,13 +5,16 @@ from .models import ChatBotMessage
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
+from dotenv import load_dotenv
+import os
 
 
 from celery.utils.log import get_task_logger
 logger = get_task_logger(__name__)
 
+load_dotenv()
 
-api_key = "mlsn.2154de4397d32c740ac01986421919204147fe243ec614683192c4d8fd1adabe"
+api_key = os.environ.get("API_KEY")
 
 
 def generate_html_content(messages):
@@ -26,17 +29,18 @@ def generate_html_content(messages):
     return message_row
 
 def send_mail_for_bot(email, messages, platform_name, bot_name = None):
+    platform_name = "WebBot" if platform_name == "ChatBot" else platform_name
     table_rows = generate_html_content(messages)
     total_messages = len(messages)
     
-    api_key = "mlsn.2154de4397d32c740ac01986421919204147fe243ec614683192c4d8fd1adabe"
+    api_key = os.environ.get("API_KEY")
 
     mailer = emails.NewEmail(api_key)
     mail_body = {}
 
     mail_from = {
         "name": "test",
-        "email": "MS_VwinvN@trial-7dnvo4dzykxl5r86.mlsender.net",
+        "email": os.environ.get("MAIL_USER"),
     }
 
     recipients = [
@@ -61,7 +65,7 @@ def send_mail_for_bot(email, messages, platform_name, bot_name = None):
     mailer.set_mail_from(mail_from, mail_body)
     mailer.set_mail_to(recipients, mail_body)
     mailer.set_subject(f"Notification for {platform_name}", mail_body)
-    mailer.set_template("jy7zpl9mpjog5vx6", mail_body)
+    mailer.set_template(os.environ.get("TEMPLATE_ID"), mail_body)
     mailer.set_advanced_personalization(personalization, mail_body)
 
     response = mailer.send(mail_body)
@@ -99,8 +103,7 @@ def send_mail(email, hour, bot_type, bot_name, state):
     if bot_type == "whatsapp":
         all_messages.append((chat_bot_messages, 'WhatsApp'))
 
-    logger.info("all_messages", all_messages)
     for messages, platform_name in all_messages:
         if len(messages) > 0:
-            response=send_mail_for_bot(email, messages, platform_name, bot_name)
-            logger("NICE")
+            response = send_mail_for_bot(email, messages, platform_name, bot_name)
+            logger.info("Mail sent")
