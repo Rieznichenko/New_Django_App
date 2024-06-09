@@ -86,7 +86,7 @@ def send_mail(email, hour, bot_type, bot_name, state):
     # discord_messages = DiscordMessage.objects.all().order_by('timestamp')
     # telegram_messages = TelegramMessage.objects.all().order_by('timestamp')
     one_hour_ago = timezone.now() - timedelta(hours=int(hour))
-    chat_bot_messages = ChatBotMessage.objects.filter(timestamp__lte=one_hour_ago, bot_type = bot_type, chatbot_name = bot_name).order_by('timestamp')
+    chat_bot_messages = ChatBotMessage.objects.filter(timestamp__gte=one_hour_ago, bot_type = bot_type, chatbot_name = bot_name).order_by('timestamp')
 
     all_messages = []
 
@@ -99,7 +99,8 @@ def send_mail(email, hour, bot_type, bot_name, state):
     if bot_type == "whatsapp":
         all_messages.append((chat_bot_messages, 'WhatsApp'))
 
+    logger.info("all_messages", all_messages)
     for messages, platform_name in all_messages:
         if len(messages) > 0:
             response=send_mail_for_bot(email, messages, platform_name, bot_name)
-            print("NICE",response)
+            logger("NICE")
