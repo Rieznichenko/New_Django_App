@@ -5,7 +5,7 @@ from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot
+from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -397,6 +397,101 @@ class ChatBotMessageAdmin(CustomBaseAdmin):
     list_display = ('author', 'content', 'bot_type', 'chatbot_name', 'timestamp') + list_displayer
 
 
+class OdooAiAdmin(CustomBaseAdmin):
+    list_editable = ['state']
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 4px 6px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+
+    def visit(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 4px 6px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: blue; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/odooai/{obj.widget_id}'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}" target="_blank">Visit</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Visit</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    
+    # def viewscript(self, obj):
+    #     button_style = (
+    #         'margin: 2px 0; '
+    #         'padding: 4px 6px; '
+    #         'vertical-align: middle; '
+    #         'font-family: var(--font-family-primary); '
+    #         'font-weight: normal; '
+    #         'font-size: 0.8125rem; '
+    #         'background-color: green; '
+    #         'color: white; '
+    #         'cursor: pointer;'
+    #         'width: 80px;'
+    #         'vertical-align: None; !important'
+    #     )
+
+    #     if obj:
+    #         viewscript_button = format_html(
+    #             '<button id="viewScript" type="button" class="button" style="{0}" onclick="openModal(\'{1}\')">View Script</button>',
+    #             button_style,
+    #             obj.widget_id
+    #         )
+    #     else:
+    #         viewscript_button = format_html(
+    #             '<button type="button" class="button" style="{0}" disabled>View Script</button>',
+    #             button_style
+    #         )
+    #     return mark_safe(viewscript_button)
+    # class Media:
+    #     js = ('js/custom_admin.js',)
+    #     css = {
+    #         'all': ('css/custom_admin.css',)
+    #     }
+
+
+    list_display = ('chatbot_name', 'widget_id', 'chatbot_llm_config', 'state',
+                    'chatbot_llm_agent','welcome_message', 'logo', 'visit', 'delete',
+                    ) + CustomBaseAdmin.list_display
+
+
     
 
 class EmailScheduleAdmin(admin.ModelAdmin):
@@ -502,4 +597,5 @@ admin_site.register(LLMAgent, LLMAgentAdmin)
 admin_site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin_site.register(ChatBot, ChatBotAdmin)
 admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
+admin_site.register(OdooAi, OdooAiAdmin)
 admin_site.register(EmailSchedule, EmailScheduleAdmin)
