@@ -2,7 +2,8 @@ import schedule
 from .views import *
 from django.urls import path
 from .models import TelegramBotConfig, DiscordBotConfig
-from .signals import run_bot_in_thread, run_discord_bot_in_thread, generate_random_code
+from .signals import run_bot_in_thread, run_discord_bot_in_thread,\
+    generate_random_code
 
 urlpatterns = [
     path('api/ajax/get-config', ajax_get_config, name="ajax_get_config"),
@@ -11,6 +12,9 @@ urlpatterns = [
     path('api/chatbot/call', call_llm_model, name="call_llm_model"),
     path('chatbot/<str:id>', chatbot_create, name="chatbot_create"),
     path('get_bot_names/', get_bot_names, name='get_bot_names'),
+
+    # for Odoo AI
+    path('api/odoo/products', get_odoo_products, name="get_odoo_products"),
 ]
 
 def start_bot_thread(instance, caller_function):

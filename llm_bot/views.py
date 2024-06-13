@@ -7,10 +7,12 @@ import openai
 import time
 import logging
 from functools import wraps
-from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, TelegramBotConfig, WhatsAppBotConfig, ChatBot
+from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, \
+    TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
+from odoo_ai import main
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -131,7 +133,8 @@ def send_message(response_text, to, bot_token):
 def chatbot_details(request):
     try:
         widget_id = request.GET.get('widget_id')
-        chatbot = ChatBot.objects.get(widget_id=widget_id)   
+        type = request.GET.get('widget_id')
+        chatbot = ChatBot.objects.get(widget_id=widget_id) if not type else OdooAi.objects.get(widget_id=widget_id)
 
         if chatbot:
             response_data = {
@@ -146,6 +149,53 @@ def chatbot_details(request):
         return JsonResponse(response_data, status=200)
     except Exception as e:
         return JsonResponse({"error": f"faiure occurred because {e}"}, status=500)
+
+@authorize
+def get_odoo_products(request):
+    widget_id = request.GET.get('widget_id')
+    user_input = request.GET.get('user_input')
+
+    chatbot = OdooAi.objects.get(widget_id=widget_id)
+    bot_name = chatbot.chatbot_name
+    if chatbot.state == "paused":
+        return JsonResponse({"error": "Bot has been stopped."}, status=400)
+    
+    lm_config_instance = LLMCOnfig.objects.get(id=chatbot.chatbot_llm_config.id)
+    llm_agent = LLMAgent.objects.get(id = chatbot.chatbot_llm_agent.id)
+
+    assistant_id = llm_agent.assistant_id
+    api_key = lm_config_instance.api_key
+
+    print(user_input)
+
+    try:
+        resp = {}
+        product_data = []
+        if user_input:
+            if "asst_" in assistant_id:
+                logging.info("Openai client created")
+                openai.api_key = api_key
+                agent_response = main(user_input, api_key)
+
+                for product in agent_response:
+                    resp["description"] = product.get("description")
+                    resp["id"] = product.get("id")
+                    resp["button_name"] = "Order"
+                    resp["product_name"] = product.get("name")
+                    product_data.append(resp.copy())
+                    resp = {}
+
+                return JsonResponse({"products": product_data}, status=200)
+            else:
+                gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
+                return JsonResponse({"products": gemini_response}, status=200)
+        else:
+            return JsonResponse({"error": "please provide user input"}, status=400)
+
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse({"error": "failure occurred because {e}"}, status=500)
+
 
     
 @authorize
