@@ -12,7 +12,7 @@ from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMC
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
-from odoo_ai import main
+from odoo_ai import main, create_sale_order
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -149,6 +149,21 @@ def chatbot_details(request):
         return JsonResponse(response_data, status=200)
     except Exception as e:
         return JsonResponse({"error": f"faiure occurred because {e}"}, status=500)
+    
+@authorize
+def sale_odoo_products(request):
+    product_id = request.GET.get('product_id')
+    partner_id = 30970
+    product_quantity = 1
+    unit_price = request.GET.get('unit_price')
+    product_name = request.GET.get('product_name')
+
+    if product_id and partner_id and unit_price:
+        order_id = create_sale_order(product_id, partner_id, unit_price, product_name)
+        return JsonResponse({"order_id": order_id})
+    else:
+        return JsonResponse({"error": f"faiure occurred because one of the fields among product_id, unit_price is missing"}, status=500)
+
 
 @authorize
 def get_odoo_products(request):
@@ -182,6 +197,8 @@ def get_odoo_products(request):
                     resp["id"] = product.get("id")
                     resp["button_name"] = "Order"
                     resp["product_name"] = product.get("name")
+                    resp["price"] = product.get("list_price")
+                    
                     product_data.append(resp.copy())
                     resp = {}
 

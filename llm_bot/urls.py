@@ -15,6 +15,7 @@ urlpatterns = [
 
     # for Odoo AI
     path('api/odoo/products', get_odoo_products, name="get_odoo_products"),
+    path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
 ]
 
 def start_bot_thread(instance, caller_function):
