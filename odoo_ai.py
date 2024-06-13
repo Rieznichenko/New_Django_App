@@ -31,7 +31,7 @@ def execute_query(models, db, uid, query):
 
 def fetch_product_names(models, db, uid, product_ids):
     """Fetch product names from product IDs."""
-    return models.execute_kw(db, uid, PASSWORD, 'product.product', 'read', [product_ids], {'fields': ['name', 'website_url', 'description']})
+    return models.execute_kw(db, uid, PASSWORD, 'product.product', 'read', [product_ids], {'fields': ['name', 'website_url', 'description', 'list_price']})
 
 # Main function
 def main(user_query, api_key):
@@ -60,3 +60,30 @@ def main(user_query, api_key):
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+
+
+def _create_sale_order(models, db, uid, password, partner_id, order_lines):
+    """Create a new sale order."""
+    order_id = models.execute_kw(db, uid, password, 'sale.order', 'create', [{
+        'partner_id': partner_id,
+        'order_line': order_lines,
+    }])
+    return order_id
+
+
+def create_sale_order(product_id, partner_id, price_unit, product_name):
+    uid = authenticate_odoo(URL, DB, USERNAME, PASSWORD)
+    with xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object') as models:
+        order_lines = [
+                (0, 0, {
+                    'product_id': product_id,
+                    'product_uom_qty': 1,
+                    'price_unit': price_unit,
+                    'name': product_name
+                }),
+            ]
+            
+    order_id = _create_sale_order(models, DB, uid, PASSWORD, partner_id, order_lines)
+    return order_id
+
+    
