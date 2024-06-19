@@ -8,7 +8,7 @@ import time
 import logging
 from functools import wraps
 from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, \
-    TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi
+    TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi, OdooDatabase
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -45,6 +45,14 @@ def ajax_get_config(request):
     llm_agents = LLMAgent.objects.filter(llm_config = llm_config_instance)
 
     result = list(llm_agents.values('id', 'agent_name'))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+def ajax_get_odoo_database(request):
+    llm_config_id = request.GET.get('id', '')
+
+    llm_config_instance = OdooDatabase.objects.filter(id=llm_config_id)
+
+    result = list(llm_config_instance.values('id', 'database_name', 'read_model', 'write_model'))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 def get_llm_config(channel_id):

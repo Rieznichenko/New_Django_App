@@ -7,6 +7,7 @@ from .signals import run_bot_in_thread, run_discord_bot_in_thread,\
 
 urlpatterns = [
     path('api/ajax/get-config', ajax_get_config, name="ajax_get_config"),
+    path('api/ajax/get-odoo-database-config', ajax_get_odoo_database, name="ajax_get_odoo_database"),
     path('api/webhook-whatsapp', webhook_whatsapp, name="webhook_whatsapp"),
     path('api/chatbot/details', chatbot_details, name='chatbot_details'),
     path('api/chatbot/call', call_llm_model, name="call_llm_model"),

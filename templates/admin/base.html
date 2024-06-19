@@ -7,7 +7,39 @@
         // Wait for jQuery to be ready
         $(document).ready(function() {
             $('#id_discord_llm_agent').prop('disabled', true);
-            console.log("hi")
+            try{
+            $("#id_read_model_name").empty()
+            $("#id_write_model_name").empty()
+            }catch{}
+
+
+
+            $('#id_database').on('change', function () {
+
+                $("#id_read_model_name").empty();
+                $("#id_write_model_name").empty()
+
+                var url = "{% url 'ajax_get_odoo_database' %}";
+                $.getJSON(url, { id: $(this).val() }, function (j) {
+                    var options_read_model = '<option value="">---------</option>';
+                    var options_write_model = '<option value="">---------</option>';
+                    for (var i = 0; i < j.length; i++) {
+                        options_read_model +=
+                            '<option value="' + j[i].id + '">' + j[i].read_model + "</option>";
+
+                        options_write_model +=
+                            '<option value="' + j[i].id + '">' + j[i].write_model + "</option>";
+                    }
+                    $("#id_read_model_name").html(options_read_model);
+                    $("#id_write_model_name").html(options_write_model);
+                    $('#id_read_model_name').prop('disabled', false);
+                    $('#id_write_model_name').prop('disabled', false);
+                });
+
+                })
+
+
+
          
 
             $('#id_discord_llm_config').on('change', function () {

@@ -5,7 +5,8 @@ from django.contrib.auth.admin import GroupAdmin, UserAdmin
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi
+from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule,\
+    LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi, OdooDatabase
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -587,6 +588,41 @@ class CustomAdminSite(AdminSite):
             app['models'].sort(key=lambda x: ordering.get(x['name'], float('inf')))
 
         return app_list
+    
+
+class OdooDatabaseAdmin(CustomBaseAdmin):
+    def delete(self, obj):
+        button_style = (
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #ff0000; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+
+        if obj:
+            delete_url = f'/admin/{obj._meta.app_label}/{obj._meta.model_name}/{obj.id}/delete/'
+            delete_button = format_html(
+                '<a href="{0}" class="button" style="{1}">Delete</a>',
+                delete_url,
+                button_style
+            )
+        else:
+            delete_button = format_html(
+                '<button class="button" style="{0}" disabled>Delete</button>',
+                button_style
+            )
+        return mark_safe(delete_button)
+    list_display = ('database_name','read_model', 'write_model', 'delete') + tuple(
+        field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
+    )
+
+
+
 admin_site = CustomAdminSite(name="ihorSite")
 admin_site.register(Group, GroupAdmin)
 admin_site.register(User, UserAdmin)
@@ -599,3 +635,4 @@ admin_site.register(ChatBot, ChatBotAdmin)
 admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
 admin_site.register(OdooAi, OdooAiAdmin)
 admin_site.register(EmailSchedule, EmailScheduleAdmin)
+admin_site.register(OdooDatabase, OdooDatabaseAdmin)
