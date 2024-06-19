@@ -141,7 +141,7 @@ def send_message(response_text, to, bot_token):
 def chatbot_details(request):
     try:
         widget_id = request.GET.get('widget_id')
-        type = request.GET.get('widget_id')
+        type = request.GET.get('type')
         chatbot = ChatBot.objects.get(widget_id=widget_id) if not type else OdooAi.objects.get(widget_id=widget_id)
 
         if chatbot:
