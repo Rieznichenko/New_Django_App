@@ -98,7 +98,7 @@ class OdooTableFieldForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['field_name'].widget = forms.Select()
-        self.fields['field_name'].disabled = True
+        # self.fields['field_name'].disabled = True
 
         if 'instance' in kwargs:
             if kwargs.get("instance"):

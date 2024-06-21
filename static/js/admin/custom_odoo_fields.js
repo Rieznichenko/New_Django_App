@@ -71,4 +71,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+document.addEventListener('DOMNodeInserted', handleDynamicElement);
+
 });
+
+
+function handleDynamicElement(event) {
+    try{
+    const targetClass = 'form-row dynamic-odootablefield_set';
+
+    if (event.target.classList.contains("form-row")) {
+        const originalRow = document.querySelector('#odootablefield_set-0');
+        
+        const newRow = event.target;
+        
+        const originalSelect = originalRow.querySelector('select');
+        const newSelect = newRow.querySelector('select');
+        
+        newSelect.innerHTML = originalSelect.innerHTML;
+
+    }}catch{}
+}
