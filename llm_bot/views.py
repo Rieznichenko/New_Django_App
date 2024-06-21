@@ -307,8 +307,8 @@ def get_table_choices(request, database_id):
     table_choices = get_odoo_tables(database.db_url, database.db_name, uid, database.password)
     return JsonResponse({'choices': table_choices})
 
-def get_field_choices(request, table_name):
-    database = get_object_or_404(OdooDatabase, pk=4)
+def get_field_choices(request, table_name, database_id):
+    database = get_object_or_404(OdooDatabase, pk=database_id)
     uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
     table_choices = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, table_name)
     return JsonResponse({'choices': table_choices})

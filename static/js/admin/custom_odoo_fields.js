@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     // if database_table stuff is changes
-    function updateFieldChoices(tableId) {
-        fetch(`/get_field_choices/${tableId}/`)  // Replace with your actual endpoint for fetching field choices
+    function updateFieldChoices(tableId, database_id) {
+        fetch(`/get_field_choices/${tableId}/${database_id}`)  // Replace with your actual endpoint for fetching field choices
             .then(response => response.json())
             .then(data => {
                 fieldNameField.innerHTML = '';
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         databaseTableField.addEventListener('change', function() {
             const tableId = this.value;
             if (tableId) {
-                updateFieldChoices(tableId);
+                updateFieldChoices(tableId, databaseNameField.value);
             } else {
                 fieldNameField.innerHTML = '';
                 fieldNameField.disabled = true;

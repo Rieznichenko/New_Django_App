@@ -18,7 +18,7 @@ urlpatterns = [
     path('api/odoo/products', get_odoo_products, name="get_odoo_products"),
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
     path('get_table_choices/<int:database_id>/', get_table_choices, name='get_table_choices'),
-   path('get_field_choices/<str:table_name>/', get_field_choices, name='get_field_choices'),
+   path('get_field_choices/<str:table_name>/<int:database_id>', get_field_choices, name='get_field_choices'),
 ]
 
 def start_bot_thread(instance, caller_function):
