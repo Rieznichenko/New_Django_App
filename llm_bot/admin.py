@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from .models import ChatBotMessage, DiscordBotConfig, EmailSchedule,\
-    LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi, OdooDatabase
+    LLMAgent, LLMCOnfig, TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooDatabase
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
@@ -582,7 +582,6 @@ class CustomAdminSite(AdminSite):
         }
         app_dict = self._build_app_dict(request, app_label)
         app_list = sorted(app_dict.values(), key=lambda x: x['name'].lower())
-
         # Sort the models alphabetically within each app.
         for app in app_list:
             app['models'].sort(key=lambda x: ordering.get(x['name'], float('inf')))
@@ -633,6 +632,5 @@ admin_site.register(LLMAgent, LLMAgentAdmin)
 admin_site.register(WhatsAppBotConfig, WhatsappBotAdmin)
 admin_site.register(ChatBot, ChatBotAdmin)
 admin_site.register(ChatBotMessage, ChatBotMessageAdmin)
-admin_site.register(OdooAi, OdooAiAdmin)
 admin_site.register(EmailSchedule, EmailScheduleAdmin)
-admin_site.register(OdooDatabase, OdooDatabaseAdmin)
+# admin_site.register(OdooDatabase)

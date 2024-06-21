@@ -194,10 +194,6 @@ class EmailSchedule(models.Model):
         super().delete(*args, **kwargs)
 
 
-
-
-# For Odoo stuff
-
 class OdooDatabase(models.Model):
     database_name = models.CharField(max_length=100, default='', blank=True, null=True)
     read_model = models.CharField(max_length=100, default='', blank=True, null=True)
@@ -206,29 +202,6 @@ class OdooDatabase(models.Model):
     def __str__(self) -> str:
         return self.database_name
     
-
-class OdooAi(BotConfig):  # Assuming BotConfig is a subclass of models.Model
-    STATE_CHOICES = [
-        ('running', 'Running'),
-        ('paused', 'Puased'),
-    ]
-    bot_type = models.CharField(default="odoo", max_length=256, editable=False, auto_created=True)
-    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")
-    # chatbot_name = models.CharField(max_length=100, default='', unique=True)
-    database = models.ForeignKey(OdooDatabase, default='', on_delete=models.CASCADE, related_name='odooai_database')
-    read_model_name = models.ForeignKey(OdooDatabase, default='', on_delete=models.CASCADE, related_name='odooai_read_model')
-    write_model_name = models.ForeignKey(OdooDatabase, default='', on_delete=models.CASCADE, related_name='odooai_write_model')
-    widget_id = models.UUIDField(default=uuid.uuid4, editable=False)
-    chatbot_llm_config = models.ForeignKey(Page, on_delete=models.CASCADE)
-    chatbot_llm_agent = models.ForeignKey(LLMAgent, on_delete=models.CASCADE, null=True)
-    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True, null=True)
-    welcome_message = models.TextField(default='', blank=True, null=True)
-
-    def __str__(self) -> str:
-        return self.chatbot_name
-    
-
     class Meta:
-        verbose_name = "Odoo AI Configuration"
-        verbose_name_plural = "Odoo AI Configurations"
+        verbose_name = "Database"
+        verbose_name_plural = "Database"

@@ -17,6 +17,8 @@ urlpatterns = [
     # for Odoo AI
     path('api/odoo/products', get_odoo_products, name="get_odoo_products"),
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
+    path('get_table_choices/<int:database_id>/', get_table_choices, name='get_table_choices'),
+   path('get_field_choices/<str:table_name>/', get_field_choices, name='get_field_choices'),
 ]
 
 def start_bot_thread(instance, caller_function):
@@ -33,4 +35,4 @@ def start_required_threads():
 
 if 'runserver' in os.getenv('DJANGO_COMMAND', ''):
     print("oh yeahh")
-    start_required_threads()
+    # start_required_threads()

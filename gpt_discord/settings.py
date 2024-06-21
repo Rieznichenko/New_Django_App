@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'llm_bot'
+    'llm_bot',
+    "odoo"
 ]
 
 MIDDLEWARE = [
@@ -88,6 +89,7 @@ DATABASES = {
         'PORT': '',
     }
 }
+
 
 
 # Password validation
@@ -165,7 +167,7 @@ CSRF_TRUSTED_ORIGINS = ['https://ia.humanytek.com']
 
 from decouple import config
 
-DEBUG = config("DEBUG", cast=bool, default=False)
+DEBUG = True
 
 INSTALLED_APPS = INSTALLED_APPS + [
     'django_celery_beat',

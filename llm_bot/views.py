@@ -8,11 +8,14 @@ import time
 import logging
 from functools import wraps
 from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, \
-    TelegramBotConfig, WhatsAppBotConfig, ChatBot, OdooAi, OdooDatabase
+    TelegramBotConfig, WhatsAppBotConfig, ChatBot
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
 from odoo_ai import main, create_sale_order
+from django.shortcuts import get_object_or_404
+from odoo.models import OdooDatabase
+from odoo.odoo_utils import get_odoo_tables, authenticate_odoo, get_odoo_table_fields
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -142,7 +145,8 @@ def chatbot_details(request):
     try:
         widget_id = request.GET.get('widget_id')
         type = request.GET.get('type')
-        chatbot = ChatBot.objects.get(widget_id=widget_id) if not type else OdooAi.objects.get(widget_id=widget_id)
+        if not type:
+            chatbot = ChatBot.objects.get(widget_id=widget_id)
 
         if chatbot:
             response_data = {
@@ -295,3 +299,16 @@ def get_bot_names(request):
 
     bot_list = [{'id': bot.id, 'name': bot.chatbot_name} for bot in bots]
     return JsonResponse({'bots': bot_list})
+
+
+def get_table_choices(request, database_id):
+    database = get_object_or_404(OdooDatabase, pk=database_id)
+    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
+    table_choices = get_odoo_tables(database.db_url, database.db_name, uid, database.password)
+    return JsonResponse({'choices': table_choices})
+
+def get_field_choices(request, table_name):
+    database = get_object_or_404(OdooDatabase, pk=4)
+    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
+    table_choices = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, table_name)
+    return JsonResponse({'choices': table_choices})

@@ -4,6 +4,27 @@
     {{ block.super }}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+    function toggleFields(authModeField) {
+        var credentialsFields = document.querySelectorAll('.field-username, .field-password');
+        var apiKeyField = document.querySelector('.field-api_key');
+        
+        if (authModeField.value === 'credentials') {
+            credentialsFields.forEach(function(field) {
+                field.style.display = 'block';
+            });
+            if (apiKeyField) {
+                apiKeyField.style.display = 'none';
+            }
+        } else if (authModeField.value === 'api_key') {
+            credentialsFields.forEach(function(field) {
+                field.style.display = 'none';
+            });
+            if (apiKeyField) {
+                apiKeyField.style.display = 'block';
+            }
+        }
+    }
+
         // Wait for jQuery to be ready
         $(document).ready(function() {
             $('#id_discord_llm_agent').prop('disabled', true);
