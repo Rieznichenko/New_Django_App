@@ -323,7 +323,7 @@ def read_odoo_api(request):
                 product_data.append(resp.copy())
                 resp = {}
 
-            return JsonResponse({"products": product_data}, status=200)
+            return JsonResponse({"data": product_data}, status=200)
         else:
             return JsonResponse({"error": "please provide user input"}, status=400)
 
