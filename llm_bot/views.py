@@ -273,6 +273,13 @@ def get_field_choices(request, table_name, database_id):
 
 ## Here is the new APIs
 
+def get_read_choices(request, config_type):
+    get_db_object = OdooDatabase.objects.get(id = config_type)
+    get_db_object = OdooFields.objects.filter(database_name = get_db_object)
+    result = list(get_db_object.values('id', 'database_name__db_name', 'type'))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
 def get_required_odoo_fields(requested_id):
     response_dict = {}
     get_param = get_object_or_404(OdooFields, pk=requested_id)
@@ -330,3 +337,22 @@ def read_odoo_api(request):
     except Exception as e:
         logging.exception(e)
         return JsonResponse({"error": "failure occurred because {e}"}, status=500)
+
+
+def write_odoo_api(request):
+    requested_id = request.GET.get('id')
+    field_details = get_required_odoo_fields(requested_id)
+    # bot_name = chatbot.chatbot_name
+    # if chatbot.state == "paused":
+    #     return JsonResponse({"error": "Bot has been stopped."}, status=400)
+    product_id = request.GET.get('product_id')
+    partner_id = 30970
+    product_quantity = 1
+    unit_price = request.GET.get('unit_price')
+    product_name = request.GET.get('product_name')
+
+    if product_id and partner_id and unit_price:
+        order_id = create_sale_order(field_details, partner_id)
+        return JsonResponse({"order_id": order_id})
+    else:
+        return JsonResponse({"error": f"faiure occurred because one of the fields among product_id, unit_price is missing"}, status=500)

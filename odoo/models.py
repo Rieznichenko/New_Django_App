@@ -1,6 +1,6 @@
 from typing import Iterable
 from django.db import models
-
+import uuid
 
 
 class OdooDatabase(models.Model):
@@ -61,3 +61,27 @@ class OdooTableField(models.Model):
     
     class Meta:
         verbose_name = 'Select table field'
+
+
+class OddoBotConfig(models.Model):
+    STATE_CHOICES = [
+        ('running', 'Running'),
+        ('paused', 'Puased'),
+    ]
+    chatbot_name = models.CharField(max_length=100, default='', unique=True)
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")    
+    widget_id = models.UUIDField(default=uuid.uuid4, editable=False,null=True, blank=True)
+    logo = models.ImageField(upload_to='logos/', null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    welcome_message = models.TextField(default='', blank=True, null=True)
+    select_database = models.ForeignKey(OdooDatabase, null=True, blank=True, on_delete=models.CASCADE)
+    select_read_model = models.ForeignKey(OdooTableField, null=True, blank=True, on_delete=models.CASCADE, related_name="read_models_config")
+    select_write_model = models.ForeignKey(OdooTableField, null=True, blank=True,  on_delete=models.CASCADE, related_name="write_models_config")
+
+    def __str__(self) -> str:
+        return self.chatbot_name
+    
+
+    class Meta:
+        verbose_name = "Chatbot Configuration"
+        verbose_name_plural = "Chatbot Configurations"

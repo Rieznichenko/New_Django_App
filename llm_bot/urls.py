@@ -19,9 +19,15 @@ urlpatterns = [
     path('get_table_choices/<int:database_id>/', get_table_choices, name='get_table_choices'),
     path('get_field_choices/<str:table_name>/<int:database_id>', get_field_choices, name='get_field_choices'),
 
+    # for odoo config
+    path('get-read-choices/<str:config_type>/', get_read_choices, name='get_read_choices'),
+
+
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
     path('api/get-odoo-field-data', get_odoo_field_data, name='get_odoo_field_data'),
     path('api/read-odoo-api', read_odoo_api, name="read_odoo_api"),
+    path('api/write_odoo_api', write_odoo_api, name="write_odoo_api"),
+
 ]
 
 def start_bot_thread(instance, caller_function):
