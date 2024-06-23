@@ -315,7 +315,7 @@ def read_odoo_api(request):
         resp = {}
         product_data = []
         if user_input:
-            agent_response = main(user_input, os.environ.get("API_KEY"), field_details)
+            agent_response = main(user_input, os.environ.get("OPENAI_KEY"), field_details)
 
             for product in agent_response:
                 resp = {key: product.get(key) for key in field_details.get("table_fields")}
