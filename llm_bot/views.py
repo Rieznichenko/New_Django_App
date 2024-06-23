@@ -9,6 +9,7 @@ import logging
 from functools import wraps
 from llm_bot.models import ChatBotMessage, DiscordBotConfig, EmailSchedule, LLMCOnfig, LLMAgent, \
     TelegramBotConfig, WhatsAppBotConfig, ChatBot
+from odoo.models import *
 import requests
 import logging
 from llm import chat_functionality_gemini,chat_functionality
@@ -16,6 +17,10 @@ from odoo_ai import main, create_sale_order
 from django.shortcuts import get_object_or_404
 from odoo.models import OdooDatabase
 from odoo.odoo_utils import get_odoo_tables, authenticate_odoo, get_odoo_table_fields
+from django.core.serializers import serialize
+from dotenv import load_dotenv
+load_dotenv()
+
 
 logging.basicConfig(
     format="[%(asctime)s] [%(filename)s:%(lineno)d] %(message)s", level=logging.INFO
@@ -177,53 +182,6 @@ def sale_odoo_products(request):
         return JsonResponse({"error": f"faiure occurred because one of the fields among product_id, unit_price is missing"}, status=500)
 
 
-@authorize
-def get_odoo_products(request):
-    widget_id = request.GET.get('widget_id')
-    user_input = request.GET.get('user_input')
-
-    chatbot = OdooAi.objects.get(widget_id=widget_id)
-    bot_name = chatbot.chatbot_name
-    if chatbot.state == "paused":
-        return JsonResponse({"error": "Bot has been stopped."}, status=400)
-    
-    lm_config_instance = LLMCOnfig.objects.get(id=chatbot.chatbot_llm_config.id)
-    llm_agent = LLMAgent.objects.get(id = chatbot.chatbot_llm_agent.id)
-
-    assistant_id = llm_agent.assistant_id
-    api_key = lm_config_instance.api_key
-
-    print(user_input)
-
-    try:
-        resp = {}
-        product_data = []
-        if user_input:
-            if "asst_" in assistant_id:
-                logging.info("Openai client created")
-                openai.api_key = api_key
-                agent_response = main(user_input, api_key)
-
-                for product in agent_response:
-                    resp["description"] = product.get("description")
-                    resp["id"] = product.get("id")
-                    resp["button_name"] = "Order"
-                    resp["product_name"] = product.get("name")
-                    resp["price"] = product.get("list_price")
-                    
-                    product_data.append(resp.copy())
-                    resp = {}
-
-                return JsonResponse({"products": product_data}, status=200)
-            else:
-                gemini_response = chat_functionality_gemini(user_input, "", api_key, assistant_id)
-                return JsonResponse({"products": gemini_response}, status=200)
-        else:
-            return JsonResponse({"error": "please provide user input"}, status=400)
-
-    except Exception as e:
-        logging.exception(e)
-        return JsonResponse({"error": "failure occurred because {e}"}, status=500)
 
 
     
@@ -312,3 +270,63 @@ def get_field_choices(request, table_name, database_id):
     uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
     table_choices = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, table_name)
     return JsonResponse({'choices': table_choices})
+
+## Here is the new APIs
+
+def get_required_odoo_fields(requested_id):
+    response_dict = {}
+    get_param = get_object_or_404(OdooFields, pk=requested_id)
+    response_dict["id"] = get_param.id
+    response_dict["database_name"] = get_param.database_name.db_name
+    response_dict["database_url"] = get_param.database_name.db_url
+    response_dict["database_table"] = get_param.database_table
+    response_dict["database_username"] = get_param.database_name.username
+    response_dict["database_password"] = get_param.database_name.password
+    response_dict["type"] = get_param.type
+
+    # Fetch related OdooTableField instances
+    table_fields = OdooTableField.objects.filter(odoo_field=get_param)
+    table_fields_list = []
+    for table_field in table_fields:
+        table_fields_list.append(table_field.field_name)
+    
+    response_dict["table_fields"] = table_fields_list
+    return response_dict
+
+
+@authorize
+def get_odoo_field_data(request):
+    requested_id = request.GET.get('id')
+    return JsonResponse(get_required_odoo_fields(requested_id))
+
+
+@authorize
+def read_odoo_api(request):
+    requested_id = request.GET.get('id')
+    user_input = request.GET.get('user_input')
+
+    field_details = get_required_odoo_fields(requested_id)
+    # bot_name = chatbot.chatbot_name
+    # if chatbot.state == "paused":
+    #     return JsonResponse({"error": "Bot has been stopped."}, status=400)
+    print(user_input)
+
+    try:
+        resp = {}
+        product_data = []
+        if user_input:
+            agent_response = main(user_input, os.environ.get("API_KEY"), field_details)
+
+            for product in agent_response:
+                resp = {key: product.get(key) for key in field_details.get("table_fields")}
+                
+                product_data.append(resp.copy())
+                resp = {}
+
+            return JsonResponse({"products": product_data}, status=200)
+        else:
+            return JsonResponse({"error": "please provide user input"}, status=400)
+
+    except Exception as e:
+        logging.exception(e)
+        return JsonResponse({"error": "failure occurred because {e}"}, status=500)

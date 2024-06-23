@@ -15,10 +15,13 @@ urlpatterns = [
     path('get_bot_names/', get_bot_names, name='get_bot_names'),
 
     # for Odoo AI
-    path('api/odoo/products', get_odoo_products, name="get_odoo_products"),
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
     path('get_table_choices/<int:database_id>/', get_table_choices, name='get_table_choices'),
-   path('get_field_choices/<str:table_name>/<int:database_id>', get_field_choices, name='get_field_choices'),
+    path('get_field_choices/<str:table_name>/<int:database_id>', get_field_choices, name='get_field_choices'),
+
+    path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
+    path('api/get-odoo-field-data', get_odoo_field_data, name='get_odoo_field_data'),
+    path('api/read-odoo-api', read_odoo_api, name="read_odoo_api"),
 ]
 
 def start_bot_thread(instance, caller_function):

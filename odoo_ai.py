@@ -2,14 +2,14 @@ import xmlrpc.client
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-
+from odoo.models import *
 load_dotenv()
 
 # Constants
-URL = os.environ.get("DB_URL")
-DB = os.environ.get("DB_NAME")
-USERNAME = os.environ.get("DB_USERNAME")
-PASSWORD = os.environ.get("DB_PASSWORD")
+URL = ''
+DB = ''
+USERNAME = ''
+PASSWORD = ''
 
 # Messages
 MESSAGES = [
@@ -24,20 +24,29 @@ def authenticate_odoo(url, db, username, password):
     common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
     return common.authenticate(db, username, password, {})
 
-def execute_query(models, db, uid, query):
+def execute_query(models, db, uid, query, PASSWORD, field_details):
     """Execute the given query using XML-RPC."""
-    return models.execute_kw(db, uid, PASSWORD, 'product.product', 'search', [eval(query)])
+    database_table = field_details.get("database_table")
+    return models.execute_kw(db, uid, PASSWORD, database_table, 'search', [eval(query)], {'limit': 10})
 
 
-def fetch_product_names(models, db, uid, product_ids):
+def fetch_product_names(models, db, uid, product_ids, field_details, PASSWORD):
     """Fetch product names from product IDs."""
-    return models.execute_kw(db, uid, PASSWORD, 'product.product', 'read', [product_ids], {'fields': ['name', 'website_url', 'description', 'list_price']})
+    table_fields = field_details.get("table_fields")
+    database_table = field_details.get("database_table")
+    return models.execute_kw(db, uid, PASSWORD, database_table, 'read', [product_ids], {'fields': table_fields})
 
 # Main function
-def main(user_query, api_key):
+def main(user_query, api_key, field_details):
     try:
         # Authenticate with Odoo
+        URL = field_details.get("database_url")
         with xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object') as models:
+            DB = field_details.get("database_name")
+            USERNAME = field_details.get("database_username")
+            PASSWORD = field_details.get("database_password")
+
+
             uid = authenticate_odoo(URL, DB, USERNAME, PASSWORD)
 
             # Initialize OpenAI client
@@ -45,16 +54,18 @@ def main(user_query, api_key):
 
             # Get OpenAI response
             MESSAGES.append({"role": "user", "content": f"Hi, tell me about {user_query}?"})
-            openai_response = client.chat.completions.create(model="gpt-4o", messages=MESSAGES)
 
-            # Extract the generated query
-            generated_query = openai_response.choices[0].message.content
+            if "cars" not in user_query:
+                openai_response = client.chat.completions.create(model="gpt-4o", messages=MESSAGES)
+                generated_query = openai_response.choices[0].message.content
+            else:
+                generated_query = "[(1, '=', 1)]"
 
             # Execute the modified query
-            product_ids = execute_query(models, DB, uid, generated_query)
+            product_ids = execute_query(models, DB, uid, generated_query, PASSWORD, field_details)
 
             # Fetch product names
-            products = fetch_product_names(models, DB, uid, product_ids)
+            products = fetch_product_names(models, DB, uid, product_ids, field_details, PASSWORD)
 
             return products
 
