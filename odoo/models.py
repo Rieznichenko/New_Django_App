@@ -75,8 +75,8 @@ class OddoBotConfig(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     welcome_message = models.TextField(default='', blank=True, null=True)
     select_database = models.ForeignKey(OdooDatabase, null=True, blank=True, on_delete=models.CASCADE)
-    select_read_model = models.ForeignKey(OdooTableField, null=True, blank=True, on_delete=models.CASCADE, related_name="read_models_config")
-    select_write_model = models.ForeignKey(OdooTableField, null=True, blank=True,  on_delete=models.CASCADE, related_name="write_models_config")
+    select_read_model = models.ForeignKey(OdooFields, null=True, blank=True, on_delete=models.CASCADE, related_name="read_models_config")
+    select_write_model = models.ForeignKey(OdooFields, null=True, blank=True,  on_delete=models.CASCADE, related_name="write_models_config")
 
     def __str__(self) -> str:
         return self.chatbot_name
