@@ -20,8 +20,8 @@ class OdooDatabase(models.Model):
         return self.db_name or "he"
     
     class Meta:
-        verbose_name = "Database"
-        verbose_name_plural = "Database"
+        verbose_name = "Configuration"
+        verbose_name_plural = "Configuration"
     
 
 class Test(models.Model):
@@ -44,8 +44,8 @@ class OdooFields(models.Model):
         return f"{self.database_name} - {self.database_table}"
 
     class Meta:
-        verbose_name = "Odoo Field"
-        verbose_name_plural = "Odoo Fields"
+        verbose_name = "Odoo Field and Models and Configuration"
+        verbose_name_plural = "Odoo Field and Models and Configuration"
 
     def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
         return super().save()
