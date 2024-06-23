@@ -15,7 +15,7 @@ import logging
 from llm import chat_functionality_gemini,chat_functionality
 from odoo_ai import main, create_sale_order
 from django.shortcuts import get_object_or_404
-from odoo.models import OdooDatabase
+from odoo.models import OdooDatabase, OddoBotConfig
 from odoo.odoo_utils import get_odoo_tables, authenticate_odoo, get_odoo_table_fields
 from django.core.serializers import serialize
 from dotenv import load_dotenv
@@ -303,16 +303,23 @@ def get_required_odoo_fields(requested_id):
 
 @authorize
 def get_odoo_field_data(request):
-    requested_id = request.GET.get('id')
-    return JsonResponse(get_required_odoo_fields(requested_id))
+    response_dict = {}
+    requested_id = request.GET.get('chatbot_id')
+    obj = OddoBotConfig.objects.get(id = requested_id)
+    response_dict["name"] = obj.chatbot_name
+    response_dict["welcome_message"] = obj.welcome_message
+    response_dict["logo"] = f"https://ia.humanytek.com{obj.logo.url}" if obj.logo else None,
+    response_dict["read_fields_id"] = obj.select_read_model.id if obj.select_read_model else None
+    response_dict["write_fields_id"] = obj.select_write_model.id if obj.select_write_model else None
+    return JsonResponse(response_dict)
 
 
 @authorize
 def read_odoo_api(request):
-    requested_id = request.GET.get('id')
+    requested_read_id = request.GET.get('id')
     user_input = request.GET.get('user_input')
 
-    field_details = get_required_odoo_fields(requested_id)
+    field_details = get_required_odoo_fields(requested_read_id)
     # bot_name = chatbot.chatbot_name
     # if chatbot.state == "paused":
     #     return JsonResponse({"error": "Bot has been stopped."}, status=400)
@@ -338,21 +345,23 @@ def read_odoo_api(request):
         logging.exception(e)
         return JsonResponse({"error": "failure occurred because {e}"}, status=500)
 
-
+@csrf_exempt
 def write_odoo_api(request):
-    requested_id = request.GET.get('id')
-    field_details = get_required_odoo_fields(requested_id)
+    request_body = json.loads(request.body)
+    requested_write_id = request_body.get('id')
+    payload = request_body.get("payload")
+    field_details = get_required_odoo_fields(requested_write_id)
     # bot_name = chatbot.chatbot_name
     # if chatbot.state == "paused":
     #     return JsonResponse({"error": "Bot has been stopped."}, status=400)
-    product_id = request.GET.get('product_id')
+    # product_id = request.GET.get('product_id')
     partner_id = 30970
-    product_quantity = 1
+    # product_quantity = 1
     unit_price = request.GET.get('unit_price')
-    product_name = request.GET.get('product_name')
+    # product_name = request.GET.get('product_name')
 
-    if product_id and partner_id and unit_price:
-        order_id = create_sale_order(field_details, partner_id)
+    if "product_id" and "price_unit" and 'name' in payload:
+        order_id = create_sale_order(field_details, partner_id, payload)
         return JsonResponse({"order_id": order_id})
     else:
         return JsonResponse({"error": f"faiure occurred because one of the fields among product_id, unit_price is missing"}, status=500)

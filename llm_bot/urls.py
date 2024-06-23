@@ -26,7 +26,7 @@ urlpatterns = [
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
     path('api/get-odoo-field-data', get_odoo_field_data, name='get_odoo_field_data'),
     path('api/read-odoo-api', read_odoo_api, name="read_odoo_api"),
-    path('api/write_odoo_api', write_odoo_api, name="write_odoo_api"),
+    path('api/write-odoo-api', write_odoo_api, name="write_odoo_api"),
 
 ]
 

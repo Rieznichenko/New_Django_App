@@ -82,19 +82,17 @@ def _create_sale_order(models, db, uid, password, partner_id, order_lines):
     return order_id
 
 
-def create_sale_order(product_id, partner_id, price_unit, product_name):
+def create_sale_order(field_details, partner_id, payload):
+    URL = field_details.get("database_url")
+    DB = field_details.get("database_name")
+    USERNAME = field_details.get("database_username")
+    PASSWORD = field_details.get("database_password")
+    
     uid = authenticate_odoo(URL, DB, USERNAME, PASSWORD)
     with xmlrpc.client.ServerProxy(f'{URL}/xmlrpc/2/object') as models:
         order_lines = [
-                (0, 0, {
-                    'product_id': product_id,
-                    'product_uom_qty': 1,
-                    'price_unit': price_unit,
-                    'name': product_name
-                }),
+                (0, 0, payload),
             ]
             
     order_id = _create_sale_order(models, DB, uid, PASSWORD, partner_id, order_lines)
     return order_id
-
-    
