@@ -10,7 +10,8 @@ def get_odoo_tables(url, db, uid, password):
     """Get all models (tables) from Odoo."""
     with xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object') as models:
         tables = models.execute_kw(db, uid, password, 'ir.model', 'search_read', [[], ['model']])
-        return [table['model'] for table in tables]
+        field_names = [table['model'] for table in tables]
+        return sorted(field_names)
 
 
 def get_odoo_table_fields(url, db, uid, password, table_name):
