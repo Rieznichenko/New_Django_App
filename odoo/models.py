@@ -4,6 +4,7 @@ import uuid
 
 
 class OdooDatabase(models.Model):
+    connection_name = models.CharField(max_length=100, blank=True, null=True)
     AUTH_MODE_CHOICES = [
         ('credentials', 'Credentials'),
         ('api_key', 'API Key'),
@@ -17,7 +18,7 @@ class OdooDatabase(models.Model):
     api_key = models.CharField(max_length=100, blank=True, null=True, verbose_name='API Key')
 
     def __str__(self) -> str:
-        return self.db_name or "he"
+        return self.connection_name or self.db_name
     
     class Meta:
         verbose_name = "Configuration"
@@ -31,6 +32,7 @@ class Test(models.Model):
 
 
 class OdooFields(models.Model):
+    models_and_fields_name = models.CharField(max_length=100, blank=True, null=True)
     database_name = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
     database_table = models.CharField(max_length=100,default = '')
     TYPE_CHOICES = (
@@ -41,7 +43,7 @@ class OdooFields(models.Model):
 
 
     def __str__(self):
-        return f"{self.database_name} - {self.database_table}"
+        return self.models_and_fields_name or f"{self.database_name} - {self.database_table}"
 
     class Meta:
         verbose_name = "Odoo Field and Models and Configuration"

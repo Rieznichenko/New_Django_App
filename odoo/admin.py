@@ -81,7 +81,7 @@ class OdooDatabaseAdmin(admin.ModelAdmin):
             )
         return mark_safe(edit_button)
     
-    list_display = ("db_url", "db_name", "auth_mode", "delete", "edit")
+    list_display = ("connection_name", "db_url", "db_name", "auth_mode", "delete", "edit")
 
     class Media:
         js = ('js/admin/dbconfig.js',)  # Include the JavaScript file
@@ -209,7 +209,7 @@ class OdooFieldsAdmin(admin.ModelAdmin):
         extra_context['admin_view'] = 'add'
         return super().add_view(request, form_url, extra_context=extra_context)
     
-    list_display = ("database_name", "database_table", "type", "delete", "edit")
+    list_display = ("models_and_fields_name", "database_name", "database_table", "type", "delete", "edit")
 
 
 
