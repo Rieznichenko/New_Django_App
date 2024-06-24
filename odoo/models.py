@@ -70,6 +70,7 @@ class OddoBotConfig(models.Model):
         ('running', 'Running'),
         ('paused', 'Puased'),
     ]
+    bot_type = models.CharField(default="odoo", max_length=256, editable=False, auto_created=True)
     chatbot_name = models.CharField(max_length=100, default='', unique=True)
     state = models.CharField(max_length=20, choices=STATE_CHOICES, default="running")    
     widget_id = models.UUIDField(default=uuid.uuid4, editable=False,null=True, blank=True)

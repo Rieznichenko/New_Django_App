@@ -273,6 +273,26 @@ class OddoBotConfigAdmin(admin.ModelAdmin):
             )
         return mark_safe(delete_button)
     
+    def history(self, obj):
+        button_style = (
+            'border-radius: 4px;'
+            'margin: 2px 0; '
+            'padding: 2px 3px; '
+            'vertical-align: middle; '
+            'font-family: var(--font-family-primary); '
+            'font-weight: normal; '
+            'font-size: 0.8125rem; '
+            'background-color: #417690; '
+            'color: white; '
+            'cursor: pointer;'
+        )
+        cl_url = f"/admin/llm_bot/chatbotmessage/"
+        # url = reverse('admin:appname_relatedmodel_changelist')
+        url_with_filter = f"{cl_url}?chatbot_name={obj.chatbot_name}&bot_type={obj.bot_type}"
+        return format_html('<a class="button" style="{}" href="{}">History</a>', button_style, 
+                           url_with_filter)
+
+
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
         extra_context['admin_view'] = 'change'
@@ -284,7 +304,7 @@ class OddoBotConfigAdmin(admin.ModelAdmin):
         return super().add_view(request, form_url, extra_context=extra_context)
     
     list_display = ('chatbot_name', 'widget_id', 'state'
-                    ,'welcome_message', 'logo', 'edit','delete',)
+                    ,'welcome_message', 'logo', 'edit','delete','history',)
 
 
 

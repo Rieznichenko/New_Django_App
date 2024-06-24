@@ -149,6 +149,7 @@ class ChatBotMessage(models.Model):
         ('telegram', 'Telegram'),
         ('webbot', 'WebBot'),
         ('whatsapp', 'WhatsApp'),
+        ('odoo', 'Odoo'),
     ]
     
     

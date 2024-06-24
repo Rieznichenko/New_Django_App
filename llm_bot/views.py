@@ -306,6 +306,10 @@ def get_odoo_field_data(request):
     response_dict = {}
     requested_id = request.GET.get('chatbot_id')
     obj = OddoBotConfig.objects.get(id = requested_id)
+
+    if obj.state == "paused":
+        return JsonResponse({"error": "Bot has been stopped."}, status=400)
+
     response_dict["name"] = obj.chatbot_name
     response_dict["welcome_message"] = obj.welcome_message
     response_dict["logo"] = f"https://ia.humanytek.com{obj.logo.url}" if obj.logo else None,
@@ -318,11 +322,11 @@ def get_odoo_field_data(request):
 def read_odoo_api(request):
     requested_read_id = request.GET.get('id')
     user_input = request.GET.get('user_input')
-
     field_details = get_required_odoo_fields(requested_read_id)
-    # bot_name = chatbot.chatbot_name
-    # if chatbot.state == "paused":
-    #     return JsonResponse({"error": "Bot has been stopped."}, status=400)
+    get_bot_details = OdooFields.objects.get(id = requested_read_id)
+
+    ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=get_bot_details.database_name.connection_name, bot_type="Odoo")
+
     print(user_input)
 
     try:
@@ -337,6 +341,7 @@ def read_odoo_api(request):
                 product_data.append(resp.copy())
                 resp = {}
 
+            ChatBotMessage.objects.create(content=user_input, author="Bot", chatbot_name=get_bot_details.database_name.connection_name, bot_type="Odoo")
             return JsonResponse({"data": product_data}, status=200)
         else:
             return JsonResponse({"error": "please provide user input"}, status=400)
