@@ -18,4 +18,6 @@ def get_odoo_table_fields(url, db, uid, password, table_name):
     with xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object') as models:
         fields = models.execute_kw(db, uid, password, 'ir.model.fields', 'search_read', 
                                    [[('model', '=', table_name)], ['name']])
-        return [field['name'] for field in fields]
+        
+        field_names = [field['name'] for field in fields]
+        return sorted(field_names)
