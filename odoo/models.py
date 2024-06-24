@@ -21,8 +21,8 @@ class OdooDatabase(models.Model):
         return self.connection_name or self.db_name
     
     class Meta:
-        verbose_name = "Configuration"
-        verbose_name_plural = "Configuration"
+        verbose_name = "Database Configuration"
+        verbose_name_plural = "Database Configuration"
     
 
 class Test(models.Model):
@@ -46,8 +46,8 @@ class OdooFields(models.Model):
         return self.models_and_fields_name or f"{self.database_name} - {self.database_table}"
 
     class Meta:
-        verbose_name = "Odoo Field and Models and Configuration"
-        verbose_name_plural = "Odoo Field and Models and Configuration"
+        verbose_name = "Odoo Models and Fields Configuration"
+        verbose_name_plural = "Odoo Models and Fields Configuration"
 
     def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
         return super().save()
