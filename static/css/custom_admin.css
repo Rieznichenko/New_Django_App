@@ -15,6 +15,10 @@
     align-content: center
 }
 
+.field-view_related_model_button{
+    align-content: center
+}
+
 #modalContent {
     background-color: #fefefe;
     margin: 15% auto;
