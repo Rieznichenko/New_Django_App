@@ -265,11 +265,11 @@ def get_table_choices(request, database_id):
     table_choices = get_odoo_tables(database.db_url, database.db_name, uid, database.password)
     return JsonResponse({'choices': table_choices})
 
-def get_field_choices(request, table_name, database_id):
+def get_field_choices(request=None, table_name=None, database_id=None):
     database = get_object_or_404(OdooDatabase, pk=database_id)
     uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
     table_choices = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, table_name)
-    return JsonResponse({'choices': table_choices})
+    return JsonResponse({'choices': table_choices}) if request else table_choices
 
 ## Here is the new APIs
 
@@ -323,9 +323,10 @@ def read_odoo_api(request):
     requested_read_id = request.GET.get('id')
     user_input = request.GET.get('user_input')
     field_details = get_required_odoo_fields(requested_read_id)
-    get_bot_details = OdooFields.objects.get(id = requested_read_id)
+    get_bot_details_object = OdooFields.objects.get(id = requested_read_id)
+    get_bot_details = OddoBotConfig.objects.get(select_read_model = get_bot_details_object)
 
-    ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=get_bot_details.database_name.connection_name, bot_type="Odoo")
+    ChatBotMessage.objects.create(content=user_input, author="Human", chatbot_name=get_bot_details.chatbot_name, bot_type="Odoo")
 
     print(user_input)
 
@@ -341,7 +342,7 @@ def read_odoo_api(request):
                 product_data.append(resp.copy())
                 resp = {}
 
-            ChatBotMessage.objects.create(content=user_input, author="Bot", chatbot_name=get_bot_details.database_name.connection_name, bot_type="Odoo")
+            ChatBotMessage.objects.create(content=user_input, author="Bot", chatbot_name=get_bot_details.chatbot_name, bot_type="Odoo")
             return JsonResponse({"data": product_data}, status=200)
         else:
             return JsonResponse({"error": "please provide user input"}, status=400)

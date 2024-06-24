@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from .models import OdooDatabase, OdooFields, OdooTableField, OddoBotConfig
 from llm_bot.admin import CustomAdminSite, admin_site
+from llm_bot.views import get_field_choices
 
 class OdooDatabaseForm(forms.ModelForm):
     class Meta:
@@ -103,14 +104,27 @@ class OdooTableFieldForm(forms.ModelForm):
         if 'instance' in kwargs:
             if kwargs.get("instance"):
                 if kwargs['instance'].id:
-                    CHOICES = [
-                        (kwargs['instance'].field_name, kwargs['instance'].field_name)
-                    ]
-                    print("Ch", CHOICES)
+                    instance = kwargs.get('instance')
+                    CHOICES = [(instance.field_name, instance.field_name)]
+                    existing_choice = instance.field_name
+                    get_choices = get_model_choices(kwargs)
+                    if get_choices:
+                        for choice in get_choices:
+                            if choice != existing_choice:
+                                CHOICES.append((choice, choice))
+
                     self.fields['field_name'].widget = forms.Select(choices=CHOICES)
                     # self.fields['field_name'].disabled = True
 
 
+def get_model_choices(kwargs):
+    try:
+        database_id = kwargs['instance'].odoo_field.database_name.id
+        table_name = kwargs['instance'].odoo_field.database_table
+        fields = get_field_choices(None, table_name, database_id)
+        return fields
+    except:
+        return []
 
 class OdooFieldsInline(admin.TabularInline):
     model = OdooTableField
