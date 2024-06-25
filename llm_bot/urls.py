@@ -44,4 +44,4 @@ def start_required_threads():
 
 if 'runserver' in os.getenv('DJANGO_COMMAND', ''):
     print("oh yeahh")
-    # start_required_threads()
+    start_required_threads()
