@@ -271,6 +271,23 @@ def get_field_choices(request=None, table_name=None, database_id=None):
     table_choices = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, table_name)
     return JsonResponse({'choices': table_choices}) if request else table_choices
 
+def get_field_choices_relation(request = None, database_id=None, read_id=None, write_id=None):
+    read_type_object = OdooFields.objects.get(id = read_id, type="read")
+    database = read_type_object.database_name
+    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
+    table_choices_read = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, read_type_object.database_table)
+
+    write_type_object = OdooFields.objects.get(id = write_id, type="write")
+    database = write_type_object.database_name
+    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
+    table_choices_write = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, read_type_object.database_table)
+
+
+    return JsonResponse({'choices_read': table_choices_read, 'choices_write': table_choices_write})
+
+
+
+
 ## Here is the new APIs
 
 def get_read_choices(request, config_type):

@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/sale/products', sale_odoo_products, name="sale_odoo_products"),
     path('get_table_choices/<int:database_id>/', get_table_choices, name='get_table_choices'),
     path('get_field_choices/<str:table_name>/<int:database_id>', get_field_choices, name='get_field_choices'),
+    path('get_field_choices-relation/<int:database_id>/<int:read_id>/<int:write_id>', get_field_choices_relation, name='get_field_choices_relation'),
 
     # for odoo config
     path('get-read-choices/<str:config_type>/', get_read_choices, name='get_read_choices'),

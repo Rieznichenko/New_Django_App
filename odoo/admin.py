@@ -202,7 +202,7 @@ class OdooFieldsForm(forms.ModelForm):
 
 
 class OdooFieldsAdmin(admin.ModelAdmin):
-    inlines = [OdooFieldsInline, OdooRelationFieldsInline]
+    inlines = [OdooFieldsInline]
     form = OdooFieldsForm
 
     class Media:
@@ -278,9 +278,9 @@ class OdooFieldsAdmin(admin.ModelAdmin):
 
 
 class OddoBotConfigAdmin(admin.ModelAdmin):
-
+    inlines = [OdooRelationFieldsInline]
     class Media:
-        js = ('js/admin/custom_odoo_fields_db_config.js',)
+        js = ('js/admin/custom_odoo_fields.js',)
 
     def edit(self, obj):
         button_style = (

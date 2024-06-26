@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const databaseTableField = document.querySelector('#id_database_table');
     const form = document.querySelector('#odoofields_form');  // Adjust form ID based on your actual form ID
     const fieldNameField = document.querySelector("#id_odootablefield_set-0-field_name")
-    const relation_read_field = document.querySelector("#id_odd_relation-0-oddo_read_field")
-    const relation_write_field = document.querySelector("#id_odd_relation-0-oddo_write_field")
+    // const relation_read_field = document.querySelector("#id_odd_relation-0-oddo_read_field")
+    // const relation_write_field = document.querySelector("#id_odd_relation-0-oddo_write_field")
 
     function updateTableChoices(databaseId) {
         fetch(`/get_table_choices/${databaseId}/`)
@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 fieldNameField.innerHTML = '';
-                relation_read_field.innerHTML = '';
-                relation_write_field.innerHTML = ''
+                // relation_read_field.innerHTML = '';
+                // relation_write_field.innerHTML = ''
 
                 data.choices.forEach(choice => {
                     const option1 = document.createElement('option');
@@ -56,15 +56,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     option1.textContent = choice;
                     fieldNameField.appendChild(option1);
     
-                    const option2 = document.createElement('option');
-                    option2.value = choice;
-                    option2.textContent = choice;
-                    relation_read_field.appendChild(option2);
+                    // const option2 = document.createElement('option');
+                    // option2.value = choice;
+                    // option2.textContent = choice;
+                    // relation_read_field.appendChild(option2);
     
-                    const option3 = document.createElement('option');
-                    option3.value = choice;
-                    option3.textContent = choice;
-                    relation_write_field.appendChild(option3);
+                    // const option3 = document.createElement('option');
+                    // option3.value = choice;
+                    // option3.textContent = choice;
+                    // relation_write_field.appendChild(option3);
                     });
                 
             });
@@ -89,16 +89,78 @@ document.addEventListener('DOMContentLoaded', function() {
 
 document.addEventListener('DOMNodeInserted', handleDynamicElement);
 
+
+// custom relation stuff here
+
+
+const readModelSelect = document.getElementById('id_select_read_model');
+const writeModelSelect = document.getElementById('id_select_write_model');
+
+let readModelChanged = false;
+let writeModelChanged = false;
+
+
+
+function checkBothChanged() {
+    if (readModelChanged && writeModelChanged) {
+        select_db = document.querySelector('#id_select_database').value;
+        select_read_model = document.querySelector('#id_select_read_model').value;
+        select_write_model = document.querySelector('#id_select_write_model').value;
+        const relation_read_field = document.querySelector("#id_odd_relation-0-oddo_read_field")
+        const relation_write_field = document.querySelector("#id_odd_relation-0-oddo_write_field")
+
+        fetch(`/get_field_choices-relation/${select_db}/${select_read_model}/${select_write_model}`)  // Replace with your actual endpoint for fetching field choices
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+                
+                relation_read_field.innerHTML = '';
+                relation_write_field.innerHTML = ''
+
+                
+                data.choices_read.forEach(choice => {
+                    const option2 = document.createElement('option');
+                    option2.value = choice;
+                    option2.textContent = choice;
+                    relation_read_field.appendChild(option2);
+                });
+
+                data.choices_write.forEach(choice => {
+    
+                    const option3 = document.createElement('option');
+                    option3.value = choice;
+                    option3.textContent = choice;
+                    relation_write_field.appendChild(option3);
+
+
+                });
+                
+            });
+
+
+    }
+  }
+  readModelSelect.addEventListener('change', function() {
+    readModelChanged = readModelSelect.value !== "";
+    checkBothChanged();
+  });
+
+  writeModelSelect.addEventListener('change', function() {
+    writeModelChanged = writeModelSelect.value !== "";
+    checkBothChanged();
+  });
 });
 
 
 function handleDynamicElement(event) {
     try{
     const targetClass = 'form-row dynamic-odootablefield_set';
-    console.log("tagret class", event.target.classList)
 
     if (event.target.classList.contains("form-row") && event.target.classList.contains("dynamic-odootablefield_set")) {
-        console.log("if clause")
         const originalRow = document.querySelector('#odootablefield_set-0');
         
         const newRow = event.target;
@@ -110,11 +172,10 @@ function handleDynamicElement(event) {
 
     }
     else if(event.target.classList.contains("form-row") && event.target.classList.contains("dynamic-odd_relation")){
+        console.log("Event raise", event)
         const originalRow = document.querySelector('#odd_relation-0');
         
-        const newRow = event.target;
-        console.log(newRow)
-        
+        const newRow = event.target;        
         const originalSelect1 = originalRow.querySelector('select[name$="oddo_write_field"]');
         const originalSelect2 = originalRow.querySelector('select[name$="oddo_read_field"]');
         
@@ -128,7 +189,19 @@ function handleDynamicElement(event) {
 
 
     }
+    else {
+        console.log("Target does not match the condition");
+    }
 
+    if (databaseNameField && databaseTableField && form) {
+        console.log("DOne")
+
+    }
 
 }catch{}
+
+
+
+
+
 }

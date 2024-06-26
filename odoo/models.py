@@ -65,10 +65,10 @@ class OdooTableField(models.Model):
         verbose_name = 'Select table field'
 
 
-class OdooRelationField(models.Model):
-    odoo_relation_field = models.ForeignKey(OdooFields, on_delete = models.CASCADE, default='', null=True, blank=True, related_name="odd_relation")
-    oddo_write_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
-    oddo_read_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
+# class OdooRelationField(models.Model):
+#     odoo_relation_field = models.ForeignKey(OdooFields, on_delete = models.CASCADE, default='', null=True, blank=True, related_name="odd_relation")
+#     oddo_write_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
+#     oddo_read_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
 
     def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
         return super().save()
@@ -97,3 +97,13 @@ class OddoBotConfig(models.Model):
     class Meta:
         verbose_name = "Chatbot Configuration"
         verbose_name_plural = "Chatbot Configurations"
+
+
+
+class OdooRelationField(models.Model):
+    odoo_relation_field = models.ForeignKey(OddoBotConfig, on_delete = models.CASCADE, default='', null=True, blank=True, related_name="odd_relation")
+    oddo_write_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
+    oddo_read_field = models.CharField(max_length = 100, default = '', blank = True, null = True)
+
+    def save(self, force_insert: bool = ..., force_update: bool = ..., using: str | None = ..., update_fields: Iterable[str] | None = ...) -> None:
+        return super().save()
