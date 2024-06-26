@@ -5,7 +5,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from .models import OdooDatabase, OdooFields, OdooTableField, OddoBotConfig, OdooRelationField
 from llm_bot.admin import CustomAdminSite, admin_site
-from llm_bot.views import get_field_choices
+from llm_bot.views import get_field_choices, get_field_choices_relation
 
 class OdooDatabaseForm(forms.ModelForm):
     class Meta:
@@ -111,15 +111,16 @@ class OdooRelationFieldForm(forms.ModelForm):
                     CHOICES_READ = [(instance.oddo_read_field, instance.oddo_read_field)]
                     CHOICES_WRITE = [(instance.oddo_write_field, instance.oddo_write_field)]
 
-                    get_choices = get_relation_model_choices(kwargs)
+                    read_fields, write_fields = get_relation_model_choices(kwargs)
+                    
+                    for choice in write_fields:
+                        if choice != odoo_write_field:
+                            CHOICES_WRITE.append((choice, choice))
 
-                    if get_choices:
-                        for choice in get_choices:
-                            if choice != odoo_write_field:
-                                CHOICES_WRITE.append((choice, choice))
-
-                            elif choice != odoo_read_field:
-                                CHOICES_READ.append((choice, choice))
+                    for choice in read_fields:
+                        if choice != odoo_read_field:
+                            CHOICES_READ.append((choice, choice))
+                    
 
                 self.fields['oddo_write_field'].widget = forms.Select(choices = CHOICES_WRITE)
                 self.fields['oddo_read_field'].widget = forms.Select(choices = CHOICES_READ)
@@ -164,22 +165,27 @@ def get_model_choices(kwargs):
     
 def get_relation_model_choices(kwargs):
     try:
-        database_id = kwargs['instance'].odoo_relation_field.database_name.id
-        table_name = kwargs['instance'].odoo_relation_field.database_table
-        fields = get_field_choices(None, table_name, database_id)
-        return fields
+        read_fields, write_fields = get_field_choices_relation(read_id = kwargs['instance'].odoo_relation_field.select_read_model.id, write_id = kwargs['instance'].odoo_relation_field.select_write_model.id)
+        return read_fields, write_fields
     except:
-        return []
+        return [], []
 
 class OdooRelationFieldsInline(admin.TabularInline):
     model = OdooRelationField
     form = OdooRelationFieldForm
-    extra = 1  # Set a positive integer to control the number of extra forms displayed
+    def get_extra(self, request, obj=None, **kwargs):
+        if obj and obj.id:
+            return 0
+        return 1
+
 
 class OdooFieldsInline(admin.TabularInline):
     model = OdooTableField
     form = OdooTableFieldForm
-    extra = 1  # Set a positive integer to control the number of extra forms displayed
+    def get_extra(self, request, obj=None, **kwargs):
+        if obj and obj.id:
+            return 0
+        return 1
 
 class OdooFieldsForm(forms.ModelForm):
     class Meta:

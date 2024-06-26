@@ -282,8 +282,10 @@ def get_field_choices_relation(request = None, database_id=None, read_id=None, w
     uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
     table_choices_write = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, read_type_object.database_table)
 
-
-    return JsonResponse({'choices_read': table_choices_read, 'choices_write': table_choices_write})
+    if request:
+        return JsonResponse({'choices_read': table_choices_read, 'choices_write': table_choices_write})
+    else:
+        return table_choices_read, table_choices_write
 
 
 
