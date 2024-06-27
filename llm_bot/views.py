@@ -320,6 +320,23 @@ def get_required_odoo_fields(requested_id):
     return response_dict
 
 
+def get_table_fields_by_id(object_id):
+    table_fields = OdooTableField.objects.filter(odoo_field=object_id)
+    table_fields_list = []
+    for table_field in table_fields:
+        table_fields_list.append(table_field.field_name)
+    
+    return table_fields_list
+
+def create_relation_dict(odoo_object):
+    relation_dict = {}
+    obj = OdooRelationField.objects.filter(odoo_relation_field = odoo_object)
+    relation_dict = {}
+    for k in obj:
+        relation_dict[k.oddo_write_field] = {"type": "relation", "value": k.oddo_read_field}
+    return relation_dict
+
+
 @authorize
 def get_odoo_field_data(request):
     response_dict = {}
@@ -331,9 +348,10 @@ def get_odoo_field_data(request):
 
     response_dict["name"] = obj.chatbot_name
     response_dict["welcome_message"] = obj.welcome_message
-    response_dict["logo"] = f"https://ia.humanytek.com{obj.logo.url}" if obj.logo else None,
-    response_dict["read_fields_id"] = obj.select_read_model.id if obj.select_read_model else None
-    response_dict["write_fields_id"] = obj.select_write_model.id if obj.select_write_model else None
+    response_dict["logo"] = f"https://ia.humanytek.com{obj.logo.url}" if obj.logo else None
+    response_dict["read_fields"] = get_table_fields_by_id(obj.select_read_model.id) if obj.select_read_model else []
+    response_dict["write_fields"] = get_table_fields_by_id(obj.select_write_model.id) if obj.select_write_model else []
+    response_dict["relation"] = create_relation_dict(obj)
     return JsonResponse(response_dict)
 
 
