@@ -265,6 +265,18 @@ def get_table_choices(request, database_id):
     table_choices = get_odoo_tables(database.db_url, database.db_name, uid, database.password)
     return JsonResponse({'choices': table_choices})
 
+
+def _utils_pull_odoo_fields(request_id, type):
+    retrieved_fields = []
+
+    odoo_object = OdooFields.objects.get(id = request_id, type = type)
+    odoo_object_fields = OdooTableField.objects.filter(odoo_field = odoo_object)
+    for field in odoo_object_fields:
+        retrieved_fields.append(field.field_name)
+
+    return retrieved_fields
+
+
 def get_field_choices(request=None, table_name=None, database_id=None):
     database = get_object_or_404(OdooDatabase, pk=database_id)
     uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
@@ -272,15 +284,8 @@ def get_field_choices(request=None, table_name=None, database_id=None):
     return JsonResponse({'choices': table_choices}) if request else table_choices
 
 def get_field_choices_relation(request = None, database_id=None, read_id=None, write_id=None):
-    read_type_object = OdooFields.objects.get(id = read_id, type="read")
-    database = read_type_object.database_name
-    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
-    table_choices_read = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, read_type_object.database_table)
-
-    write_type_object = OdooFields.objects.get(id = write_id, type="write")
-    database = write_type_object.database_name
-    uid = authenticate_odoo(database.db_url, database.db_name, database.username, database.password)
-    table_choices_write = get_odoo_table_fields(database.db_url, database.db_name, uid, database.password, read_type_object.database_table)
+    table_choices_read = _utils_pull_odoo_fields(read_id, "read")
+    table_choices_write =  _utils_pull_odoo_fields(write_id, "write")
 
     if request:
         return JsonResponse({'choices_read': table_choices_read, 'choices_write': table_choices_write})
