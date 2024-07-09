@@ -196,7 +196,7 @@ def call_llm_model(request):
         return JsonResponse({"error": "Bot has been stopped."}, status=400)
     
     lm_config_instance = LLMCOnfig.objects.get(id=chatbot.chatbot_llm_config.id)
-    llm_agent = LLMAgent.objects.get(llm_config = chatbot.chatbot_llm_agent.id)
+    llm_agent = LLMAgent.objects.get(id = chatbot.chatbot_llm_agent.id)
 
     assistant_id = llm_agent.assistant_id
     api_key = lm_config_instance.api_key
