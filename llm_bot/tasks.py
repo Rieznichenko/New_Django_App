@@ -7,6 +7,8 @@ from django.utils import timezone
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+from analytics.models import AanlyticsSchedule
+from odoo.odoo_utils import fetch_product_details
 
 
 from celery.utils.log import get_task_logger
@@ -107,3 +109,21 @@ def send_mail(email, hour, bot_type, bot_name, state):
         if len(messages) > 0:
             response = send_mail_for_bot(email, messages, platform_name, bot_name)
             logger.info("Mail sent")
+
+@shared_task
+def create_analytic_csv(schedule_name, output_plan, instance_id):
+    logger.info("Detials ***********", schedule_name, output_plan, instance_id)
+
+    get_schedule_details = AanlyticsSchedule.objects.get(id = instance_id)
+
+    db_url = get_schedule_details.select_database.db_url
+    db_name = get_schedule_details.select_database.db_name
+    username = get_schedule_details.select_database.username
+    password = get_schedule_details.select_database.password
+
+    try:
+        fetch_product_details(db_url, db_name, username, password, schedule_name)
+        return True
+    except Exception as e:
+        logger.error(f"Failed to create analytic csv because {e}")
+        return False

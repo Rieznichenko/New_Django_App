@@ -1,5 +1,9 @@
 import xmlrpc.client
-
+import csv
+from datetime import datetime
+from django.conf import settings
+import os
+from analytics.models import AnalyticHistory
 
 def authenticate_odoo(url, db, username, password):
     """Authenticate with Odoo and return UID."""
@@ -22,3 +26,46 @@ def get_odoo_table_fields(url, db, uid, password, table_name):
         
         field_names = [field['name'] for field in fields]
         return sorted(field_names)
+
+
+def fetch_product_details(url, db, username, password, schedule_name):
+    """Fetch product details from Odoo and write them to a CSV file."""
+    if url:
+        uid = authenticate_odoo(url, db, username, password)
+
+        with xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object') as models:
+            product_ids = models.execute_kw(db, uid, password, 'product.template', 'search', [[]])
+            products = models.execute_kw(db, uid, password, 'product.template', 'read', [product_ids], {'fields': ['default_code', 'name', 'description', 'standard_price', 'warehouse_id']})
+            
+            # Create CSV file
+            create_csv(products, schedule_name)
+            
+            print('Successfully exported product details to CSV')
+
+    # except Exception as e:
+    #     print(f'An error occurred: {str(e)}')
+
+def create_csv(products, schedule_name):
+    """Create a CSV file with product details."""
+    file_name = f'{schedule_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+    
+    with open(file_path, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['SKU', 'Name', 'Description', 'Unit cost', 'location'])  # Header row
+        
+        for product in products:
+            sku = product.get('default_code', '')
+            name = product.get('name', '')
+            description = product.get('description', '')
+            standard_price = product.get('standard_price', 0.0)
+            warehouse_id = None
+            
+            writer.writerow([sku, name, description, standard_price, warehouse_id])
+
+    AnalyticHistory.objects.create(
+            schedule_name=schedule_name,
+            file_name=file_name
+        )
+    
+    return file_name

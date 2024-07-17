@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'llm_bot',
-    "odoo"
+    "odoo",
+    "analytics"
 ]
 
 MIDDLEWARE = [
@@ -89,7 +90,6 @@ DATABASES = {
         'PORT': '',
     }
 }
-
 
 
 # Password validation
