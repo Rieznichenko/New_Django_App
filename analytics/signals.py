@@ -10,7 +10,7 @@ from .models import AanlyticsSchedule
 def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
     schedule, _ = IntervalSchedule.objects.get_or_create(
         every=instance.output_plan,
-        period=IntervalSchedule.SECONDS,
+        period=IntervalSchedule.HOURS,
     )
     print("HEy", schedule)
 
