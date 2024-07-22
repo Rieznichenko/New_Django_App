@@ -12,10 +12,9 @@ def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
         every=instance.output_plan,
         period=IntervalSchedule.HOURS,
     )
-    print("HEy", schedule)
 
     task_name = f'Create anaalytic CSV {instance.schedule_name}_{instance.id}'
-    task_args = json.dumps([instance.schedule_name, instance.output_plan, instance.id])
+    task_args = json.dumps([instance.schedule_name, instance.output_plan, instance.id, instance.output_detail.id, instance.embedded_code])
 
     if instance.periodic_task:
         instance.periodic_task.interval = schedule

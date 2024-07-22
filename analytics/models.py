@@ -23,18 +23,7 @@ class OdooDatabase(models.Model):
         verbose_name = "Database Configuration"
         verbose_name_plural = "Database Configuration"
 
-class AanlyticsSchedule(models.Model):
-    schedule_name = models.CharField(max_length=100, verbose_name='Schedule Name', blank=True, null=True)
-    select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
-    output_plan = models.IntegerField(help_text="Please input output plan in hours")
-    periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
 
-    def __str__(self) -> str:
-        return self.schedule_name
-    
-    class Meta:
-        verbose_name = "Analytics Generate Schedule"
-        verbose_name_plural = "Analytics Generate Schedule"
 
 
 class AnalyticHistory(models.Model):
@@ -48,3 +37,31 @@ class AnalyticHistory(models.Model):
     class Meta:
         verbose_name = "Analytics Schedule History"
         verbose_name_plural = "Analytics Schedule History"
+
+
+class AnalyticOutput(models.Model):
+    connection_name = models.CharField(max_length=100, verbose_name='Connection Name', blank=True, null=True)
+    ftp_path = models.CharField(max_length=100, blank=True, null=True)
+    ftp_destination_server = models.CharField(max_length=100, blank=True, null=True)
+    ftp_destination_user = models.CharField(max_length=100, blank=True, null=True)
+    ftp_destination_password = models.CharField(max_length=100, blank=True, null=True)
+    ftp_destination_port = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Analytics Output Coonnection"
+        verbose_name_plural = "Analytics Output Coonnection"
+
+class AanlyticsSchedule(models.Model):
+    schedule_name = models.CharField(max_length=100, verbose_name='Schedule Name', blank=True, null=True)
+    select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
+    output_plan = models.IntegerField(help_text="Please input output plan in hours")
+    periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
+    embedded_code = models.TextField(blank=True, null=True)
+    output_detail = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.schedule_name
+    
+    class Meta:
+        verbose_name = "Analytics Generate Schedule"
+        verbose_name_plural = "Analytics Generate Schedule"

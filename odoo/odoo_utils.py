@@ -4,6 +4,7 @@ from datetime import datetime
 from django.conf import settings
 import os
 from analytics.models import AnalyticHistory
+from file_dump_store import dump_file_to_ftp
 
 def authenticate_odoo(url, db, username, password):
     """Authenticate with Odoo and return UID."""
@@ -28,7 +29,7 @@ def get_odoo_table_fields(url, db, uid, password, table_name):
         return sorted(field_names)
 
 
-def fetch_product_details(url, db, username, password, schedule_name):
+def fetch_product_details(url, db, username, password, schedule_name, output_detail):
     """Fetch product details from Odoo and write them to a CSV file."""
     if url:
         uid = authenticate_odoo(url, db, username, password)
@@ -38,14 +39,14 @@ def fetch_product_details(url, db, username, password, schedule_name):
             products = models.execute_kw(db, uid, password, 'product.template', 'read', [product_ids], {'fields': ['default_code', 'name', 'description', 'standard_price', 'warehouse_id']})
             
             # Create CSV file
-            create_csv(products, schedule_name)
+            create_csv(products, schedule_name, output_detail)
             
             print('Successfully exported product details to CSV')
 
     # except Exception as e:
     #     print(f'An error occurred: {str(e)}')
 
-def create_csv(products, schedule_name):
+def create_csv(products, schedule_name, output_detail):
     """Create a CSV file with product details."""
     file_name = f'{schedule_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     file_path = os.path.join(settings.MEDIA_ROOT, file_name)
@@ -67,5 +68,7 @@ def create_csv(products, schedule_name):
             schedule_name=schedule_name,
             file_name=file_name
         )
+    
+    dump_file_to_ftp(output_detail, file_path)
     
     return file_name

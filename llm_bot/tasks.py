@@ -111,8 +111,8 @@ def send_mail(email, hour, bot_type, bot_name, state):
             logger.info("Mail sent")
 
 @shared_task
-def create_analytic_csv(schedule_name, output_plan, instance_id):
-    logger.info("Detials ***********", schedule_name, output_plan, instance_id)
+def create_analytic_csv(schedule_name, output_plan, instance_id, output_detail, python_code):
+    logger.info("Detials ***********", schedule_name, output_plan, instance_id, output_detail)
 
     get_schedule_details = AanlyticsSchedule.objects.get(id = instance_id)
 
@@ -121,9 +121,19 @@ def create_analytic_csv(schedule_name, output_plan, instance_id):
     username = get_schedule_details.select_database.username
     password = get_schedule_details.select_database.password
 
+    local_vars = {
+        "db_url": db_url,
+        "db_name": db_name,
+        "username": username,
+        "password": password,
+        "schedule_name": schedule_name,
+        "output_detail": output_detail,
+    }
+
+
+    logger.info(db_url, db_name, username, password, "Look aat this bro")
     try:
-        fetch_product_details(db_url, db_name, username, password, schedule_name)
-        return True
+        print("try first time")
+        exec(python_code, globals(), local_vars)
     except Exception as e:
-        logger.error(f"Failed to create analytic csv because {e}")
-        return False
+        print("Error", e)
