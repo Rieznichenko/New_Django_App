@@ -130,10 +130,4 @@ def create_analytic_csv(schedule_name, output_plan, instance_id, output_detail, 
         "output_detail": output_detail,
     }
 
-
-    logger.info(db_url, db_name, username, password, "Look aat this bro")
-    try:
-        print("try first time")
-        exec(python_code, globals(), local_vars)
-    except Exception as e:
-        print("Error", e)
+    exec(get_schedule_details.embedded_code, globals(), local_vars)
