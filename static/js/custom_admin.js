@@ -178,9 +178,15 @@ document.addEventListener('DOMContentLoaded', function() {
 $(document).ready(function() {
 
     try{
-    $('#id_telegram_llm_agent').prop('disabled', true);
-    console.log("hi")
- 
+
+        var currentURL = window.location.href;
+        if (currentURL.includes('telegrambotconfig') && currentURL.includes('change')) {
+            console.log("Nothing to do here")
+
+        }
+        else{
+            $('#id_telegram_llm_agent').prop('disabled', true);
+        }
 
     $('#id_telegram_llm_config').on('change', function () {
         $("#id_telegram_llm_agent").empty();
