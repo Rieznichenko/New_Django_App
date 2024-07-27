@@ -53,6 +53,13 @@ def run_telegram_bot(api_key, assistant_id, telegram_bot_token, bot_thread_id):
         api_key, assitant_id, bot_token, bot_thread_id = config_store.get_param()
         try:
             obj = TelegramBotConfig.objects.get(telegram_bot_token=bot_token)
+
+            api_key = obj.telegram_llm_agent.llm_config.llmconfig.api_key
+            assitant_id = obj.telegram_llm_agent.assistant_id
+            telegram_bot_token = obj.telegram_bot_token
+            
+            config_store.set_param(api_key, assistant_id, telegram_bot_token, '')
+
             bot_name = obj.chatbot_name
             if obj.state == "paused":
                 return
