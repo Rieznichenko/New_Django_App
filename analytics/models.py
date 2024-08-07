@@ -51,6 +51,7 @@ class AnalyticOutput(models.Model):
         verbose_name = "Analytics Output Coonnection"
         verbose_name_plural = "Analytics Output Coonnection"
 
+
 class AanlyticsSchedule(models.Model):
     schedule_name = models.CharField(max_length=100, verbose_name='Schedule Name', blank=True, null=True)
     select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)

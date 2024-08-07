@@ -1,0 +1,13 @@
+/* static/css/custom_admin.css */
+.code-editor-container {
+    margin-bottom: 20px;
+}
+
+.code-editor-container textarea {
+    width: 100%;
+    min-height: 200px;
+}
+
+.code-editor-container button {
+    margin-top: 10px;
+}
