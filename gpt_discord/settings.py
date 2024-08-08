@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'llm_bot',
     "odoo",
-    "analytics"
+    "analytics",
+    'django_celery_beat',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -164,15 +166,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CSRF_TRUSTED_ORIGINS = ['https://ia.humanytek.com']
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'apscheduler': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'myapp': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
 
 from decouple import config
 
 DEBUG = True
 
-INSTALLED_APPS = INSTALLED_APPS + [
-    'django_celery_beat',
-    'django_celery_results',
-]
 
 CELERY_RESULT_BACKEND = "django-db"
 

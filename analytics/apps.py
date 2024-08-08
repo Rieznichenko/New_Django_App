@@ -7,3 +7,5 @@ class AnalyticsConfig(AppConfig):
 
     def ready(self):
         from . import signals
+        from .scheduler import start_scheduler
+        start_scheduler()

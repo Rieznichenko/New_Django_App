@@ -9,3 +9,4 @@ __pycache__/
 media/
 client_secret.json
 token.json
+.idea

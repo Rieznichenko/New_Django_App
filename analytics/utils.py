@@ -3,6 +3,7 @@ from RestrictedPython.Eval import default_guarded_getitem, default_guarded_getit
 import traceback
 
 
+
 def execute_code(code):
     try:
         # Compile the code with restrictions
@@ -31,4 +32,3 @@ def execute_code(code):
     except Exception as e:
         # Handle and log exceptions
         return str(e) + "\n" + traceback.format_exc()
-
