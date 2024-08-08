@@ -1,0 +1,90 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Load CodeMirror CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css">
+    <!-- Load CodeMirror JS from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/edit/matchbrackets.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/custom_analytics_admin.css' %}">
+{% endblock %}
+{% block content %}
+    <form method="post" action="" id="aanlyticsschedule_form" class="form-horizontal">
+        {% csrf_token %}
+        <div>
+            {% for fieldset in adminform %}
+                <fieldset class="module aligned">
+
+                        {% for line in fieldset %}
+{#                            <div class="fieldBox">#}
+                                {% for field in line %}
+                                    <div class="form-row">
+                                        <div>
+                                            {% if field.field.name == 'embedded_code' %}
+                                                <div class="form-group">
+                                                    <!-- CodeMirror editor and test button -->
+                                                    <label for="{{ field.field.id_for_label }}">{{ field.field.label }}</label>
+                                                    <textarea id="id_embedded_code" name="{{ field.field.name }}">{{ field.field.value }}</textarea>
+                                                    <button id="test-code-btn" type="button" class="button">Test Code</button>
+                                                </div>
+                                            {% else %}
+                                                <div class="flex-container">
+                                                {{ field.errors }}
+                                                {{ field.field.label_tag }}
+                                                {{ field.field }}
+                                                {% if field.help_text %}
+                                                    <p class="help">{{ field.help_text }}</p>
+                                                {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+{#                            </div>#}
+                        {% endfor %}
+{#                    </div>#}
+                </fieldset>
+            {% endfor %}
+        </div>
+        <div class="submit-row">
+            <input type="submit" value="Save" class="default" name="_save">
+            <input type="submit" value="Save and add another" name="_addanother">
+            <input type="submit" value="Save and continue editing" name="_continue">
+            {% if has_change_permission %}
+            <a href="{% url 'admin:analytics_aanlyticsschedule_delete' object_id %}" class="deletelink">Delete</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize CodeMirror editor
+            var editor = CodeMirror.fromTextArea(document.getElementById("id_embedded_code"), {
+                mode: "python",
+                lineNumbers: true,
+                matchBrackets: true
+            });
+
+            // Handle button click
+            document.getElementById('test-code-btn').addEventListener('click', function() {
+                var code = editor.getValue();
+                fetch("{% url 'admin:test_code' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ code: code })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                });
+            });
+        });
+    </script>
+{% endblock %}

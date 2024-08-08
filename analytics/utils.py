@@ -3,8 +3,7 @@ from RestrictedPython.Eval import default_guarded_getitem, default_guarded_getit
 import traceback
 
 
-
-def execute_code(code):
+def execute_code_restricted(code):
     try:
         # Compile the code with restrictions
         byte_code = compile_restricted(code, '<string>', 'exec')
