@@ -5,14 +5,14 @@ from django import forms
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .forms import AanlyticsScheduleAdminForm
+from . import views
 from .models import OdooDatabase, AanlyticsSchedule, AnalyticHistory, AnalyticOutput
 from llm_bot.admin import admin_site
 from django.http import HttpResponse
 from django.conf import settings
 import os
 from django.urls import reverse, path
-from .views import execute_code_view
+
 
 # Register your models here.
 class OdooDatabaseForm(forms.ModelForm):
@@ -97,22 +97,15 @@ class OdooDatabaseAdmin(admin.ModelAdmin):
 
 
 class AanlyticsScheduleAdmin(admin.ModelAdmin):
-    form = AanlyticsScheduleAdminForm
+    change_form_template = 'admin/analytics/aanlyticsschedule/change_form.html'
     exclude = ('periodic_task',)
 
-    # Add custom URL for testing the code
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('<path:object_id>/test/', self.admin_site.admin_view(execute_code_view), name='test_code'),
+            path('test_code/', self.admin_site.admin_view(views.test_code_view), name='test_code'),
         ]
         return custom_urls + urls
-    #
-    # # Customize the change form template
-    # def change_view(self, request, object_id, form_url='', extra_context=None):
-    #     extra_context = extra_context or {}
-    #     extra_context['test_code_url'] = self.get_urls()[0].pattern._route.replace('<path:object_id>', str(object_id))
-    #     return super().change_view(request, object_id, form_url, extra_context)
 
     def delete(self, obj):
         button_style = (

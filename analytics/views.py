@@ -1,19 +1,21 @@
-# myapp/views.py
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import traceback
 
 @csrf_exempt
-def execute_code_view(request, object_id):
+def test_code_view(request):
     if request.method == 'POST':
-        code = request.POST.get('code', '')
-        try:
-            compile(code, '<string>', 'exec')
-            return JsonResponse({'output': 'Syntax is correct.'})
-        except SyntaxError as e:
-            return JsonResponse({'output': f'Syntax Error: {str(e)}'}, status=400)
-        except Exception as e:
-            output = str(e) + "\n" + traceback.format_exc()
-            return JsonResponse({'output': output}, status=500)
+        data = json.loads(request.body)
+        code = data.get('code', '')
 
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
+        try:
+            # Compile the code to check for syntax errors
+            # compile(code, '<string>', 'exec')
+            local_vars = {}
+            exec(code, globals(), local_vars)
+            return JsonResponse({'message': f'Returned: {local_vars.get("result")}'})
+        except SyntaxError as e:
+            return JsonResponse({'message': f'Syntax Error: {e}'})
+        except Exception as e:
+            return JsonResponse({'message': f'Error: {e}'})
+    return JsonResponse({'message': 'Invalid request.'})

@@ -382,7 +382,7 @@ class ChatBotAdmin(CustomBaseAdmin):
     class Media:
         js = ('js/custom_admin.js',)
         css = {
-            'all': ('css/custom_admin.css',)
+            'all': ('css/custom_analytics_admin.css',)
         }
 
 
@@ -484,7 +484,7 @@ class OdooAiAdmin(CustomBaseAdmin):
     # class Media:
     #     js = ('js/custom_admin.js',)
     #     css = {
-    #         'all': ('css/custom_admin.css',)
+    #         'all': ('css/custom_analytics_admin.css',)
     #     }
 
 
