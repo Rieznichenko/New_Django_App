@@ -54,6 +54,12 @@ fi
 
 # Run Django migrations
 echo "Running Django migrations..."
+python manage.py makemigrations
+python manage.py migrate
+
+python manage.py llm_bot
+python manage.py odoo
+python manage.py analytics
 python manage.py migrate
 
 echo "Setup complete. Virtual environment '$VENV_NAME' is ready, activated, and migrations are applied."
