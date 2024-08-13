@@ -15,8 +15,8 @@ sudo systemctl enable redis-server
 
 # Set the PostgreSQL database and user credentials
 DB_NAME="humanytekdb"
-DB_USER="your_db_user"
-DB_PASSWORD="your_db_password"
+DB_USER="admin"
+DB_PASSWORD="Greenisgood1!"
 
 # Create PostgreSQL database and user
 echo "Creating PostgreSQL database and user..."
