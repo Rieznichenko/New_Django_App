@@ -62,6 +62,10 @@ python manage.py odoo
 python manage.py analytics
 python manage.py migrate
 
+# Collect static files
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
 echo "Setup complete. Virtual environment '$VENV_NAME' is ready, activated, and migrations are applied."
 
 # Supervisor configuration for Django, Celery worker, and Celery Beat
