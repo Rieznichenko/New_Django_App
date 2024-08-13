@@ -13,6 +13,20 @@ echo "Starting and enabling Redis..."
 sudo systemctl start redis-server
 sudo systemctl enable redis-server
 
+# Set the PostgreSQL database and user credentials
+DB_NAME="humanytekdb"
+DB_USER="your_db_user"
+DB_PASSWORD="your_db_password"
+
+# Create PostgreSQL database and user
+echo "Creating PostgreSQL database and user..."
+sudo -u postgres psql -c "CREATE DATABASE $DB_NAME;"
+sudo -u postgres psql -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASSWORD';"
+sudo -u postgres psql -c "ALTER ROLE $DB_USER SET client_encoding TO 'utf8';"
+sudo -u postgres psql -c "ALTER ROLE $DB_USER SET default_transaction_isolation TO 'read committed';"
+sudo -u postgres psql -c "ALTER ROLE $DB_USER SET timezone TO 'UTC';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $DB_USER;"
+
 # Set the virtual environment name
 VENV_NAME="venv"
 
