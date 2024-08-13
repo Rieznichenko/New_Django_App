@@ -86,8 +86,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'humanytekdb',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
+        'USER': 'admin',
+        'PASSWORD': 'Greenisgood1!',
         'HOST': 'localhost',
         'PORT': '5432',
     }
