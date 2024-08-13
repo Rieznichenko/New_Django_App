@@ -53,8 +53,8 @@ CELERY_BEAT_CONF="$SUPERVISOR_CONF_DIR/celery_beat.conf"
 echo "Creating Supervisor config for Django..."
 sudo tee "$DJANGO_CONF" > /dev/null <<EOL
 [program:django]
-command=/home/ayudatek-template/$VENV_NAME/bin/python /home/ayudatek-template/manage.py runserver 0.0.0.0:8000
-directory=/home/ayudatek-template
+command=/home/ubuntu/New_Django_App/$VENV_NAME/bin/python /home/ubuntu/New_Django_App/manage.py runserver 0.0.0.0:8000
+directory=/home/ubuntu/New_Django_App
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/django.err.log
@@ -65,8 +65,8 @@ EOL
 echo "Creating Supervisor config for Celery worker..."
 sudo tee "$CELERY_WORKER_CONF" > /dev/null <<EOL
 [program:celery_worker]
-command=/home/ayudatek-template/$VENV_NAME/bin/celery -A gpt_discord worker --loglevel=info
-directory=/home/ayudatek-template
+command=/home/ubuntu/New_Django_App/$VENV_NAME/bin/celery -A gpt_discord worker --loglevel=info
+directory=/home/ubuntu/New_Django_App
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/celery_worker.err.log
@@ -77,8 +77,8 @@ EOL
 echo "Creating Supervisor config for Celery Beat..."
 sudo tee "$CELERY_BEAT_CONF" > /dev/null <<EOL
 [program:celery_beat]
-command=/home/ayudatek-template/$VENV_NAME/bin/celery -A gpt_discord beat --loglevel=info
-directory=/home/ayudatek-template
+command=/home/ubuntu/New_Django_App/$VENV_NAME/bin/celery -A gpt_discord beat --loglevel=info
+directory=/home/ubuntu/New_Django_App
 autostart=true
 autorestart=true
 stderr_logfile=/var/log/celery_beat.err.log
