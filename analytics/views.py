@@ -1,9 +1,9 @@
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import sys
-from io import StringIO
-
+from io import StringIO, BytesIO
+import zipfile
 
 @csrf_exempt
 def test_code_view(request):
@@ -12,8 +12,6 @@ def test_code_view(request):
         code = data.get('code', '')
 
         try:
-            # Compile the code to check for syntax errors
-            # compile(code, '<string>', 'exec')
             local_vars = {}
 
             # Capture printed output
@@ -23,11 +21,25 @@ def test_code_view(request):
             exec(code, globals(), local_vars)
             sys.stdout = old_stdout
 
-            output = redirected_output.getvalue()
-            result = local_vars.get("result", output)
+            # Collect results for multiple CSVs
+            results = [value for key, value in local_vars.items() if isinstance(value, tuple) and len(value) == 2]
 
+            if results:
+                # Create a zip archive in memory
+                zip_buffer = BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zip_file:
+                    for idx, (file_name, csv_content) in enumerate(results):
+                        zip_file.writestr(file_name, csv_content)
 
-            return JsonResponse({'message': f'Returned: {result}'})
+                # Prepare zip file for download
+                response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+                response['Content-Disposition'] = 'attachment; filename=csv_files.zip'
+                return response
+
+            else:
+                output = redirected_output.getvalue()
+                return JsonResponse({'message': f'Returned: {output}'})
+                
         except SyntaxError as e:
             return JsonResponse({'message': f'Syntax Error: {e}'})
         except Exception as e:

@@ -71,20 +71,49 @@
 
             // Handle button click
             document.getElementById('test-code-btn').addEventListener('click', function() {
-                var code = editor.getValue();
-                fetch("{% url 'admin:test_code' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({ code: code })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                });
-            });
+    var code = editor.getValue();
+    fetch("{% url 'admin:test_code' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ code: code })
+    })
+    .then(response => {
+        // Save response to a variable for later use
+        const contentDisposition = response.headers.get('Content-Disposition');
+        if (contentDisposition && contentDisposition.includes('attachment')) {
+            return response.blob().then(blob => ({ blob, response }));
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data.blob) {
+            // Trigger CSV download
+            const url = window.URL.createObjectURL(data.blob);
+            const a = document.createElement('a');
+            a.href = url;
+
+            // Extract file name from content disposition or set a default
+            const contentDisposition = data.response.headers.get('Content-Disposition');
+            const filename = contentDisposition.split('filename=')[1] || 'output.csv';
+            a.download = filename.replace(/"/g, '');  // Remove quotes around filename if present
+
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            // Handle JSON response
+            alert(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+});
+
         });
     </script>
 {% endblock %}
