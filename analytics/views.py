@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 import sys
 from io import StringIO, BytesIO
 import zipfile
+import csv
 
 @csrf_exempt
 def test_code_view(request):
@@ -28,8 +29,11 @@ def test_code_view(request):
                 # Create a zip archive in memory
                 zip_buffer = BytesIO()
                 with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED) as zip_file:
-                    for idx, (file_name, csv_content) in enumerate(results):
-                        zip_file.writestr(file_name, csv_content)
+                    for file_name, csv_data in results:
+                        csv_buffer = StringIO()
+                        csv_writer = csv.writer(csv_buffer)
+                        csv_writer.writerows(csv_data)
+                        zip_file.writestr(file_name, csv_buffer.getvalue().encode('utf-8'))  # Encode as bytes
 
                 # Prepare zip file for download
                 response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
