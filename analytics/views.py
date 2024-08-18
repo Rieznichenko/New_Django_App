@@ -5,15 +5,26 @@ import sys
 from io import StringIO, BytesIO
 import zipfile
 import csv
+from analytics.models import AanlyticsSchedule
 
 @csrf_exempt
 def test_code_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         code = data.get('code', '')
+        instance_id = data.get('id', '')
 
         try:
             local_vars = {}
+            get_schedule_details = AanlyticsSchedule.objects.get(id = instance_id)
+
+            local_vars["db_url"] = get_schedule_details.select_database.db_url
+            local_vars["db_name"] = get_schedule_details.select_database.db_name
+            local_vars["username"] = get_schedule_details.select_database.username
+            local_vars["password"] = get_schedule_details.select_database.password
+            local_vars["output_detail"] = get_schedule_details.output_detail.id
+            local_vars["schedule_name"] = get_schedule_details.schedule_name
+
 
             # Capture printed output
             old_stdout = sys.stdout

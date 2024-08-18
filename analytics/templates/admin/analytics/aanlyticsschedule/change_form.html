@@ -71,15 +71,18 @@
 
             // Handle button click
             document.getElementById('test-code-btn').addEventListener('click', function() {
-    var code = editor.getValue();
-    fetch("{% url 'admin:test_code' %}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}'
-        },
-        body: JSON.stringify({ code: code })
-    })
+                var url = window.location.href;
+                var urlParts = url.split('/').filter(Boolean);
+                var id = urlParts[urlParts.length - 2]; // Gets the ID, which is second-to-last segment
+                var code = editor.getValue();
+                fetch("{% url 'admin:test_code' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ code: code, id: id })
+                })
     .then(response => {
         // Save response to a variable for later use
         const contentDisposition = response.headers.get('Content-Disposition');
