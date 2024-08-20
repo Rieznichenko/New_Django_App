@@ -51,6 +51,9 @@ class AnalyticOutput(models.Model):
         verbose_name = "Analytics Output Coonnection"
         verbose_name_plural = "Analytics Output Coonnection"
 
+    def __str__(self) -> str:
+        return self.connection_name
+
 
 class AanlyticsSchedule(models.Model):
     schedule_name = models.CharField(max_length=100, verbose_name='Schedule Name', blank=True, null=True)
@@ -58,7 +61,7 @@ class AanlyticsSchedule(models.Model):
     output_plan = models.IntegerField(help_text="Please input output plan in hours")
     periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
     embedded_code = models.TextField(blank=True, null=True)
-    output_detail = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE, blank=True, null=True)
+    output_detail = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return self.schedule_name
