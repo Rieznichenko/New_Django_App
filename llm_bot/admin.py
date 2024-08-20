@@ -180,7 +180,7 @@ class LLMAgentAdmin(CustomBaseAdmin):
             )
         return mark_safe(delete_button)
     
-    list_display = ('agent_name', 'assistant_id', 'agent_name', 'delete') + tuple(
+    list_display = ('agent_name', 'assistant_id', 'delete') + tuple(
         field for field in CustomBaseAdmin.list_display if field != 'view_related_model_button'
     )
 
