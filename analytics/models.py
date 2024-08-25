@@ -69,3 +69,17 @@ class AanlyticsSchedule(models.Model):
     class Meta:
         verbose_name = "Analytics Generate Schedule"
         verbose_name_plural = "Analytics Generate Schedule"
+
+
+class SaveAnalytic(models.Model):
+    analytic_name = models.CharField(max_length=100, verbose_name='Name', blank=True, null=True)
+    analytic_schedule = models.ForeignKey(AanlyticsSchedule, on_delete=models.CASCADE)
+    select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
+    embedded_code = models.TextField(blank=True, null=True)
+
+    def __str__(self) -> str:
+        return self.schedule_name
+    
+    class Meta:
+        verbose_name = "Save Analytic"
+        verbose_name_plural = "Save Analytic"
