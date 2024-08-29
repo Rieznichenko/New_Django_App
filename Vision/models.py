@@ -27,7 +27,7 @@ class VisionApplication(models.Model):
 class ApplicationUser(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True)
     vision_application = models.ForeignKey(VisionApplication, on_delete=models.CASCADE)
-    telegram_id = models.CharField(max_length=200, null=True, blank=True)
+    channel_username = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         verbose_name = "Application User"

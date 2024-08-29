@@ -22,7 +22,7 @@ class VisionAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:  # When editing an existing object
-            return self.readonly_fields + ('application_name',)  # Example of making other fields read-only
+            return self.readonly_fields
         return self.readonly_fields
 
 
@@ -140,7 +140,7 @@ class ApplicationUserAdmin(admin.ModelAdmin):
             )
         return mark_safe(edit_button)
     
-    list_display = ("name", "telegram_id", "delete", "edit")
+    list_display = ("name", "channel_username", "delete", "edit")
 
 admin_site.register(VisionApplication, VisionAdmin)
 admin_site.register(ApplicationUser, ApplicationUserAdmin)

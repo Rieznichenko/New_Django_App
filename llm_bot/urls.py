@@ -3,6 +3,8 @@ from django.urls import path
 from .models import TelegramBotConfig, DiscordBotConfig
 from .signals import run_bot_in_thread, run_discord_bot_in_thread,\
     generate_random_code
+from Vision.views import SendMessageView
+
 
 urlpatterns = [
     path('api/ajax/get-config', ajax_get_config, name="ajax_get_config"),
@@ -27,6 +29,10 @@ urlpatterns = [
     path('api/get-odoo-field-data', get_odoo_field_data, name='get_odoo_field_data'),
     path('api/read-odoo-api', read_odoo_api, name="read_odoo_api"),
     path('api/write-odoo-api', write_odoo_api, name="write_odoo_api"),
+
+    # for vissoonn
+    path('api/vision', SendMessageView.as_view(), name='send_message'),
+
 
 ]
 
