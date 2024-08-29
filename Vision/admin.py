@@ -18,6 +18,13 @@ from llm_bot.admin import CustomAdminSite, admin_site
 # Register your models here.
 
 class VisionAdmin(admin.ModelAdmin):
+    readonly_fields = ('unique_token',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:  # When editing an existing object
+            return self.readonly_fields + ('application_name',)  # Example of making other fields read-only
+        return self.readonly_fields
+
 
     def delete(self, obj):
         button_style = (
@@ -73,7 +80,7 @@ class VisionAdmin(admin.ModelAdmin):
             )
         return mark_safe(edit_button)
     
-    list_display = ("application_name", "telegram_bot_id", "application_id", "delete", "edit")
+    list_display = ("application_name", "telegram_bot_id", "unique_token", "delete", "edit")
 
 
 

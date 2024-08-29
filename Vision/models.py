@@ -1,13 +1,12 @@
 from django.db import models
-
-# Create your models here.
+import uuid
 
 
 class VisionApplication(models.Model):
     application_name = models.CharField(max_length=200, null=True, blank=True)
     telegram_bot_id = models.CharField(max_length=200, null=True, blank=True)
-    application_id = models.CharField(max_length=200, null=True, blank=True)
-    unique_token = models.CharField(max_length=200, null=True, blank=True)
+    unique_token = models.CharField(max_length=200, null=True, blank=True, editable=False)
+
 
 
     class Meta:
@@ -16,6 +15,11 @@ class VisionApplication(models.Model):
 
     def __str__(self) -> str:
         return self.application_name
+    
+    def save(self, *args, **kwargs):
+        if not self.unique_token:
+            self.unique_token = f"VSK-{uuid.uuid4()}"
+        super().save(*args, **kwargs)
     
 
 
