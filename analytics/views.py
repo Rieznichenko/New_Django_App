@@ -6,6 +6,7 @@ from io import StringIO, BytesIO
 import zipfile
 import csv
 from analytics.models import AanlyticsSchedule
+from llm_bot.tasks import process_csv_generation
 
 @csrf_exempt
 def test_code_view(request):
@@ -17,6 +18,10 @@ def test_code_view(request):
         try:
             local_vars = {}
             get_schedule_details = AanlyticsSchedule.objects.get(id = instance_id)
+            task = process_csv_generation.delay(instance_id, code)
+            return JsonResponse({'task_id': task.id})
+
+
 
             local_vars["db_url"] = get_schedule_details.select_database.db_url
             local_vars["db_name"] = get_schedule_details.select_database.db_name
@@ -60,3 +65,111 @@ def test_code_view(request):
         except Exception as e:
             return JsonResponse({'message': f'Error: {e}'})
     return JsonResponse({'message': 'Invalid request.'})
+
+
+
+# def create_mist_csv(url, db, username, password, schedule_name, output_detail):
+#     """Create MIST CSV from Odoo and write them to a CSV file."""
+
+#     import xmlrpc.client
+#     import csv
+#     from datetime import datetime
+#     from django.conf import settings
+#     import os
+#     from analytics.models import AnalyticHistory
+#     from file_dump_store import dump_file_to_ftp
+
+#     company_ids = [1]  # IDs de las empresas a considerar
+#     header_row = ['sku', 'location', 'onhand', 'transit']
+#     memory_data = []
+
+#     if url:
+#         common = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/common')
+#         uid = common.authenticate(db, username, password, {})
+
+#         models = xmlrpc.client.ServerProxy(f'{url}/xmlrpc/2/object')
+
+#         # Get product IDs
+#         product_ids = models.execute_kw(
+#             db, uid, password, 
+#             'product.product', 
+#             'search', 
+#             [[['type', '=', 'product'], ['company_id', 'in', company_ids]]]
+#         )
+
+#         if not product_ids:
+#             print("No products found.")
+#             return None
+
+#         # Get warehouse locations
+#         warehouse_ids = models.execute_kw(
+#             db, uid, password, 
+#             'stock.warehouse', 
+#             'search', 
+#             [[['company_id', 'in', company_ids]]]
+#         )
+
+#         if not warehouse_ids:
+#             print("No warehouses found.")
+#             return None
+
+#         warehouse_locations = {}
+#         for warehouse_id in warehouse_ids:
+#             warehouse = models.execute_kw(
+#                 db, uid, password, 
+#                 'stock.warehouse', 
+#                 'read', 
+#                 [warehouse_id], 
+#                 {'fields': ['lot_stock_id']}
+#             )
+#             lot_stock_id = warehouse[0].get('lot_stock_id', [None])[0]
+
+#             if lot_stock_id:
+#                 location = models.execute_kw(
+#                     db, uid, password, 
+#                     'stock.location', 
+#                     'read', 
+#                     [lot_stock_id], 
+#                     {'fields': ['complete_name']}
+#                 )
+#                 location_name = location[0].get('complete_name', '')
+#             else:
+#                 location_name = ''
+
+#             warehouse_locations[warehouse_id] = location_name
+
+#         # Create CSV file
+#         file_name = f'{schedule_name}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+#         file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+
+#         with open(file_path, mode='w', newline='') as file:
+#             writer = csv.writer(file, delimiter=';')
+#             writer.writerow(header_row)
+#             memory_data.append(header_row)
+
+#             for product_id in product_ids[:5]:
+#                 product = models.execute_kw(
+#                     db, uid, password, 
+#                     'product.product', 
+#                     'read', 
+#                     [product_id], 
+#                     {'fields': ['default_code']}
+#                 )
+
+#                 if not product:
+#                     continue
+
+#                 sku = product[0].get('default_code', '')
+
+#                 for warehouse_id, location_name in warehouse_locations.items():
+#                     row = [sku, location_name, 'N', 'N']
+#                     writer.writerow(row)
+#                     memory_data.append(row)
+
+#         print(f'Successfully exported stock details to CSV: {file_path}')
+
+#         return file_path  # Return the file path
+
+
+# # Ejecutar el script
+# mist_csv = create_mist_csv(db_url, db_name, username, password, schedule_name, output_detail)

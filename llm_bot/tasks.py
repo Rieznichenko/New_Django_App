@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 import os
 from analytics.models import AanlyticsSchedule
 from odoo.odoo_utils import fetch_product_details
+from io import StringIO
+import sys
 
 
 from celery.utils.log import get_task_logger
@@ -131,3 +133,45 @@ def create_analytic_csv(schedule_name, output_plan, instance_id, output_detail, 
     }
 
     exec(get_schedule_details.embedded_code, globals(), local_vars)
+
+
+@shared_task
+def process_csv_generation(instance_id, code):
+    # Fetch the schedule details
+    get_schedule_details = AanlyticsSchedule.objects.get(id=instance_id)
+
+    # Set up local variables for dynamic execution
+    local_vars = {
+        "db_url": get_schedule_details.select_database.db_url,
+        "db_name": get_schedule_details.select_database.db_name,
+        "username": get_schedule_details.select_database.username,
+        "password": get_schedule_details.select_database.password,
+        "output_detail": get_schedule_details.output_detail.id,
+        "schedule_name": get_schedule_details.schedule_name
+    }
+
+    # Execute the custom code with dynamic variables
+    old_stdout = sys.stdout
+    redirected_output = StringIO()
+
+    try:
+        sys.stdout = redirected_output
+
+        # Use `exec` to execute the provided code
+        exec(code, globals(), local_vars)
+
+        # Capture the output of the execution (if it uses print)
+        exec_output = redirected_output.getvalue()
+
+        # If there is a specific result to return from the code, ensure it's in local_vars
+        # For example, if `file_path` is expected to be generated in the code
+        result = local_vars.get("file_path")  # Change 'file_path' to any variable name that is expected
+
+        return result, exec_output
+    except Exception as e:
+        print(str(e))
+        # Handle any execution errors
+        return None, str(e)
+    finally:
+        # Restore the original stdout
+        sys.stdout = old_stdout

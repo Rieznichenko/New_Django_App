@@ -61,62 +61,94 @@
     </form>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize CodeMirror editor
-            var editor = CodeMirror.fromTextArea(document.getElementById("id_embedded_code"), {
-                mode: "python",
-                lineNumbers: true,
-                matchBrackets: true
-            });
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize CodeMirror editor
+    var editor = CodeMirror.fromTextArea(document.getElementById("id_embedded_code"), {
+        mode: "python",
+        lineNumbers: true,
+        matchBrackets: true
+    });
 
-            // Handle button click
-            document.getElementById('test-code-btn').addEventListener('click', function() {
-                var url = window.location.href;
-                var urlParts = url.split('/').filter(Boolean);
-                var id = urlParts[urlParts.length - 2]; // Gets the ID, which is second-to-last segment
-                var code = editor.getValue();
-                fetch("{% url 'admin:test_code' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({ code: code, id: id })
+    // Handle button click
+    document.getElementById('test-code-btn').addEventListener('click', function() {
+        var button = this;
+        var url = window.location.href;
+        var urlParts = url.split('/').filter(Boolean);
+        var id = urlParts[urlParts.length - 2]; // Gets the ID, which is second-to-last segment
+        var code = editor.getValue();
+
+        // Change button text and disable it
+        button.textContent = 'Processing your code...';
+        button.disabled = true;
+
+        fetch("{% url 'admin:test_code' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ code: code, id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const taskId = data.task_id;
+            const checkStatusInterval = setInterval(function() {
+                fetch(`/api/task/${taskId}/`)
+                .then(response => response.json())
+                .then(statusData => {
+                    if (statusData.state === 'SUCCESS') {
+                        clearInterval(checkStatusInterval);
+                        // Fetch result from the endpoint
+                        fetch(`/api/celery/result/${taskId}/`)
+                        .then(response => {
+                            const contentType = response.headers.get('Content-Type');
+                            if (contentType && contentType.includes('text/csv')) {
+                                return response.blob().then(blob => {
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                });
+
+                                // Restore the button text and enable it
+                                button.textContent = 'Test Code';
+                                button.disabled = false;
+                            } else {
+                                return response.json().then(resultData => {
+                                    // Show alert with error message
+                                    alert(resultData.error);
+                                    // Restore the button text and enable it
+                                    button.textContent = 'Test Code';
+                                    button.disabled = false;
+                                });
+                            }
+                        });
+                    } else if (statusData.state === 'FAILURE') {
+                        clearInterval(checkStatusInterval);
+                        alert('Task failed');
+                        // Restore the button text and enable it
+                        button.textContent = 'Test Code';
+                        button.disabled = false;
+                    }
                 })
-    .then(response => {
-        // Save response to a variable for later use
-        const contentDisposition = response.headers.get('Content-Disposition');
-        if (contentDisposition && contentDisposition.includes('attachment')) {
-            return response.blob().then(blob => ({ blob, response }));
-        } else {
-            return response.json();
-        }
-    })
-    .then(data => {
-        if (data.blob) {
-            // Trigger CSV download
-            const url = window.URL.createObjectURL(data.blob);
-            const a = document.createElement('a');
-            a.href = url;
-
-            // Extract file name from content disposition or set a default
-            const contentDisposition = data.response.headers.get('Content-Disposition');
-            const filename = contentDisposition.split('filename=')[1] || 'output.csv';
-            a.download = filename.replace(/"/g, '');  // Remove quotes around filename if present
-
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        } else {
-            // Handle JSON response
-            alert(data.message);
-        }
-    })
-    .catch(error => {
-        console.error('There was a problem with your fetch operation:', error);
+                .catch(error => {
+                    console.error('There was a problem with fetching the task status:', error);
+                });
+            }, 10000); // Check every 10 seconds
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        })
+        .finally(() => {
+            // Restore the button text and enable it
+            // button.textContent = 'Test Code';
+            // button.disabled = false;
+        });
     });
 });
 
-        });
     </script>
 {% endblock %}

@@ -33,6 +33,10 @@ urlpatterns = [
     # for vissoonn
     path('api/vision', SendMessageView.as_view(), name='send_message'),
 
+    # for polling
+    path('api/task/<str:task_id>/', get_task_status, name='get_task_status'),
+    path('api/celery/result/<str:task_id>/', get_celery_result, name='get_celery_result'),
+
 
 ]
 

@@ -19,6 +19,8 @@ from odoo.models import OdooDatabase, OddoBotConfig
 from odoo.odoo_utils import get_odoo_tables, authenticate_odoo, get_odoo_table_fields
 from django.core.serializers import serialize
 from dotenv import load_dotenv
+from celery.result import AsyncResult
+
 load_dotenv()
 
 
@@ -302,6 +304,28 @@ def get_read_choices(request, config_type):
     get_db_object = OdooFields.objects.filter(database_name = get_db_object)
     result = list(get_db_object.values('id', 'database_name__db_name', 'type'))
     return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+@csrf_exempt
+def get_task_status(request, task_id):
+    result = AsyncResult(task_id)
+    return JsonResponse({"state" : result.state})
+
+@csrf_exempt
+def get_celery_result(request, task_id):
+    result = AsyncResult(task_id)
+    m, message = result.get()
+    if "Successfully exported" not in message:
+        return JsonResponse({"error" : message})
+    else:
+        file_path = message.split("Successfully exported stock details to CSV: ")[-1].strip()
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as file:
+                response = HttpResponse(file.read(), content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+                return response
+        else:
+            return JsonResponse({"error": "File not found"}, status=404)
 
 
 def get_required_odoo_fields(requested_id):
