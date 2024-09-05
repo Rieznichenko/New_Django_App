@@ -103,6 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         .then(response => {
                             const contentType = response.headers.get('Content-Type');
                             if (contentType && contentType.includes('text/csv')) {
+                                // Restore the button text and enable it
+                                button.textContent = 'Test Code';
+                                button.disabled = false;
+                                
                                 return response.blob().then(blob => {
                                     const url = window.URL.createObjectURL(blob);
                                     const a = document.createElement('a');
@@ -112,10 +116,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                     a.click();
                                     a.remove();
                                 });
-
-                                // Restore the button text and enable it
-                                button.textContent = 'Test Code';
-                                button.disabled = false;
                             } else {
                                 return response.json().then(resultData => {
                                     // Show alert with error message
