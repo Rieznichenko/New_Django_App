@@ -327,6 +327,12 @@ def get_celery_result(request, task_id):
         else:
             return JsonResponse({"error": "File not found"}, status=404)
 
+@csrf_exempt
+def stop_celery_task(request, task_id):
+    result = AsyncResult(task_id).revoke(terminate=True)
+    return JsonResponse({"status" : True}, status=200)
+
+
 
 def get_required_odoo_fields(requested_id):
     response_dict = {}

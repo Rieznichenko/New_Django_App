@@ -30,7 +30,17 @@
                                                     <label for="{{ field.field.id_for_label }}">{{ field.field.label }}</label>
                                                     <textarea id="id_embedded_code" name="{{ field.field.name }}">{{ field.field.value }}</textarea>
                                                     <button id="test-code-btn" type="button" class="button">Test Code</button>
-                                                </div>
+                                                    <button id="stop-code-btn" type="button" class="text-danger" disabled
+                                                    style="cursor: pointer;
+                                                           background: var(--delete-button-bg); 
+                                                           border-radius: 4px; 
+                                                           padding: 10px 15px; 
+                                                           /* height: 0.9375rem;  */
+                                                           /* line-height: 0.9375rem;  */
+                                                           color: var(--button-fg);">
+                                                Stop Execution
+                                            </button>
+                                                                                            </div>
                                             {% else %}
                                                 <div class="flex-container">
                                                 {{ field.errors }}
@@ -61,94 +71,123 @@
     </form>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize CodeMirror editor
-    var editor = CodeMirror.fromTextArea(document.getElementById("id_embedded_code"), {
-        mode: "python",
-        lineNumbers: true,
-        matchBrackets: true
-    });
-
-    // Handle button click
-    document.getElementById('test-code-btn').addEventListener('click', function() {
-        var button = this;
-        var url = window.location.href;
-        var urlParts = url.split('/').filter(Boolean);
-        var id = urlParts[urlParts.length - 2]; // Gets the ID, which is second-to-last segment
-        var code = editor.getValue();
-
-        // Change button text and disable it
-        button.textContent = 'Processing your code...';
-        button.disabled = true;
-
-        fetch("{% url 'admin:test_code' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ code: code, id: id })
-        })
-        .then(response => response.json())
-        .then(data => {
-            const taskId = data.task_id;
-            const checkStatusInterval = setInterval(function() {
-                fetch(`/api/task/${taskId}/`)
+        document.addEventListener('DOMContentLoaded', function() {
+            var stopButton = document.getElementById('stop-code-btn');
+            var testButton = document.getElementById('test-code-btn');
+            var editor = CodeMirror.fromTextArea(document.getElementById("id_embedded_code"), {
+                mode: "python",
+                lineNumbers: true,
+                matchBrackets: true
+            });
+        
+            let taskId; // Declare taskId variable to store the task ID
+        
+            // Disable stop button by default
+            stopButton.disabled = true;
+        
+            // Handle "Test Code" button click
+            testButton.addEventListener('click', function() {
+                var url = window.location.href;
+                var urlParts = url.split('/').filter(Boolean);
+                var id = urlParts[urlParts.length - 2];
+                var code = editor.getValue();
+        
+                testButton.textContent = 'Processing your code...';
+                testButton.disabled = true;
+                stopButton.disabled = false;  // Enable stop button when code starts processing
+        
+                fetch("{% url 'admin:test_code' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ code: code, id: id })
+                })
                 .then(response => response.json())
-                .then(statusData => {
-                    if (statusData.state === 'SUCCESS') {
-                        clearInterval(checkStatusInterval);
-                        // Fetch result from the endpoint
-                        fetch(`/api/celery/result/${taskId}/`)
-                        .then(response => {
-                            const contentType = response.headers.get('Content-Type');
-                            if (contentType && contentType.includes('text/csv')) {
-                                // Restore the button text and enable it
-                                button.textContent = 'Test Code';
-                                button.disabled = false;
-                                
-                                return response.blob().then(blob => {
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '');
-                                    document.body.appendChild(a);
-                                    a.click();
-                                    a.remove();
+                .then(data => {
+                    taskId = data.task_id;  // Store the task ID
+        
+                    const checkStatusInterval = setInterval(function() {
+                        fetch(`/api/task/${taskId}/`)
+                        .then(response => response.json())
+                        .then(statusData => {
+                            if (statusData.state === 'SUCCESS') {
+                                clearInterval(checkStatusInterval);
+                                stopButton.disabled = true;  // Disable stop button after completion
+                                testButton.textContent = 'Test Code';
+                                testButton.disabled = false;
+        
+                                fetch(`/api/celery/result/${taskId}/`)
+                                .then(response => {
+                                    const contentType = response.headers.get('Content-Type');
+                                    if (contentType && contentType.includes('text/csv')) {
+                                        return response.blob().then(blob => {
+                                            const url = window.URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            a.remove();
+                                        });
+                                    } else {
+                                        return response.json().then(resultData => {
+                                            alert(resultData.error);
+                                        });
+                                    }
                                 });
-                            } else {
-                                return response.json().then(resultData => {
-                                    // Show alert with error message
-                                    alert(resultData.error);
-                                    // Restore the button text and enable it
-                                    button.textContent = 'Test Code';
-                                    button.disabled = false;
-                                });
+                            } else if (statusData.state === 'FAILURE') {
+                                clearInterval(checkStatusInterval);
+                                alert('Task failed');
+                                stopButton.disabled = true;
+                                testButton.textContent = 'Test Code';
+                                testButton.disabled = false;
                             }
+
+                            else if (statusData.state === 'REVOKED') {
+                                clearInterval(checkStatusInterval)
+                                stopButton.disabled = true;
+                                testButton.textContent = 'Test Code';
+                                testButton.disabled = false;
+                            }
+
+                        })
+                        .catch(error => {
+                            console.error('There was a problem with fetching the task status:', error);
                         });
-                    } else if (statusData.state === 'FAILURE') {
-                        clearInterval(checkStatusInterval);
-                        alert('Task failed');
-                        // Restore the button text and enable it
-                        button.textContent = 'Test Code';
-                        button.disabled = false;
+                    }, 10000); // Check every 10 seconds
+                })
+                .catch(error => {
+                    console.error('There was a problem with your fetch operation:', error);
+                });
+            });
+        
+            // Handle "Stop Execution" button click
+            stopButton.addEventListener('click', function() {
+                fetch(`/api/stop_task/${taskId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        alert('Task stopped successfully');
+                        stopButton.disabled = true;  // Disable stop button after stopping
+                        testButton.textContent = 'Test Code';
+                        testButton.disabled = false;
+                    } else {
+                        alert('Failed to stop task');
                     }
                 })
                 .catch(error => {
-                    console.error('There was a problem with fetching the task status:', error);
+                    console.error('Error stopping the task:', error);
                 });
-            }, 10000); // Check every 10 seconds
-        })
-        .catch(error => {
-            console.error('There was a problem with your fetch operation:', error);
-        })
-        .finally(() => {
-            // Restore the button text and enable it
-            // button.textContent = 'Test Code';
-            // button.disabled = false;
+            });
         });
-    });
-});
-
-    </script>
+        </script>
+        
 {% endblock %}
