@@ -30,14 +30,17 @@
                                                     <label for="{{ field.field.id_for_label }}">{{ field.field.label }}</label>
                                                     <textarea id="id_embedded_code" name="{{ field.field.name }}">{{ field.field.value }}</textarea>
                                                     <button id="test-code-btn" type="button" class="button">Test Code</button>
-                                                    <button id="stop-code-btn" type="button" class="text-danger" disabled
+                                                    <button id="stop-code-btn" type="button" class="text-danger" hidden
                                                     style="cursor: pointer;
                                                            background: var(--delete-button-bg); 
                                                            border-radius: 4px; 
                                                            padding: 10px 15px; 
                                                            /* height: 0.9375rem;  */
                                                            /* line-height: 0.9375rem;  */
-                                                           color: var(--button-fg);">
+                                                           color: var(--button-fg);
+                                                           margin: 10px;
+                                                           height: 35px;
+                                                           font-size:0.8125rem;">
                                                 Stop Execution
                                             </button>
                                                                                             </div>
@@ -83,7 +86,7 @@
             let taskId; // Declare taskId variable to store the task ID
         
             // Disable stop button by default
-            stopButton.disabled = true;
+            stopButton.hidden = true;
         
             // Handle "Test Code" button click
             testButton.addEventListener('click', function() {
@@ -94,7 +97,7 @@
         
                 testButton.textContent = 'Processing your code...';
                 testButton.disabled = true;
-                stopButton.disabled = false;  // Enable stop button when code starts processing
+                stopButton.hidden = false;  // Enable stop button when code starts processing
         
                 fetch("{% url 'admin:test_code' %}", {
                     method: 'POST',
@@ -114,7 +117,7 @@
                         .then(statusData => {
                             if (statusData.state === 'SUCCESS') {
                                 clearInterval(checkStatusInterval);
-                                stopButton.disabled = true;  // Disable stop button after completion
+                                stopButton.hidden = true;  // Disable stop button after completion
                                 testButton.textContent = 'Test Code';
                                 testButton.disabled = false;
         
@@ -140,14 +143,14 @@
                             } else if (statusData.state === 'FAILURE') {
                                 clearInterval(checkStatusInterval);
                                 alert('Task failed');
-                                stopButton.disabled = true;
+                                stopButton.hidden = true;
                                 testButton.textContent = 'Test Code';
                                 testButton.disabled = false;
                             }
 
                             else if (statusData.state === 'REVOKED') {
                                 clearInterval(checkStatusInterval)
-                                stopButton.disabled = true;
+                                stopButton.hidden = true;
                                 testButton.textContent = 'Test Code';
                                 testButton.disabled = false;
                             }
@@ -176,7 +179,7 @@
                 .then(data => {
                     if (data.status) {
                         alert('Task stopped successfully');
-                        stopButton.disabled = true;  // Disable stop button after stopping
+                        stopButton.hidden = true;  // Disable stop button after stopping
                         testButton.textContent = 'Test Code';
                         testButton.disabled = false;
                     } else {
