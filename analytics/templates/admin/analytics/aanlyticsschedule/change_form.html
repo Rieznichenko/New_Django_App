@@ -87,9 +87,17 @@
         
             // Disable stop button by default
             stopButton.hidden = true;
+
+
+              // Get the current path from the URL
+                const currentPath = window.location.pathname;
+
+                // Check if the URL is "/admin/analytics/saveanalytic/add/"
         
             // Handle "Test Code" button click
             testButton.addEventListener('click', function() {
+
+
                 var url = window.location.href;
                 var urlParts = url.split('/').filter(Boolean);
                 var id = urlParts[urlParts.length - 2];
@@ -98,6 +106,11 @@
                 testButton.textContent = 'Processing your code...';
                 testButton.disabled = true;
                 stopButton.hidden = false;  // Enable stop button when code starts processing
+
+                if (currentPath.includes("/admin/analytics/saveanalytic")) {
+                // Call your function for this URL
+                return test(code, id);
+                }
         
                 fetch("{% url 'admin:test_code' %}", {
                     method: 'POST',
@@ -191,6 +204,76 @@
                 });
             });
         });
-        </script>
+       
+       
+
+        function test(code, id) {
+            var stopButton = document.getElementById('stop-code-btn');
+            var testButton = document.getElementById('test-code-btn');
+    fetch("{% url 'admin:test_code_analytic_view' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ code: code, id: id })
+    })
+    .then(response => response.json())
+    .then(data => {
+        let taskId = data.task_id;  // Store the task ID
+
+        const checkStatusInterval = setInterval(function() {
+            fetch(`/api/task/${taskId}/`)
+            .then(response => response.json())
+            .then(statusData => {
+                if (statusData.state === 'SUCCESS') {
+                    clearInterval(checkStatusInterval);
+                    stopButton.hidden = true;  // Disable stop button after completion
+                    testButton.textContent = 'Test Code';
+                    testButton.disabled = false;
+
+                    fetch(`/api/celery/result/${taskId}/`)
+                    .then(response => {
+                        const contentType = response.headers.get('Content-Type');
+                        if (contentType && contentType.includes('text/csv')) {
+                            return response.blob().then(blob => {
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                            });
+                        } else {
+                            return response.json().then(resultData => {
+                                alert(resultData.error);
+                            });
+                        }
+                    });
+                } else if (statusData.state === 'FAILURE') {
+                    clearInterval(checkStatusInterval);
+                    alert('Task failed');
+                    stopButton.hidden = true;
+                    testButton.textContent = 'Test Code';
+                    testButton.disabled = false;
+                } else if (statusData.state === 'REVOKED') {
+                    clearInterval(checkStatusInterval);
+                    stopButton.hidden = true;
+                    testButton.textContent = 'Test Code';
+                    testButton.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('There was a problem with fetching the task status:', error);
+            });
+        }, 10000); // Check every 10 seconds
+    })
+    .catch(error => {
+        console.error('There was a problem with your fetch operation:', error);
+    });
+}
+
+       </script>
         
 {% endblock %}

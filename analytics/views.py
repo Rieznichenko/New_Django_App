@@ -6,7 +6,8 @@ from io import StringIO, BytesIO
 import zipfile
 import csv
 from analytics.models import AanlyticsSchedule
-from llm_bot.tasks import process_csv_generation
+from llm_bot.tasks import process_csv_generation, process_analytic_save
+
 
 @csrf_exempt
 def test_code_view(request):
@@ -173,3 +174,21 @@ def test_code_view(request):
 
 # # Ejecutar el script
 # mist_csv = create_mist_csv(db_url, db_name, username, password, schedule_name, output_detail)
+
+
+@csrf_exempt
+def test_code_analytic_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        code = data.get('code', '')
+        instance_id = data.get('id', '')
+
+        try:
+            local_vars = {}
+            task = process_analytic_save.delay(instance_id, code)
+            return JsonResponse({'task_id': task.id})
+        except SyntaxError as e:
+            return JsonResponse({'message': f'Syntax Error: {e}'})
+        except Exception as e:
+            return JsonResponse({'message': f'Error: {e}'})
+    return JsonResponse({'message': 'Invalid request.'})

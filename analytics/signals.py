@@ -3,7 +3,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 import json
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
-from .models import AanlyticsSchedule
+from .models import AanlyticsSchedule, SaveAnalytic
 
 
 @receiver(post_save, sender=AanlyticsSchedule)
@@ -26,6 +26,32 @@ def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
             interval=schedule,
             name=task_name,
             task='llm_bot.tasks.create_analytic_csv',
+            args=task_args,
+        )
+        instance.periodic_task = task
+        instance.save()
+
+
+@receiver(post_save, sender=SaveAnalytic)
+def send_mail_post_save_a(sender, instance: SaveAnalytic, created, **kwargs):
+    schedule, _ = IntervalSchedule.objects.get_or_create(
+        every=instance.output_plan,
+        period=IntervalSchedule.HOURS,
+    )
+
+    task_name = f'Create Genneration {instance.id}'
+    task_args = json.dumps([instance.id, instance.embedded_code])
+
+    if instance.periodic_task:
+        instance.periodic_task.interval = schedule
+        instance.periodic_task.name = task_name
+        instance.periodic_task.args = task_args
+        instance.periodic_task.save()
+    else:
+        task = PeriodicTask.objects.create(
+            interval=schedule,
+            name=task_name,
+            task='llm_bot.tasks.process_analytic_save',
             args=task_args,
         )
         instance.periodic_task = task

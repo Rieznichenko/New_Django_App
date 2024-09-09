@@ -311,7 +311,7 @@ class AanlyticsSaveAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
-            path('test_code/', self.admin_site.admin_view(views.test_code_view), name='test_code'),
+            path('test_code/', self.admin_site.admin_view(views.test_code_analytic_view), name='test_code_analytic_view'),
         ]
         return custom_urls + urls
 
@@ -369,26 +369,26 @@ class AanlyticsSaveAdmin(admin.ModelAdmin):
             )
         return mark_safe(edit_button)
     
-    def history(self, obj):
-        button_style = (
-            'border-radius: 4px;'
-            'margin: 2px 0; '
-            'padding: 2px 3px; '
-            'vertical-align: middle; '
-            'font-family: var(--font-family-primary); '
-            'font-weight: normal; '
-            'font-size: 0.8125rem; '
-            'background-color: #417690; '
-            'color: white; '
-            'cursor: pointer;'
-        )
-        cl_url = f"/admin/analytics/analytichistory/"
-        # url = reverse('admin:appname_relatedmodel_changelist')
-        url_with_filter = f"{cl_url}?schedule_name={obj.schedule_name}"
-        return format_html('<a class="button" style="{}" href="{}">History</a>', button_style, 
-                           url_with_filter)
+    # def history(self, obj):
+    #     button_style = (
+    #         'border-radius: 4px;'
+    #         'margin: 2px 0; '
+    #         'padding: 2px 3px; '
+    #         'vertical-align: middle; '
+    #         'font-family: var(--font-family-primary); '
+    #         'font-weight: normal; '
+    #         'font-size: 0.8125rem; '
+    #         'background-color: #417690; '
+    #         'color: white; '
+    #         'cursor: pointer;'
+    #     )
+    #     cl_url = f"/admin/analytics/analytichistory/"
+    #     # url = reverse('admin:appname_relatedmodel_changelist')
+    #     url_with_filter = f"{cl_url}?schedule_name={obj.analytic_name}"
+    #     return format_html('<a class="button" style="{}" href="{}">History</a>', button_style, 
+    #                        url_with_filter)
     
-    list_display = ("analytic_name", "analytic_schedule", "select_database", "embedded_code", "delete", "edit", "history")
+    list_display = ("analytic_name", "analytic_output", "select_database", "embedded_code", "delete", "edit", )
 
 
 

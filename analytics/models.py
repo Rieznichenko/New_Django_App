@@ -73,12 +73,12 @@ class AanlyticsSchedule(models.Model):
 
 class SaveAnalytic(models.Model):
     analytic_name = models.CharField(max_length=100, verbose_name='Name', blank=True, null=True)
-    analytic_schedule = models.ForeignKey(AanlyticsSchedule, on_delete=models.CASCADE)
+    analytic_output = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE, blank=True, null=True)
     select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
     embedded_code = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
-        return self.schedule_name
+        return self.analytic_name
     
     class Meta:
         verbose_name = "Save Analytic"

@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
-from analytics.models import AanlyticsSchedule
+from analytics.models import AanlyticsSchedule, SaveAnalytic
 from odoo.odoo_utils import fetch_product_details
 from io import StringIO
 import sys
@@ -133,6 +133,65 @@ def create_analytic_csv(schedule_name, output_plan, instance_id, output_detail, 
     }
 
     exec(get_schedule_details.embedded_code, globals(), local_vars)
+
+
+@shared_task
+def process_analytic_save(instance_id, code):
+    try:
+        # Retrieve the schedule details
+        get_schedule_details = SaveAnalytic.objects.get(id=instance_id)
+
+        # Extract related models
+        analytic_output = get_schedule_details.analytic_output
+        odoo_database = get_schedule_details.select_database
+
+        # Set up local variables for dynamic execution
+        local_vars = {
+            "sftp_hostname": analytic_output.ftp_destination_server,
+            "sftp_port": int(analytic_output.ftp_destination_port),  # Convert to integer
+            "sftp_username": analytic_output.ftp_destination_user,
+            "sftp_password": analytic_output.ftp_destination_password,
+            # Local directory and file paths
+            "local_dir_path": "/Users/apple/Documents/projects/gpt_discord/ftp",  # Path to save the file
+            # Odoo credentials
+            "odoo_url": odoo_database.db_url,
+            "odoo_db": odoo_database.db_name,
+            "odoo_user": odoo_database.username,
+            "odoo_password": odoo_database.password,
+        }
+
+        # Redirect stdout to capture print statements
+        old_stdout = sys.stdout
+        redirected_output = StringIO()
+        sys.stdout = redirected_output
+
+        try:
+            # Execute the provided code with dynamic variables
+            exec(code, globals(), local_vars)
+
+            # Capture the output of the execution (if it uses print)
+            exec_output = redirected_output.getvalue()
+
+            # Extract result from local_vars
+            result = local_vars.get("file_path")  # Change 'file_path' to any variable name that is expected
+
+            print(f"Execution output: {exec_output}")  # Debugging: Print what was captured
+            print(f"Local variables after execution: {local_vars}")  # Debugging: Print local_vars
+
+            return result, exec_output
+        except Exception as exec_error:
+            # Handle any execution errors
+            print(f"Execution error: {exec_error}")
+            return None, str(exec_error)
+        finally:
+            # Restore the original stdout
+            sys.stdout = old_stdout
+
+    except Exception as e:
+        # Handle errors in retrieving schedule details
+        print(f"Error retrieving schedule details: {e}")
+        return None, str(e)
+
 
 
 @shared_task
