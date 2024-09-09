@@ -73,9 +73,11 @@ class AanlyticsSchedule(models.Model):
 
 class SaveAnalytic(models.Model):
     analytic_name = models.CharField(max_length=100, verbose_name='Name', blank=True, null=True)
+    output_plan = models.IntegerField(help_text="Please input output plan in hours", blank=True, null=True)
     analytic_output = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE, blank=True, null=True)
     select_database = models.ForeignKey(OdooDatabase, on_delete=models.CASCADE)
     embedded_code = models.TextField(blank=True, null=True)
+    periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self) -> str:
         return self.analytic_name
