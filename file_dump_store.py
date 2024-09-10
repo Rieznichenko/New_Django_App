@@ -22,6 +22,4 @@ def dump_file_to_ftp(ftp_object_id, local_file_path):
         
     except Exception as e:
         print(f"Failed to dump file to ftp because {e}")
-    finally:
-        session.quit()
 
