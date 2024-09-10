@@ -388,7 +388,7 @@ class AanlyticsSaveAdmin(admin.ModelAdmin):
     #     return format_html('<a class="button" style="{}" href="{}">History</a>', button_style, 
     #                        url_with_filter)
     
-    list_display = ("analytic_name", "analytic_output", "select_database", "embedded_code", "delete", "edit", )
+    list_display = ("analytic_name", "analytic_output", "select_database", "delete", "edit", )
 
 
 
