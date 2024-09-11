@@ -242,7 +242,15 @@ class AnalyticHistoryAdmin(admin.ModelAdmin):
 
 
 class AnalyticOutputAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/analytics/aanlyticsschedule/change_form_output.html'
+    exclude = ('periodic_task',)
 
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('test_connection/', self.admin_site.admin_view(views.test_connection), name='test_connection'),
+        ]
+        return custom_urls + urls
 
     def delete(self, obj):
         button_style = (

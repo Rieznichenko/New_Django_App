@@ -5,8 +5,39 @@ import sys
 from io import StringIO, BytesIO
 import zipfile
 import csv
-from analytics.models import AanlyticsSchedule
+from analytics.models import AanlyticsSchedule, AnalyticOutput
 from llm_bot.tasks import process_csv_generation, process_analytic_save
+import paramiko
+
+
+@csrf_exempt
+def test_connection(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        code = data.get('code', '')
+        instance_id = data.get('id', '')
+        get_schedule_details = AnalyticOutput.objects.get(id = instance_id)
+
+        try:
+            # Create an SSH client
+            ssh_client = paramiko.SSHClient()
+            
+            # Automatically add the server's host key
+            ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            
+            # Connect to the server
+            print("Connecting to SFTP server...")
+            ssh_client.connect(hostname=get_schedule_details.ftp_destination_server, port=get_schedule_details.ftp_destination_port, 
+                               username=get_schedule_details.ftp_destination_user, password=get_schedule_details.ftp_destination_password)
+            print("Connected successfully to the SFTP server.")
+            
+            ssh_client.close()
+            return JsonResponse({'success': True, 'message': 'Connection successful!'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Unable to create connection with FTP because {e}'}, status=400)
+
+
 
 
 @csrf_exempt

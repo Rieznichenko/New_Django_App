@@ -1,0 +1,101 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <!-- Load CodeMirror CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/edit/matchbrackets.min.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/custom_analytics_admin.css' %}">
+{% endblock %}
+
+{% block content %}
+    <form method="post" action="" id="aanlyticsschedule_form" class="form-horizontal">
+        {% csrf_token %}
+        <div>
+            {% for fieldset in adminform %}
+                <fieldset class="module aligned">
+                    {% for line in fieldset %}
+                        {% for field in line %}
+                            <div class="form-row">
+                                <div>
+                                    {% if field.field.name != 'embedded_code' %}
+                                        <div class="flex-container">
+                                            {{ field.errors }}
+                                            {{ field.field.label_tag }}
+                                            {{ field.field }}
+                                            {% if field.help_text %}
+                                                <p class="help">{{ field.help_text }}</p>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </fieldset>
+            {% endfor %}
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="Save" class="default" name="_save">
+            <input type="submit" value="Save and add another" name="_addanother">
+            <input type="submit" value="Save and continue editing" name="_continue">
+
+            <!-- "Test connection" button -->
+            <button type="button" id="test-connection-btn" style="
+                padding: 9px 1px 0px;
+                margin: 0 0 0px;
+                background: var(--darkened-bg);
+                border: 1px solid var(--hairline-color);
+                border-radius: 4px;
+                overflow: hidden;
+                display: flex;
+                cursor: pointer;
+                flex-wrap: wrap;
+                background-color: #417690;
+                color: white;
+            ">
+                Test connection
+            </button>
+
+
+            {% if has_change_permission %}
+            <a href="{% url 'admin:analytics_aanlyticsschedule_delete' object_id %}" class="deletelink">Delete</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <script>
+        document.getElementById('test-connection-btn').addEventListener('click', function () {
+            // Extract the ID from the current URL
+            const url = window.location.href;
+            const idMatch = url.match(/\/(\d+)\/change\/$/);
+            const id = idMatch ? idMatch[1] : null;
+
+            if (id) {
+                // Call the test_connection API
+                fetch('/admin/analytics/analyticoutput/test_connection/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
+                    },
+                    body: JSON.stringify({ id: id })  // Send the extracted ID
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('ID not found in URL');
+            }
+        });
+    </script>
+{% endblock %}
