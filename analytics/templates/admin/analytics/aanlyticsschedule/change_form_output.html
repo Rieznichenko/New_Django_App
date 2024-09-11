@@ -71,31 +71,48 @@
 
     <script>
         document.getElementById('test-connection-btn').addEventListener('click', function () {
-            // Extract the ID from the current URL
-            const url = window.location.href;
-            const idMatch = url.match(/\/(\d+)\/change\/$/);
-            const id = idMatch ? idMatch[1] : null;
+    const testConnectionBtn = document.getElementById('test-connection-btn');
 
-            if (id) {
-                // Call the test_connection API
-                fetch('/admin/analytics/analyticoutput/test_connection/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
-                    },
-                    body: JSON.stringify({ id: id })  // Send the extracted ID
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert('ID not found in URL');
-            }
+    // Extract the ID from the current URL
+    const url = window.location.href;
+    const idMatch = url.match(/\/(\d+)\/change\/$/);
+    const id = idMatch ? idMatch[1] : null;
+
+    if (id) {
+        // Change the button text and disable it
+        testConnectionBtn.textContent = 'Testing';
+        testConnectionBtn.disabled = true;
+
+        // Call the test_connection API
+        fetch('/admin/analytics/analyticoutput/test_connection/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
+            },
+            body: JSON.stringify({ id: id })  // Send the extracted ID
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display the message in an alert
+            alert(data.message);
+
+            // Reset the button text and re-enable it
+            testConnectionBtn.textContent = 'Test connection';
+            testConnectionBtn.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while testing the connection.');
+
+            // Reset the button text and re-enable it
+            testConnectionBtn.textContent = 'Test connection';
+            testConnectionBtn.disabled = false;
         });
+    } else {
+        alert('ID not found in URL');
+    }
+});
+
     </script>
 {% endblock %}
