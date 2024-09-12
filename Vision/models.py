@@ -36,3 +36,16 @@ class ApplicationUser(models.Model):
     def __str__(self) -> str:
         return self.name
 
+class LLMConfiguration(models.Model):
+    name = models.CharField(max_length=200, null=True, blank=True)
+    vision_application = models.ForeignKey(VisionApplication, on_delete=models.CASCADE)
+    openai_key = models.CharField(max_length=200, null=True, blank=True)
+    assistant_id = models.CharField(max_length=200, null=True, blank=True)
+    prompt = models.TextField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "LLM Configuration"
+        verbose_name_plural = "LLM Configuration"
+
+    def __str__(self) -> str:
+        return self.name

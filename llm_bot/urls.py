@@ -3,7 +3,7 @@ from django.urls import path
 from .models import TelegramBotConfig, DiscordBotConfig
 from .signals import run_bot_in_thread, run_discord_bot_in_thread,\
     generate_random_code
-from Vision.views import SendMessageView
+from Vision.views import SendMessageView, AnalyzeImage
 
 
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
 
     # for vissoonn
     path('api/vision', SendMessageView.as_view(), name='send_message'),
+    path('api/analyze-image', AnalyzeImage.as_view(), name='AnalyzeImage'),
 
     # for polling
     path('api/task/<str:task_id>/', get_task_status, name='get_task_status'),
