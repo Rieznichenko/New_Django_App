@@ -17,6 +17,12 @@ from PIL import Image
 import io
 import openai
 import base64
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.http import JsonResponse
+from django.conf import settings
+
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -27,17 +33,10 @@ class SendMessageView(View):
         print(f"Content-Type: {content_type}")
 
         # Extract parameters
-        if 'application/json' in content_type:
-            data = json.loads(request.body)
-            token = data.get('token')
-            message_type = data.get('message_type')
-            image_url = data.get('image_url')
-            text_message = data.get('text_message')
-        else:
-            token = request.POST.get('token')
-            message_type = request.POST.get('message_type')
-            image_url = request.POST.get('image_url')
-            text_message = request.POST.get('text_message')
+        token = request.POST.get('token')
+        message_type = request.POST.get('message_type')
+        image_file = request.FILES.get('image')
+        text_message = request.POST.get('text_message')
 
         print(f"Received token: {token}")
         print(f"Received message_type: {message_type}")
@@ -58,8 +57,16 @@ class SendMessageView(View):
         responses = []
         for user in application_users:
             chat_id = user.channel_username
-            if image_url:
-                response = self.send_image_message(bot_token, chat_id, image_url)
+            if image_file:
+                file_name = image_file.name
+                file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+                with default_storage.open(file_path, 'wb+') as destination:
+                    for chunk in image_file.chunks():
+                        destination.write(chunk)
+
+                file_url = f"https://ia.humanytek.com{settings.MEDIA_URL}{file_name}"
+
+                response = self.send_image_message(bot_token, chat_id, file_url)
                 responses.append(response)
             if text_message:
                 response = self.send_text_message(bot_token, chat_id, text_message)
@@ -114,7 +121,12 @@ class AnalyzeImage(View):
             return JsonResponse({'error': 'Bot token not found in VisionApplication'}, status=500)
 
         # Retrieve OpenAI credentials and prompt
-        llm_config = LLMConfiguration.objects.get(vision_application=vision_application)
+        try:
+            llm_config = LLMConfiguration.objects.get(vision_application=vision_application)
+        except LLMConfiguration.DoesNotExist:
+            return JsonResponse({'error': 'There is not LLM configuration aattched to the input appliction or token'}, status=400)
+
+
         api_key = llm_config.openai_key
         assistant_id = llm_config.assistant_id
         prompt = llm_config.prompt
