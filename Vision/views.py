@@ -71,8 +71,6 @@ class SendMessageView(View):
             if text_message:
                 response = self.send_text_message(bot_token, chat_id, text_message)
                 responses.append(response)
-            else:
-                return JsonResponse({'error': 'Invalid message type'}, status=400)
 
         return JsonResponse({'status': 'Messages sent', 'responses': responses})
 
