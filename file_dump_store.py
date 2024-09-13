@@ -2,6 +2,7 @@ import ftplib
 import re
 from datetime import datetime, timedelta
 from analytics.models import AnalyticOutput
+import paramiko
 
 
 def dump_file_to_ftp(ftp_object_id, local_file_path):
@@ -18,11 +19,11 @@ def dump_file_to_ftp(ftp_object_id, local_file_path):
         sftp_client = ssh_client.open_sftp()
         
         # Change to the desired directory on the SFTP server
-        sftp_client.chdir(sftp_path)
+        sftp_client.chdir(obj.ftp_path)
         
         # Upload the file to the SFTP server
         remote_file_name = local_file_path.split('/')[-1]
-        sftp_client.put(local_file_path, f'{sftp_path}/{remote_file_name}')
+        sftp_client.put(local_file_path, f'{obj.ftp_path}/{remote_file_name}')
         
         print("File uploaded successfully to SFTP")
         
