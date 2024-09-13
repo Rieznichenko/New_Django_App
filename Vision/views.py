@@ -25,6 +25,15 @@ from django.conf import settings
 
 
 
+def get_image_path(image_file):
+    file_name = image_file.name
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+    with default_storage.open(file_path, 'wb+') as destination:
+        for chunk in image_file.chunks():
+            destination.write(chunk)
+
+    return file_name
+
 @method_decorator(csrf_exempt, name='dispatch')
 class SendMessageView(View):
     def post(self, request, *args, **kwargs):
@@ -58,12 +67,7 @@ class SendMessageView(View):
         for user in application_users:
             chat_id = user.channel_username
             if image_file:
-                file_name = image_file.name
-                file_path = os.path.join(settings.MEDIA_ROOT, file_name)
-                with default_storage.open(file_path, 'wb+') as destination:
-                    for chunk in image_file.chunks():
-                        destination.write(chunk)
-
+                file_name = get_image_path(image_file)
                 file_url = f"https://ia.humanytek.com{settings.MEDIA_URL}{file_name}"
 
                 response = self.send_image_message(bot_token, chat_id, file_url)
@@ -131,27 +135,35 @@ class AnalyzeImage(View):
 
         client = OpenAI(api_key = api_key)
         try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
+            file_name = get_image_path(image_file)
+            file_url = f"https://ia.humanytek.com{settings.MEDIA_URL}{file_name}"
+
+            thread = client.beta.threads.create()
+            message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=[
                     {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": f"{prompt}"},
-                        {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": get_image_bae64(image_file)
-                        },
-                        },
-                    ],
+                    "type": "image_url",
+                    "image_url": {
+                        "url": file_url
                     }
-                ],
-                max_tokens=300,
-                )
-            # Get the analysis result from the API response
-            result = response.choices[0].message.content
+                    }
+                ]
+            )
+
+            run = client.beta.threads.runs.create_and_poll(
+            thread_id=thread.id,
+            assistant_id=assistant_id,
+            )
+
+            messages = client.beta.threads.messages.list(
+                thread_id=thread.id
+            )
+
+            result = messages.data[0].content[0].text.value
             return JsonResponse({"analysis": result}, status=200)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+        

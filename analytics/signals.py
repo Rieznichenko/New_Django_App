@@ -14,7 +14,7 @@ def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
     )
 
     task_name = f'Create anaalytic CSV {instance.schedule_name}_{instance.id}'
-    task_args = json.dumps([instance.schedule_name, instance.output_plan, instance.id, instance.output_detail.id, instance.embedded_code])
+    task_args = json.dumps([instance.id, instance.embedded_code])
 
     if instance.periodic_task:
         instance.periodic_task.interval = schedule
@@ -25,7 +25,7 @@ def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
         task = PeriodicTask.objects.create(
             interval=schedule,
             name=task_name,
-            task='llm_bot.tasks.create_analytic_csv',
+            task='llm_bot.tasks.process_csv_generation',
             args=task_args,
         )
         instance.periodic_task = task
