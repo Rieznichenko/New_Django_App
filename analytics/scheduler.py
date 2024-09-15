@@ -30,40 +30,40 @@ def start_scheduler():
 
 
 def remove_history_files():
-    try:
-        ftp_objects = AnalyticOutput.objects.all()
-        for obj in ftp_objects:
-            # obj = AnalyticOutput.objects.get(id=ftp_object_id)
-            # Connect to the FTP server
-            try:
-                session = ftplib.FTP(obj.ftp_destination_server, obj.ftp_destination_user, obj.ftp_destination_password)
+    return
+    # try:
+    #     ftp_objects = AnalyticOutput.objects.all()
+    #         # obj = AnalyticOutput.objects.get(id=ftp_object_id)
+    #         # Connect to the FTP server
+    #         try:
+    #             session = ftplib.FTP(obj.ftp_destination_server, obj.ftp_destination_user, obj.ftp_destination_password)
 
-                # Change to the desired directory on the FTP server
-                session.cwd(obj.ftp_path)
+    #             # Change to the desired directory on the FTP server
+    #             session.cwd(obj.ftp_path)
 
-                # Get list of files in the directory
-                files = session.nlst()
+    #             # Get list of files in the directory
+    #             files = session.nlst()
 
-                # Define the date pattern in the filename
-                date_pattern = re.compile(r'(\d{8}_\d{6})\.csv')
+    #             # Define the date pattern in the filename
+    #             date_pattern = re.compile(r'(\d{8}_\d{6})\.csv')
 
-                # Calculate the cutoff date
-                cutoff_date = datetime.now() - timedelta(days=3)
+    #             # Calculate the cutoff date
+    #             cutoff_date = datetime.now() - timedelta(days=3)
 
-                for filename in files:
-                    match = date_pattern.search(filename)
-                    if match:
-                        file_date_str = match.group(1)
-                        file_date = datetime.strptime(file_date_str, '%Y%m%d_%H%M%S')
-                        if file_date < cutoff_date:
-                            try:
-                                session.delete(filename)
-                            except Exception as e:
-                                print(f"Failed to delete file {filename} {e}")
-            except:
-                print(f"Failed to remove files to ftp because {e}")
-            finally:
-                session.quit()
-    except Exception as e:
-        print(f"Failed to remove files to ftp because {e}")
-    print('Successfully removed history files.')
+    #             for filename in files:
+    #                 match = date_pattern.search(filename)
+    #                 if match:
+    #                     file_date_str = match.group(1)
+    #                     file_date = datetime.strptime(file_date_str, '%Y%m%d_%H%M%S')
+    #                     if file_date < cutoff_date:
+    #                         try:
+    #                             session.delete(filename)
+    #                         except Exception as e:
+    #                             print(f"Failed to delete file {filename} {e}")
+    #         except:
+    #             print(f"Failed to remove files to ftp because {e}")
+    #         finally:
+    #             session.quit()
+    # except Exception as e:
+    #     print(f"Failed to remove files to ftp because {e}")
+    # print('Successfully removed history files.')
