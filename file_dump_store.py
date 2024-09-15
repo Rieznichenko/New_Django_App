@@ -8,6 +8,8 @@ import paramiko
 def dump_file_to_ftp(ftp_object_id, local_file_path):
     try:
         obj = AnalyticOutput.objects.get(id = ftp_object_id)
+        print(f"Retrieved ftp object is : {obj}")
+        print(f"local file path {local_file_path}")
         # Initialize SSH client
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -23,6 +25,7 @@ def dump_file_to_ftp(ftp_object_id, local_file_path):
         
         # Upload the file to the SFTP server
         remote_file_name = local_file_path.split('/')[-1]
+        print(f"remote_file_name {remote_file_name}, {obj.ftp_path}")
         sftp_client.put(local_file_path, f'{obj.ftp_path}/{remote_file_name}')
         
         print("File uploaded successfully to SFTP")
