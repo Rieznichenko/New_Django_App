@@ -12,6 +12,8 @@ from django.http import HttpResponse
 from django.conf import settings
 import os
 from django.urls import reverse, path
+from django.utils.html import format_html
+from django.utils.timezone import now
 
 
 # Register your models here.
@@ -98,7 +100,7 @@ class OdooDatabaseAdmin(admin.ModelAdmin):
 
 class AanlyticsScheduleAdmin(admin.ModelAdmin):
     change_form_template = 'admin/analytics/aanlyticsschedule/change_form.html'
-    exclude = ('periodic_task',)
+    exclude = ('periodic_task', 'is_running', 'last_run', 'next_execution')
 
     def get_urls(self):
         urls = super().get_urls()
@@ -180,7 +182,23 @@ class AanlyticsScheduleAdmin(admin.ModelAdmin):
         return format_html('<a class="button" style="{}" href="{}">History</a>', button_style, 
                            url_with_filter)
     
-    list_display = ("schedule_name", "select_database", "output_plan", "delete", "edit", "history")
+    
+    def status(self, obj):
+        if obj.is_running:
+            if obj.last_run:
+                elapsed_time = now() - obj.last_run
+                return format_html(f"<span>Running elapsed {elapsed_time.seconds // 60} min</span>")
+            else:
+                return format_html(f"<span>Running elapsed </span>")
+        else:
+            if obj.next_execution:
+                remaining_time = obj.next_execution - now()
+                return format_html(f"<span>Next execution in {remaining_time.seconds // 60} minutes</span>")
+            else:
+                return format_html(f"<span> Next execution in </span>")
+
+
+    list_display = ("schedule_name", "status", "select_database", "output_plan", "delete", "edit", "history")
 
 
 class AnalyticHistoryAdmin(admin.ModelAdmin):

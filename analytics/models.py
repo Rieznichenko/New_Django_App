@@ -62,6 +62,10 @@ class AanlyticsSchedule(models.Model):
     periodic_task = models.OneToOneField(PeriodicTask, null=True, blank=True, on_delete=models.SET_NULL)
     embedded_code = models.TextField(blank=True, null=True)
     output_detail = models.ForeignKey(AnalyticOutput, on_delete=models.CASCADE)
+    is_running = models.BooleanField(default=False)
+    last_run = models.DateTimeField(null=True, blank=True)
+    next_execution = models.DateTimeField(null=True, blank=True)
+
 
     def __str__(self) -> str:
         return self.schedule_name
