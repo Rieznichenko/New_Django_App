@@ -14,6 +14,7 @@ import os
 from django.urls import reverse, path
 from django.utils.html import format_html
 from django.utils.timezone import now
+from django.utils import timezone
 
 
 # Register your models here.
@@ -193,7 +194,16 @@ class AanlyticsScheduleAdmin(admin.ModelAdmin):
         else:
             if obj.next_execution:
                 remaining_time = obj.next_execution - now()
-                return format_html(f"<span>Next execution in {remaining_time.seconds // 60} minutes</span>")
+                current_time = timezone.now()
+
+                # Calculate the time difference
+                time_difference = obj.next_execution - current_time
+
+                # Convert the time difference to minutes
+                minutes_left = time_difference.total_seconds() / 60
+                minutes_left = abs(int(minutes_left))
+
+                return format_html(f"<span>Next execution in {minutes_left} minutes</span>")
             else:
                 return format_html(f"<span> Next execution in </span>")
 
