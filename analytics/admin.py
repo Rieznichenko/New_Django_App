@@ -16,7 +16,7 @@ from django.utils.html import format_html
 from django.utils.timezone import now
 from django.utils import timezone
 
-
+from django_celery_beat.models import PeriodicTask
 # Register your models here.
 class OdooDatabaseForm(forms.ModelForm):
     class Meta:
@@ -433,3 +433,5 @@ admin_site.register(OdooDatabase, OdooDatabaseAdmin)
 admin_site.register(AnalyticHistory, AnalyticHistoryAdmin)
 admin_site.register(AnalyticOutput, AnalyticOutputAdmin)
 admin_site.register(SaveAnalytic, AanlyticsSaveAdmin)
+
+admin_site.register(PeriodicTask)
