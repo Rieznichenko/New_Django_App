@@ -16,7 +16,7 @@ def schedule_container(instance):
     """
     This function creates a Google Cloud Batch job to process CSV generation.
     """
-    client, credentials = google.auth.default()
+    # client, credentials = google.auth.default()
     batch_client = batch_v1.BatchServiceClient()
     job_name = f'analytic-csv-job-{instance.id}'
     
