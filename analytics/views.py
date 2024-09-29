@@ -4,10 +4,37 @@ from django.views.decorators.csrf import csrf_exempt
 import sys
 from io import StringIO, BytesIO
 import zipfile
-import csv
+import csv, os
+from file_dump_store import dump_file_to_ftp
 from analytics.models import AanlyticsSchedule, AnalyticOutput
 from llm_bot.tasks import process_csv_generation, process_analytic_save
 import paramiko
+from .models import AnalyticHistory
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from functools import wraps
+from django.utils import timezone
+
+
+AUTHENTICATION_TOKEN = os.environ.get('AUTH_TOKEN', "99999")
+
+
+def auth_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(request, *args, **kwargs):
+        # Get the Authorization token from headers
+        auth_header = request.headers.get('Authorization')
+
+        if not auth_header:
+            return JsonResponse({'error': 'Authorization token is missing'}, status=401)
+
+        if auth_header != AUTHENTICATION_TOKEN:
+            return JsonResponse({'error': 'Invalid authorization token'}, status=403)
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapped_view
 
 
 @csrf_exempt
@@ -223,3 +250,133 @@ def test_code_analytic_view(request):
         except Exception as e:
             return JsonResponse({'message': f'Error: {e}'})
     return JsonResponse({'message': 'Invalid request.'})
+
+
+#view functions called from batch
+@auth_required
+@csrf_exempt
+def upload_csv_view(request):
+    if request.method == 'POST':
+        
+        file = request.FILES.get('file')
+        file_name = request.POST.get('file_name', file.name)
+        output_detail = request.POST.get('output_detail', {})
+        
+        if file:
+            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+            
+            # Save the file to the media folder
+            path = default_storage.save(file_path, ContentFile(file.read()))
+            dump_file_to_ftp(output_detail, file_path)
+            
+            return JsonResponse({'message': 'File uploaded successfully', 'file_path': path}, status=200)
+        else:
+            return JsonResponse({'error': 'No file uploaded'}, status=400)
+
+
+@auth_required
+@csrf_exempt
+def get_analytic_schedule_view(request):
+    if request.method == 'POST':
+        try:
+            request_body = json.loads(request.body)
+            instance_id = request_body.get('instance_id')
+
+            if not instance_id:
+                return JsonResponse({'error': 'instance_id is required'}, status=400)
+
+            # Fetch the schedule details
+            get_schedule_details = AanlyticsSchedule.objects.get(id=instance_id)
+            get_schedule_details.is_running = True
+            get_schedule_details.last_run = timezone.now()
+            get_schedule_details.save()
+
+            # Return schedule details as response
+            response_data = {
+                "select_dataabase": {
+                    "db_url": get_schedule_details.select_database.db_url,
+                    "db_name": get_schedule_details.select_database.db_name,
+                    "username": get_schedule_details.select_database.username,
+                    "password": get_schedule_details.select_database.password
+                },
+                "output_details_id": get_schedule_details.output_detail.id,
+                "schedule_name": get_schedule_details.schedule_name
+            }
+
+            return JsonResponse(response_data, status=200)
+
+        except AanlyticsSchedule.DoesNotExist:
+            return JsonResponse({'error': 'Schedule not found'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@auth_required
+@csrf_exempt
+def update_analytic_schedule_view(request):
+    if request.method == 'POST':
+        try:
+            request_body = json.loads(request.body)
+            instance_id = request_body.get('instance_id')
+
+            if not instance_id:
+                return JsonResponse({'error': 'instance_id is required'}, status=400)
+
+            # Fetch the schedule details
+            get_schedule_details = AanlyticsSchedule.objects.get(id=instance_id)
+            get_schedule_details.is_running = False
+            get_schedule_details.next_execution = timezone.now() + timezone.timedelta(hours=int(get_schedule_details.output_plan))
+            get_schedule_details.save()
+
+
+            return JsonResponse({}, status=200)
+
+        except AanlyticsSchedule.DoesNotExist:
+            return JsonResponse({'error': 'Schedule not found'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+@auth_required
+@csrf_exempt
+def create_analytic_history_view(request):
+    if request.method == 'POST':
+        try:
+            request_body = json.loads(request.body)
+            schedule_name = request_body.get('schedule_name')
+            file_name = request_body.get('file_name')
+
+            # Create a new AnalyticHistory record
+            AnalyticHistory.objects.create(
+                schedule_name=schedule_name,
+                file_name=file_name
+            )
+
+            return JsonResponse({}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+from .google_job import schedule_container
+
+@csrf_exempt
+def execute_batch_container(request):
+    if request.method == "POST":
+        try:
+            request_body = json.loads(request.body)
+            instance_id = request_body.get("instance_id")
+
+            get_schedule_details = AanlyticsSchedule.objects.get(id=instance_id)
+            schedule_container(get_schedule_details)
+            return JsonResponse({'status': True, "error": ""}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'status': False, "error": f"Failed: {str(e)}"}, status=500)
