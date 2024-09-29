@@ -24,44 +24,39 @@ def schedule_container(instance):
     resources.cpu_milli = 500  # 0.5 vCPU core (500 milliseconds per CPU-second)
     resources.memory_mib = 512  # 0.5 GB (512 MiB)
 
-    job = batch_v1.Job()
-    job.name = job_name
-    job.task_groups = [
-        batch_v1.TaskGroup(
-            task_spec=batch_v1.TaskSpec(
-                compute_resource =resources,
-                runnables=[
-                    batch_v1.Runnable(
-                        container=batch_v1.Runnable.Container(
-                            image_uri=CONTAINER_IMAGE_URI,  # Replace with your container image
-                            entrypoint="python3",
-                            commands=["app.py", str(instance.id), instance.embedded_code]
-                        )
-                    )
-                ],
-                max_run_duration="54000s",
-                max_retry_count = 0,
-                environment=batch_v1.Environment(
-                    variables=[{
-                        "SERVER_URL": SERVER_URL,
-                        "AUTH_TOKEN": AUTH_TOKEN
-                    }]
+    task_spec = batch_v1.TaskSpec(
+        compute_resource=resources,
+        runnables=[
+            batch_v1.Runnable(
+                container=batch_v1.Runnable.Container(
+                    image_uri="us-central1-docker.pkg.dev/quixotic-elf-198705/analytic-job-scheduler/batch-app:latest",  # Replace with your container image
+                    # entrypoint="python",  # Main executable
+                    commands=["python", "app.py", str(instance.id), instance.embedded_code]  #Arguments passed to your app.py
                 )
             )
-        )
-    ]
-    
-    # Define job scheduling details
-    # job.allocation_policy = batch_v1.AllocationPolicy(
-    #     instances=[
-    #         batch_v1.AllocationPolicy.InstancePolicyOrTemplate(
-    #             instance_template=f"projects/{PROJECT_ID}/global/instanceTemplates/{template_id}"
-    #         )
-    #     ]
-    # )
+        ],
+        max_run_duration="54000s",  # Max run time of 15 hours
+        max_retry_count=0,  # No retries
+    )
+
+    task_spec.environment.variables["SERVER_URL"] = SERVER_URL
+    task_spec.environment.variables["AUTH_TOKEN"] = AUTH_TOKEN
+
+    task_group = batch_v1.TaskGroup(task_spec=task_spec)
+
+    # Define the job with the task group
+    job = batch_v1.Job(
+        name=job_name,
+        task_groups=[task_group]
+    )
+
+    job.logs_policy = batch_v1.LogsPolicy(
+        destination=batch_v1.LogsPolicy.Destination.CLOUD_LOGGING
+    )
 
     # Submit the Batch job
     try:
-        batch_client.create_job(parent=GCP_SCHEDULER_JOB_PARENT, job=job)
+        parent = f"projects/{PROJECT_ID}/locations/{REGION}"
+        batch_client.create_job(parent=parent, job=job)
     except Exception as e:
         print(f"Failed to create Batch job: {str(e)}")

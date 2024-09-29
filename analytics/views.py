@@ -15,6 +15,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from functools import wraps
 from django.utils import timezone
+from .google_job import schedule_container
 
 
 AUTHENTICATION_TOKEN = os.environ.get('AUTH_TOKEN', "99999")
@@ -358,15 +359,15 @@ def create_analytic_history_view(request):
                 file_name=file_name
             )
 
-            return JsonResponse({}, status=201)
+            return JsonResponse({}, status=200)
 
         except json.JSONDecodeError:
             return JsonResponse({'error': 'Invalid JSON'}, status=400)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
-from .google_job import schedule_container
 
+@auth_required
 @csrf_exempt
 def execute_batch_container(request):
     if request.method == "POST":

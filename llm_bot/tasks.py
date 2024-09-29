@@ -11,6 +11,7 @@ from analytics.models import AanlyticsSchedule, SaveAnalytic
 from odoo.odoo_utils import fetch_product_details
 from io import StringIO
 import sys
+from .task_helpers import create, upload_csv
 
 
 from celery.utils.log import get_task_logger
@@ -19,6 +20,20 @@ logger = get_task_logger(__name__)
 load_dotenv()
 
 api_key = os.environ.get("API_KEY")
+
+
+class AnalyticHistory:
+    @staticmethod
+    def create(schedule_name, file_name):
+        create(schedule_name, file_name)
+    
+    @staticmethod
+    def dump_file_to_ftp(output_detail, file_name):
+        upload_csv(file_name, output_detail)
+
+
+def dump_file_to_ftp(output_detail, file_path):
+    return AnalyticHistory.dump_file_to_ftp(output_detail, file_path)
 
 
 def generate_html_content(messages):
