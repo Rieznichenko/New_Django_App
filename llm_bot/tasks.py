@@ -213,9 +213,6 @@ def process_analytic_save(instance_id, code):
 def process_csv_generation(instance_id, code):
     # Fetch the schedule details
     get_schedule_details = AanlyticsSchedule.objects.get(id=instance_id)
-    get_schedule_details.is_running = True
-    get_schedule_details.last_run = timezone.now()
-    get_schedule_details.save()
 
 
     # Set up local variables for dynamic execution
@@ -251,8 +248,5 @@ def process_csv_generation(instance_id, code):
         # Handle any execution errors
         return None, str(e)
     finally:
-        get_schedule_details.is_running = False
-        get_schedule_details.next_execution = timezone.now() + timezone.timedelta(hours=int(get_schedule_details.output_plan))
-        get_schedule_details.save()
         # Restore the original stdout
         sys.stdout = old_stdout
