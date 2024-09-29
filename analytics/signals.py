@@ -44,7 +44,6 @@ def send_mail_post_save(sender, instance: AanlyticsSchedule, created, **kwargs):
     if hasattr(instance, '_skip_signal') and instance._skip_signal:
         return
 
-    # client, _ = google.auth.default()
     scheduler_client = scheduler_v1.CloudSchedulerClient()
     # parent = client.common_location_path(PROJECT_ID, REGION)
     job_name = f'{GCP_SCHEDULER_JOB_PARENT}/jobs/create-analytic-csv-{instance.id}'
@@ -77,7 +76,6 @@ def delete_scheduler_job(sender, instance: AanlyticsSchedule, **kwargs):
     This signal deletes the Google Cloud Scheduler job associated with the
     AanlyticsSchedule instance when it is deleted.
     """
-    # client, _ = google.auth.default()
     scheduler_client = scheduler_v1.CloudSchedulerClient()
     job_name = f'{GCP_SCHEDULER_JOB_PARENT}/jobs/create-analytic-csv-{instance.id}'
 

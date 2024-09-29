@@ -16,13 +16,12 @@ def schedule_container(instance):
     """
     This function creates a Google Cloud Batch job to process CSV generation.
     """
-    # client, credentials = google.auth.default()
     batch_client = batch_v1.BatchServiceClient()
     job_name = f'analytic-csv-job-{instance.id}'
     
     resources = batch_v1.ComputeResource()
-    resources.cpu_milli = 500  # 0.5 vCPU core (500 milliseconds per CPU-second)
-    resources.memory_mib = 512  # 0.5 GB (512 MiB)
+    resources.cpu_milli = 1000  # 1 vCPU core (1000 milliseconds per CPU-second)
+    resources.memory_mib = 1024  # 1 GB (1024 MiB)
 
     task_spec = batch_v1.TaskSpec(
         compute_resource=resources,
