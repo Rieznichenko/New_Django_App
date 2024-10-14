@@ -5,7 +5,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
     function toggleFields(authModeField) {
-        var credentialsFields = document.querySelectorAll('.field-username, .field-password');
+        var credentialsFields = document.querySelectorAll('.field-password');
+        var credentialsuernme = document.querySelectorAll('.field-username');
         var apiKeyField = document.querySelector('.field-api_key');
         
         if (authModeField.value === 'credentials') {
@@ -20,6 +21,8 @@
                 field.style.display = 'none';
             });
             if (apiKeyField) {
+                var usernnme_elem = document.getElementById("id_username")
+                usernnme_elem.style.display = "block";
                 apiKeyField.style.display = 'block';
             }
         }

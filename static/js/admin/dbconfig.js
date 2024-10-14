@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordField.style.display = 'block';
             apiKeyField.style.display = 'none';
         } else if (authModeField.value === 'api_key') {
-            usernameField.style.display = 'none';
+            usernameField.style.display = 'block';
             passwordField.style.display = 'none';
             apiKeyField.style.display = 'block';
         }
