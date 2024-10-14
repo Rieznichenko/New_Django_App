@@ -34,6 +34,7 @@ class OdooDatabaseForm(forms.ModelForm):
             self.fields['username'].widget.attrs.update({'style': 'display:block'})
             self.fields['password'].widget.attrs.update({'style': 'display:block'})
         elif self.instance and self.instance.auth_mode == 'api_key':
+            self.fields['username'].widget.attrs.update({'style': 'display:block'})
             self.fields['api_key'].widget.attrs.update({'style': 'display:block'})
 
 class OdooDatabaseAdmin(admin.ModelAdmin):
