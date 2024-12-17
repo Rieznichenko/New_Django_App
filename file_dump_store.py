@@ -35,5 +35,17 @@ def dump_file_to_ftp(ftp_object_id, local_file_path):
         ssh_client.close()
         
     except Exception as e:
-        print(f"Failed to upload file to SFTP because {e}")
+        if sftp_client:
+            try:
+                sftp_client.close()
+                print("SFTP client closed successfully")
+            except Exception as e:
+                print(f"Error closing SFTP client: {e}")
+        
+        if ssh_client:
+            try:
+                ssh_client.close()
+                print("SSH client closed successfully")
+            except Exception as e:
+                print(f"Error closing SSH client: {e}")
 
